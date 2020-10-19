@@ -1,0 +1,215 @@
+---
+title: "Reading_in_files"
+author: "JR"
+date: "6/24/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = FALSE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+library(ggpubr)
+library(Gviz)
+source("util/_setup.R")
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+```
+
+### Here we are going to learn how to read in files and things to consider.
+### We will start with a .csv file that shows how many times a protein is bound to
+### DNA (promoters specifically) it seems scary but we will walk through it slow
+
+```{r}
+# lets read in the bed using read_csv or read.csv (but it is slower)
+
+file <- read_csv("data/number_of_peaks_per_dbp.csv")
+
+# Now we have an object in the environment that is called file -- click to look!
+# or we can take a peak with head
+head(file)
+
+# Cool we see the gene name, number of times it bound to a gene promoter adn
+# the length of the peak. We see that gene name is in character, and the others
+# in "dbl" which means they are numeric-with floating points
+
+# Let's get more infomration about these peaks
+
+table(file)
+# Not very useful in this case because there is not a catagorical level to 
+# count true and false for
+
+summary(file)
+# Ok this is super helpful - we see the quartiles for each of the catagories
+# except the gene name. This is filtered to proteins with more than 250 peaks
+# so we see the minimum is 263 peaks, and max is 60,035! These are very helpful
+# bits of information.
+
+
+
+```
+
+# Now let's do some investigation to see which of these genes has the largest
+# or smallest number of peaks
+
+```{r}
+##Filter is a great way to quickly scan for specific gene properties
+#### Filter basic context is: filter(data, filter logic)
+#### Let's find the gene with most peaks using filter
+?filter
+gene_x <- filter(file, file$num_peaks > 60000)
+#### Here we find the gene with the most peaks is eGFP-CEBPB 
+#### The $ sign is an "indexing" symbol that means go to the column of "file" 
+#### Termed num_peaks (these also tab deliminate if it's going well)
+
+#### Finding the gene with the fewest peaks
+gene_y <- filter(file, file$num_peaks < 264)
+#### Here we find the gene with least peaks is ZNF639
+
+### Let's find the number of peaks for a specific gene say POLR2A
+gene_pol2 <- filter(file, dbp == "POLR2A")
+#### Voila we have just the info for your favorite gene.
+
+### Now let's make a new column in the file table
+file$newcol <- "What?"
+#### Now we have a newcol with the character "What?" in it.
+#### That isn't very useful and later we can see how to merge in new data so 
+#### it is linked with the gene name
+
+#### So let's remove that column
+
+file_removecol <- file[-4]
+#### This indexed into the 4th column and the - sign removed that column
+#### We can use this simple approach to add and subtract columns we will see
+#### other ways as we advance.
+
+### Now let's make a plot of the data. 
+#### First a histogram of number of peaks for each DBP
+hist(file$num_peaks, breaks = 100)
+#### This shows the distribution of peaks for each DBP as we saw above.
+##### the , breaks allows you to determine how fine you want the data (num bins)
+
+#### Now let's plot the number of peaks versus peak width.
+plot( x = file$num_peaks, y = file$total_peak_length)
+#### We can see a linear relationship, as expected that a DBP that has more peaks
+#### will have more base pairs covered.
+```
+
+
+## Defined gene list subsetting, let's say we want to subset some of this file
+## for several genes.
+```{r}
+### First let's make a list of genes we want. 
+genes <- c("POLR2A","POLR2B", "SUPT5H")
+### so our first arugment is to filter file, then we call grepl to match the terms
+### grepl is called then the genes above are called adn collapesed by |
+### This colapse is making the names in to a regexp (very cool and more later)
+### Then where we want to search in file$dbp index. 
+
+### In other words: grepl is searching for the regex of genes as input into $dbp
+### grep is making a list of terms to filter the file.
+### First let's see if we searched by the character names of these genes
+gene_list <- filter(file, grepl(paste(genes), file$dbp))
+### Oh no we get an error saying we searched for more than one string. This is
+### some nerdy grep stuff, but shows why we need to use regular expressions.
+gene_list <- filter(file, grepl(paste(genes, collapse = "|"), file$dbp))
+### Now this works because we used grep to change the gene names to regexp.
+
+### Compare the above to this
+gene_list2 <- (grep(paste(genes,collapse = "|"), 
+                        file$dbp, value = TRUE))
+
+### We simply get back the indexes that are true as grep is doing a logical search.
+### This can be useful later but for now the first example is what we want.
+
+### What about just indexing in and filtering?
+gene_list2 <- file$dbp[[c("POLR2A","POLR2B", "SUPT5H")]]
+### Huh it doesn't want to index more than once again -- grep only wants regexp 
+
+### Here is another way to do it with the character values 
+### We first tell the file we want then PIPE to a filter call
+### filter is indexing dbp names column and looking for those values that are
+### %in% the list we provide. # so will match or limit to the following argument
+gene_list2 <- file %>% filter(file$dbp %in% c("POLR2A", "POLR2B", "SUPT5H"))
+
+### So we can see here we need to be careful when searching for more than one
+### item. We need to know if we are doing a logical or regexp search.
+### In sum, probably best to use a list variable rather than individuals
+```
+
+### This file is "long" because the rows (observations) are 161 and only 3 cols.
+### Typically we want long data but in many cases you may want to "pivot" the 
+### files your working with to turn rows into cols and vice-versa. 
+
+```{r}
+
+#### Here some good info on this -- it can get very confusing :) 
+#### https://garrettgman.github.io/tidying/
+### The dplyr version has changed to:
+
+### GATHER() "gathers" wide data to make it long
+### SPREAD() "spreads" the data from long to wide
+
+### we need to have a key column to "gather and spread" so let's turn dbp rows
+### to cols. 
+
+wide_file <- spread(file, key = "dbp", value = "num_peaks")
+### Let's take a look -- yikes ok this is not what we want but if the data was
+### for some reason in that format we also spread out a lot more information
+### it's now 161 by 163 !
+
+### Let's bring it back 
+
+back_to_long <- gather(wide_file, key = "dbp", value = "num_peaks")
+### Oh no this is now totally messed up. ## Let's forget about this for now
+### but important to realize how messy changing data length can be. We will do 
+### this a few times in later code. For now there are some good examples of here:
+### http://statseducation.com/Introduction-to-R/modules/tidy%20data/spread/
+
+```
+
+## Performing functions in columns -> Mutate(new_col, function)
+### let's say we wanted to add a new column that performs some form of function
+### Mutate is a dplyr library function that is super powerful. You give a new
+### col name and then the function to be appled on the data_frame.
+```{r}
+### Let's take a look at file real quick
+head(file)
+### The total peak length is quite long, let's make it in Millions
+new_file <- file %>% mutate(length_million = file$total_peak_length / 1000000) %>%
+head(new_file)
+### Cool now we have a new column that is much easier to read for total length.
+
+### Lets see if we can write over the previous column instead of removing it
+### we can just set the new col to the old col name
+new_file2 <- file %>% 
+  mutate(total_peak_length = file$total_peak_length / 1000000) 
+head(new_file2)
+### Sweet we can mutate and just overide columns -- but we can also perform a FUN!
+### Let's give it a go:
+new_file3 <- new_file2 %>% 
+  mutate(FUN_COL = ifelse(new_file2$total_peak_length < 1, "small",
+                          ifelse(new_file2$total_peak_length < 30, "medium", "large")))
+
+hist(new_file3)
+# this is super inefficient but also efficient to get a lot of info. What can we 
+#conclude about the number of large, small and medium peaks?
+
+head(new_file3)
+### Very nice we can see we have three categories of legnths now. This is common
+### to want to take a continious variable such as gene expression levels and
+### define them as "categorical" or high medium low. 
+### Let's take a look
+summary(new_file3$total_peak_length)
+### Same as above just much easier numbers to read. ok what if we wanted to find
+### the avearage legnth of peak_length by category? This is a good example how 
+### R logic is grounded for statistics we will discuss later.
+
+
+```
+
+END Lesson

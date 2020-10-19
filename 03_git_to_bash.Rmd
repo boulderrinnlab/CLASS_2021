@@ -1,0 +1,182 @@
+---
+title: "Git to BASH"
+author: "JR"
+date: "10/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Our first objective today will be to sync to the class github. We will
+go over a few needed things to establish git connections:
+
+Sign up for github -- if you already have please make a new github repository. 
+
+
+## The very first thing we need to do is make the github website communicate 
+with Fiji. Once this relationship is established, you don't need to do this again :)
+
+Navigate to your home directory on fiji ~/IDENTIKEY
+
+```
+ls -lah
+```
+Note that there is a .ssh folder that you can place these unique keys to let
+servers communicate securely. We generate this with ssh-keygen command. 
+
+```
+cd .ssh
+cat id_rsa.pub
+```
+This will reveal the public ssh key for fiji. However we want to make a new
+ssh key for each connection. We can easily do this by:
+
+```
+ssh-keygen -t rsa
+```
+Then save this to your id_rsa.pub file using nano and paste in. Also copy to clipboard.
+
+Now let's got to your github website. On the top rigth ther is a drop down 
+menu. Click on "settings". Now you will see on the left side there is a list of
+options. Click on "SSH and CPG keys". There already be some keys in there or blank.
+Either way click "Add new key" on top right (green button). Paste in the new
+public SSH key we just generated. 
+
+You may also want to go to your local computer shell .ssh folder (same place).
+Generate a key and paste into github as done above. This way your local terminal
+(not fiji server) can push to github too. Basically any machine(s) you want to
+talk to github need this "handshake" SSH key.
+
+Cool we are all connected !
+
+-------------------------------------------------------------
+
+Now let's see how this all it works:
+
+Navigate back to ~/IDENTIKEY
+
+Let's have fiji get ready to talk to git !
+
+#initialize a git repository for the working directory 
+
+```
+git init
+ls -a
+```
+
+Now we see a generic .git folder. 
+Next we need to "clone" the git repository of interest
+Navigate to the git repository and you will see on the righ side
+"clone this wiki locally"
+click the copy button.
+Navigte back to your folder on fiji and type:
+
+```
+git clone PASTE-URL
+```
+
+Voila you are connected to our class 2021 git repository.
+
+Let's try it out:
+
+```
+Nano test.txt
+#Type in something
+# exit nano
+git status
+```
+
+Do you see a new item (test.txt) that git noticed was made and ready to sync?
+
+Let's sync so we are up to date. But we don't really want to ever do this on the
+master branch on github. We usually make a "branch" to work on and then "merge"
+branches later once the final code is compiled.
+
+So let's switch to the "students" branch
+
+```
+git checkout -b students
+```
+Now you should be on the students branch of the git site. Sometimes this can get
+buggy so you can also trying forcing a branch move:
+
+```
+git push -u origin NEW-BRANCH-NAME
+```
+
+Let's sync a new file:
+
+
+#############################
+Either specify the URL from the command-line or configure a remote repository using
+
+    git remote add <name> <url>
+
+and then push using the remote name
+
+    git push <name>
+    
+    git remote add origin
+    
+##############################
+
+```
+git status
+git add test.txt
+git commit -m (put the notes you want on what was done)
+git push
+# type git push again and you should see "up to date"
+
+! ALWAYS REMEBER TO PUSH BEFORE YOU END A SESSION !
+```
+
+If you are collaborating on a git-branch when you start a session it's always good to "pull" any updates since you last logged in. this can easily be done by:
+
+```
+git pull
+```
+
+If you want to check out previous changes you can use :
+
+```
+git log
+git diff Xsum1 Xsum2
+```
+
+This will show you all the changes -- you can also do this a bit more user friendly on git website.
+
+Finally we need a text file titled ".gitignore" put all the file types you don't want to track. These are large files such as .csv or .pdf etc here are some examples
+
+
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.bam
+*.pdf
+*.Rproj
+*.Rproj
+*.pdf
+*.png
+*results*
+*figures*
+*bam*
+*.tmp
+*html
+*.bed
+*_rslurm*
+*.chain
+*.bed*
+*data*
+*.txt
+*.csv
+*archive*
+
+
+
+-----------------------------------------------
+Let's all get set up on fiji and github website using this info ....
+
+

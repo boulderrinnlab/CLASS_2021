@@ -1,0 +1,221 @@
+---
+title: "0x_encode_portal"
+author: "JR"
+date: "10/18/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ENCODExplorer)
+library(tidyverse)
+```
+
+Description:
+
+Here we will be downloading data from the ENCODE portal. Specifically, the 
+"chromatin" interaction data, then DNA binding data, cell line HEPG2, "TF-Chip-seq".
+We furhter selected "TF Chip seq", Control chip seq and histone chip seq. 
+
+We further selected several different read lengths to cover as many DNA binding 
+proteins (DBPs) as possible. 
+
+Read lengths: 100, 76, 75, 36
+ONLY SINGLE END READS (this eliminates 54 samples)
+
+We end up with a total of 554 biological samples, almost all have a biological replicate
+and some have technical replicates, which we won't use. 
+
+So now we need to make a sample sheet that connects the file id to the DBP and 
+then use that for batch download from ENCODE.
+
+The exact report can be found here: 
+
+https://www.encodeproject.org/report/?type=Experiment&status=released&assay_slims=DNA+binding&biosample_ontology.term_name=HepG2&assay_title=TF+ChIP-seq&biosample_ontology.classification=cell+line&files.read_length=100&files.read_length=76&files.read_length=75&files.read_length=36&assay_title=Control+ChIP-seq&assay_title=Histone+ChIP-seq&files.run_type=single-ended
+
+On the top of the site there is a "download TSV" click that and we can get started!
+You now have a .TSV (tab seperated file or /t) 
+
+Next we need to get the FASTQ link for each of the replicates.
+Go to the same ENCODE website selection where the experiments are listed and 
+click dowload. This is a list of URLs for the FASTQs. Let's use unix to grab a file
+using:
+
+Curl 
+wget
+
+These two commands will go to the internet and download a file(s) into your current
+directory.
+
+Let's use this to start playing with unix commands. First delete the URLS so there
+is are only two URLs to download (it would take a very long time otherwise)
+
+Navigate to a directory using your terminal. We can make a files.txt document using
+the command:
+
+Nano
+
+Let's see waht that is using "man" function
+man nano
+Basically a really easy to use text editor in BASH/unix
+
+So let's make our first file copy and paste the url file you downloaded (with only 2 urls)
+You can do this by these simple commands.
+NANO is very useful and we will use a lot! Vi and EMACS are alternatives.
+
+```{BASH}
+# In the terminal type
+nano files.txt
+#this automatically opens a nano window, but also creates a new file at same time
+#PASTE in the URL
+# To escape the window hit cntrol X, then return
+# now let's see what happened with:
+nano files.txt
+#Voila it's there!
+#Just remmeber if you accidently hit a key there is no ctrol Z :)
+```
+
+Cool we have a text file in the directory we are in named files.txt
+Now we can use CURL or WGET to read this file and go grab the actual file from WWW
+we need to know some more BASH commands first:
+
+XARGS
+
+This invokes the shell to redirect the output of a command as the argument of another command
+or in otherwords it passes whatever the computer is thinking about into the next
+argument or command. 
+
+If we only had one URL in the file we could just do 
+
+curl URL.com
+
+But since we have a file with multiple lines we want to envoke the shell to 
+read all of the URLS and then pass all those onto the CURL command.
+Let's take a look:
+
+```{BASH}
+xargs -L 1 curl -O -J -L < files.txt
+# We almost want to read this right to left. Ultimately files.txt is put into
+# curl and that is put into the memory of the computer to go to URL and grab file.
+man xargs
+# Here we see that the -L flag will skip to next non empty line. Since there is 
+# a header in the file we are saying "make the first line empyt and go to next"
+man curl
+# Here we see that 
+
+# -O (output) 
+# by default unix keeps everything in "standard output" or "memory"
+# then it wants you to tell it when to print that out etc. Standard output is a 
+# good term to remember in general.
+# Anywhoo we are using the -O flag to have curl print the file it is comminting
+# to standard output. So in short this ensures it will print the file after retreiving
+# it's contents and you can change the name of this output file, but too much for now
+
+# -J (replace string)
+# this makes sure after one URL is commited to standard input (the resulting file
+# to standard output) that it erases the previous standard input. If this was not
+# flagged then the next line would be appended to the previous and we would get
+# one monster compiled file of all the URLS!
+
+# -L (location) 
+#if the URL has been changed to a new one it will be sent forward to the new
+#location
+
+# Enough let's run it !
+
+xargs -L 1 curl -O -J -L < files.txt
+
+# What do you get in your directory?
+
+# This can be done many different ways and we chose an example that examplifies
+# how the computer thinks (xargs) and the importance (in BASH) of standard input 
+# and standard output and how this information can be passed along.
+
+# This could also be done with wget
+man wget
+# here we see there is a flag for a "list" or -i
+# Try:
+wget -i files.txt
+# same result? This seems so much better but if urls changed or were updated etc
+# we would want to move back to more of an arugment with xargs. 
+# In short there are so many ways to do the same thing!
+
+
+## Check out screen !!! This is all good and well for a couple of files, but 
+## if the download is going to take a long time:
+
+man screen
+
+# basically type:
+screen
+# control A is for attach
+# control D is for detach
+# contro R is to reattach (to session number below)
+# screen -list (tells you all the screen session you have runnign)
+```
+
+Awesome, we now how to access the WWW and download anything that is available!
+
+But how do we know if we downloaded the right file? Kinda scary right, what if the
+file was missing a few lines or had some random internet glitch that made a gap
+in the data? Yikes! 
+
+Turns out unix can help us here too with:
+
+md5sum
+
+The original generator of this file will often provide a md5sum with the file you
+want to download from them. This is a digital key that represents the exact nature
+of the original file. md5sum is a command that can scan a file and produce this key
+and if the files are identical md5sum logic will produce identical keys. Phew!
+
+Please note how important this simple aspect is! What if you got new data from a
+sequencing platform -- you typically download through and FTP site. Do you know
+if your download was 100% successful? Not with out md5sum checks. Always request
+an md5sum for any sequencing data you download!
+
+So let's see if we downloaded the right files?
+
+```{BASH}
+
+# First let's get the md5sum values for the two URLS. Use "accession" in url 
+# to search encode portal and see what the md5sum is for the two files.
+
+
+man md5sum
+# you may have another name for it on your computer such as md5 on macosx. but
+# on most servers it will be md5sum
+
+# so lets run it.
+
+md5sum *.gz 
+# note you can use md5sum on compressed files too such as .gz
+# check to see if your md5sum matches that on encode website.
+# would you want to do 1,099 times? Probably not so luckily we can check a list!
+# let's make a list with nano
+
+nano md5sums.txt
+# paste in the two md5sums from the ENCODE website
+# ctrl x and enter 
+# now we have a file with two md5sums
+# now try:
+md5sum *.gz md5sums.txt
+
+# were the files right?
+
+# Typically this works out alright and if you want to just see if the number of
+# matched md5sum checks is same as number of files you can add:
+# | wc -l
+# this will read the standard output from the md5sum -- using the pipe " |"
+# kinda similar to xargs the pipe passes information from the left argument to
+# the right, which is wc (word count and -l means lines) this will tell you how
+# many lines of matched md5sums were found -- check the number is not less than
+# files downloaded.
+
+md5sum *.gz md5sums.txt | wc -l
+
+# we belabor this on purpose for it's critical importance in data-reproducibility
+```
+
+Congratulations -- all of ENCODE is now available ! Next we will continue
+practicing BASH/unix in the .TSV file we downloaded earlier.

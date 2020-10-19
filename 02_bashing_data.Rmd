@@ -1,0 +1,121 @@
+---
+title: "02_bashing_data"
+author: "JR"
+date: "10/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In 01_ we started explporing and downloading data. We ended up with a .tsv
+file with all the data information we are interested in. Let's explore how we
+can use bash to explore the table and learn some more unix commands.
+
+Let's start with some of the very basics to get everybody on the same page:
+
+cd - to change directories
+ls - list the files
+pwd - tells you the pathway you are currently at (very useful actually!)
+```
+cd ~/
+ls
+pwd
+```
+Wait could there be more? let's try:
+
+```
+ls -lah
+```
+Do you see new files and folders that start with .X ? These are invisible files
+that are often very important. the -lah is called a flag that gives us more information. Let's see what they are 
+
+```
+man ls
+```
+-l for long
+-a for all
+-h human readable
+basically I typically always use these flags
+
+Now let's make a new file using touch
+
+```
+touch test.txt
+ls
+```
+woah a new file shows up! What is in it? lets use Nano
+
+```
+nano test.txt
+# type whatever
+# ctrl x to get out and enter
+```
+
+Now let's take a look at the file with cat
+
+```
+cat test.txt
+```
+Cat will print all items in a file and sometimes they are very long. So there are other unix commands to get the head and tail of a file while specificying how many lines you want:
+
+```
+head -10 test.txt
+tail -10 test.txt
+```
+
+Let's make another file and combine two files to highlight other functinality of the cat command
+
+```
+tocuh test2.txt
+nano test2.txt
+# type whatever
+cat test.txt test2.txt > test3.txt
+cat test3.txt
+```
+
+now let's make a folder to put all these files in use mkdir
+
+```
+mkdir practice
+ls -lah
+```
+
+let's move the files in there 
+
+```
+mv test2.txt /practice
+mv test3.txt /practice
+mv test.txt / practice
+ls
+```
+
+Nice and tidy. However that could be quite laborious if you wanted to move a bunch of files. So we can use WILDCARDS
+
+```
+mv *.txt /practice
+ls
+```
+This will move any file that ends in .txt the star means anything counts :)
+There are many useful wild cards such as ? , [] etc here:
+
+http://www.linfo.org/wildcard.html
+
+|||||||||||||||||||||||||||||||||
+The pipe
+|||||||||||||||||||||||||||||||||
+
+
+
+
+TSV fie
+
+Grep 
+
+AWK
+
+
+
+
+

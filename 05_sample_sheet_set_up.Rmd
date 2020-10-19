@@ -1,0 +1,451 @@
+---
+title: "sample_sheet_setup"
+author: "JR"
+date: "9/23/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ENCODExplorer)
+library(tidyverse)
+```
+
+# >>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+## Let's see what to do here but likely the API hack
+
+
+
+```{r}
+library(tidyverse)
+library(httr)
+install.packages("janitor")
+library(janitor)
+
+contstruct_query <- function(experiment_accession,
+                             base_url = "https://www.encodeproject.org/report.tsv?",
+                             file_format = "fastq",
+                             type = "File", 
+                             status = "released",
+                             fields = c("accession", "read_count", "md5sum",
+                                        "controlled_by", "paired_end",
+                                        "paired_with", "replicate", "target")) {
+  query <- paste(list(paste0("type=", type), 
+        paste0("status=", status),
+        paste0("file_format=", file_format),
+        paste0("dataset=%2Fexperiments%2F", experiment_accession, "%2F"),
+        map_chr(fields, ~paste0("field=", .))) %>%
+          flatten(),
+       collapse = "&")
+  url <- paste0(base_url, query)
+  return(url)
+}
+get_fastq_info <- function(experiment_accession) {
+  request <- GET(contstruct_query(experiment_accession)) 
+  body <- read_tsv(content(request, "text"), skip = 1)
+  return(body)
+}
+# Read in the experiment report downloaded from Encode
+# we will only use the Accession column 
+# Here we'll retrieve the read_count and md5 sum 
+# as well as the file accession (with some other metadata)
+# for the fastq files associated with each experiment.
+
+
+
+
+
+fastq_info <- read.table("Best_class_full_controls.tsv",
+                        skip = 1, sep = "\t", header = T) %>%
+  dplyr::select(Accession) %>%
+  dplyr::rename(experiment_accession = Accession) %>%
+  distinct() %>%
+  mutate(fastq_info = map(experiment_accession, ~get_fastq_info(.))) %>%
+  unnest(fastq_info) %>%
+  dplyr::rename(file_accession = Accession) %>%
+  clean_names()
+
+
+write.csv(fastq_info, "final_files_md5sum.csv")
+```
+
+```{r}
+controls <- fastq_info %>% filter(is.na(controlled_by)) %>%
+  dplyr::rename(control_accession = file_accession) %>%
+  dplyr::select(control_accession) %>%
+  mutate(has_control = TRUE)
+
+write.csv(controls, "controls.csv")
+
+experiments <- fastq_info %>% filter(!is.na(controlled_by)) %>%
+  mutate(control_accession = gsub("files", "", gsub("/", "", controlled_by))) %>%
+  separate_rows(control_accession, sep = ",") %>%
+  merge(controls, all.x = T)
+no_controls <- experiments %>%
+  filter(is.na(has_control))
+
+write.csv(experiments, "experiments.csv")
+write.csv(no_controls, "no_controls.csv")
+
+
+
+
+
+
+
+table(experiments$has_control)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+STEP 2: ENCODExplorer package 
+We need this package to download meta data associated with FASTQ file. 
+Specifically, MD5checksum and matching input controls to the right DBP, read length
+etc.
+
+Download here:
+https://www.bioconductor.org/packages/release/bioc/html/ENCODExplorer.html
+
+
+```{r}
+#We will install our first R package :) 
+
+BiocManager::install("ENCODExplorer")
+
+```
+
+# So now we have a file labeled "files.txt" and we will read this in to start
+getting the samples in the order we want for the design file.
+
+```{r}
+
+input_dt <- read_csv("Test_input_dt.csv")
+
+downloaded <- c()
+  if(nrow("Test_input_dt.csv") > 0){
+    for(i in 1:nrow(input_dt)) {
+      if(show_experiment) {
+        experiment_name = input_dt$accession[[i]]
+      } else {
+        experiment_name = NULL
+      }
+    
+      dl.file = download_single_file(file_url=input_dt$href[[i]], 
+                                     file_md5=input_dt$md5sum[[i]],
+                                     dir=dir,
+                                     force=force,
+                                     experiment_name=experiment_name)
+      downloaded <- c(downloaded, dl.file)
+    }
+  }
+  
+  return(downloaded)
+
+
+
+
+
+```
+
+
+
+```{r}
+
+file <- read_csv("input_dt.txt")
+
+ encode_df <- data(encode_df, package = "ENCODExplorer")
+
+
+query_results <- queryEncode(df=encode_df, organism = "Homo sapiens",
+                      biosample_name = "HepG2", file_format = "fastq", fixed = TRUE)
+
+
+
+fuzzy_results <- fuzzySearch(searchTerm = c("brca", "ZNF24"), database=encode_df, filterVector = c("target"), multipleTerm = TRUE)
+```
+
+
+
+Michaels Encode Explorer
+
+
+```{r}
+options(stringsAsFactors = FALSE)
+library(ENCODExplorer)
+library(tidyverse)
+
+urls <- read.table("class_2021_HEPG2_files.txt", skip = 1)
+
+urls$accession <- sapply(urls$V1, function(x) {
+  filename <- unlist(strsplit(x, "load/"))[[2]]
+  unlist(strsplit(filename, ".fast"))[[1]]
+})
+
+
+
+# write.csv(urls, "urls_with_accession.csv")
+
+# Add in the missing controls.
+#urls2 <- read.table("K562_chip_missing_controls.txt", skip = 1)
+#urls2$accession <- sapply(urls2$V1, function(x) {
+ # filename <- unlist(strsplit(x, "load/"))[[2]]
+  #unlist(strsplit(filename, ".fast"))[[1]]
+#})
+
+file_accessions <- c(urls$accession)
+
+query_results <- queryEncode(file_accession = file_accessions)
+
+
+# tried set_accession ---- does not work --- (could add function x?)
+#query_results <- queryEncode(set_accession = file_accessions, file_format = "fastq", fixed = T, fuzzy = T)
+
+#https://www.bioconductor.org/packages/release/bioc/vignettes/ENCODExplorer/inst/doc/ENCODExplorer.html#query
+
+
+
+query_results <- query_results %>% 
+  select(c("accession", "file_accession", "target", "dataset_description",
+           "replicate_libraries", "replicate_antibody",
+           "controls", "controlled_by", "paired_end", "paired_with",
+           "href", "biological_replicate_number",
+           "library", "md5sum"))
+           
+           
+
+
+
+# let's check to see that the library accession corresponds
+# to the bio replicate number
+#lib_sum <- query_results %>%
+  #group_by(accession) %>%
+  #summarize(n_libraries = length(unique(replicate_libraries)),
+            #bio_reps = paste(unique(biological_replicate_number), collapse = ","),
+           # n_bio_reps = length(unique(biological_replicate_number)))
+#table(lib_sum$n_libraries)           
+#table(lib_sum$n_bio_reps)           
+#length(which(lib_sum$n_libraries == lib_sum$n_bio_reps))  == nrow(lib_sum)
+
+
+#query_results <- query_results %>% 
+  #3select(-library,
+         #-biological_replicate_number)
+
+
+
+write.csv(query_results, "Hepg2_test.csv", row.names = FALSE) 
+
+
+
+-------- this all works but wrong number no matter how I try :) -------
+
+testCreate <- as.data.frame("Hepg2_test.csv") %>% write.table("table_create.txt")
+
+
+#This function organizes the data.table created by fuzzySearch, queryEncode or  searchToquery. It extracts the replicate and control files within a dataset.
+
+#It creates a data.table with the file accessions, the dataset accessions and numeric values associated with the nature of the file (1:replicate / 2:control) when the format parameter is set to  long.
+
+#By setting the format parameter to wide, each dataset will have its own column as illustrated below.
+
+
+
+
+createDesign(as.data.frame("Hepg2_test.csv"))
+# >>>>>>>>>> UP TO HERE WORKS BUT WRONG NUBMBER OF SAMPLES :) <<<<<<<<<<<
+
+
+
+
+
+
+# >>>>>>>>>>>>>>>> Don't think we need this below <<<<<<<<<<<<<<<<<<<<
+
+
+# let's check out how the controls are working
+control_accessions <- unique(query_results$controls) 
+#remove NA
+control_accessions <- control_accessions[which(!is.na(control_accessions))]
+length(which(control_accessions %in% query_results$accession)) == length(control_accessions)
+
+###### Fixed this by getting another batch download txt from from Encode
+###### for these two accesions. (K562_chip_missing_controls.txt)
+###### They were sequenced by Kevin White which is why they got filtered out!
+# # Some files don't have controls.
+# missing_controls <- control_accessions[which(!(control_accessions %in% query_results$accession))]
+# missing_samples <- query_results[which(query_results$controls %in% missing_controls),]
+
+# Okay, this looks pretty good. Let's make a design file.
+# the target column will become group
+# the paired_end column will become fastq_1 and fastq_2. 
+query_results[which(query_results$paired_end == "1"), "paired_end"] <- "fastq_1"
+query_results[which(query_results$paired_end == "2"), "paired_end"] <- "fastq_2"
+
+# Some libraries seem to be sequenced across multiple lanes, so we'll 
+# merge like this.
+fastq1_df <- query_results %>% filter(paired_end == "fastq_1") %>%
+  select(target, accession, file_accession, replicate_libraries, controls, dataset_description) %>%
+  mutate(fastq_1 = file_accession) %>%
+  select(-file_accession)
+
+fastq2_df <- query_results %>% filter(paired_end == "fastq_2") %>%
+  select(file_accession, paired_with) %>%
+  mutate(fastq_1 = paired_with, 
+         fastq_2 = file_accession) %>%
+  select(-paired_with, -file_accession)
+
+
+
+
+
+designdf <- merge(fastq1_df, fastq2_df)
+
+
+
+
+# Now let's work on naming the control group properly.
+# Right now the target is just control, but we want it 
+# to be more descriptive.
+# This will be easiest to do in excel.
+controls <- query_results %>% filter(grepl("control", tolower(target)))
+write.csv(controls, "control_group_names.csv")
+
+control_name_map <- read.csv("control_group_name_map.csv")
+names(control_name_map) <- c("controls", "control")
+designdf <- merge(designdf, control_name_map, all.x = TRUE)
+
+
+
+
+# okay, now we need to make sure the control target file matches
+# the control column group names.
+names(control_name_map) <- c("accession", "group")
+designdf <- merge(designdf, control_name_map, all.x = TRUE)
+
+
+# now add the group names for non-controls
+designdf[is.na(designdf$group),"group"] <- designdf[is.na(designdf$group),"target"]
+length(which(is.na(designdf$target)))
+
+# let's number the replicates
+rep_nums <- designdf %>% group_by(group) %>%
+  select(group, replicate_libraries) %>%
+  mutate(rep_number = as.numeric(factor(replicate_libraries)))
+
+# This ensures that something like ENCLB642OCU
+# which has two runs for that library has the sample replicate number
+# ex. 
+rep_nums[which(rep_nums$replicate_libraries == "ENCLB642OCU"),]
+
+# now let's merge this in
+designdf <- merge(designdf, rep_nums %>% 
+                    as.data.frame() %>% 
+                    select(replicate_libraries, rep_number))
+
+
+# Now we've got to get an antibody column
+designdf$antibody <- designdf$group
+designdf$antibody <- sapply(designdf$antibody, function(x) {
+  strs <- unlist(strsplit(x, "-"))
+  if (length(strs) > 1) {
+    strs <- strs[[2]]
+  }
+  strs
+})
+
+designdf[grepl("control", designdf$antibody),"antibody"] <- NA
+
+
+# sweet, I think we've got it.
+designdf <- designdf %>% 
+  mutate(replicate = rep_number) %>%
+  select(-rep_number) %>%
+  select(group,replicate,fastq_1,fastq_2,antibody,control) %>%
+  arrange(group,replicate)
+
+# just need to name the fastq files.
+designdf$fastq_1 <- paste0("fastq/encode/", designdf$fastq_1,".fastq.gz")
+designdf$fastq_2 <- paste0("fastq/encode/", designdf$fastq_2,".fastq.gz")
+
+
+# Jeez, we have some duplicated samples in here somehow
+dup_samples <- designdf %>% filter(
+  group %in% designdf[which(duplicated(designdf[,c("group", "fastq_1", "fastq_2")])),"group"],
+  replicate %in% designdf[which(duplicated(designdf[,c("group", "fastq_1", "fastq_2")])),"replicate"])
+
+# Hmm, I don't know how this got duplicated, but all the samples
+# still seem to be represented
+designdf <- designdf %>% distinct()
+
+# Check again.
+dup_samples <- designdf %>% filter(
+  group %in% designdf[which(duplicated(designdf[,c("group", "fastq_1", "fastq_2")])),"group"],
+  replicate %in% designdf[which(duplicated(designdf[,c("group", "fastq_1", "fastq_2")])),"replicate"])
+
+# Still have two. Just going to manually remove these.
+designdf <- designdf[which(!(designdf$group == "eGFP-NR2C1_input_control" &
+                          designdf$replicate == 5)),]
+designdf <- designdf[which(!(designdf$group == "input_control" &
+                   designdf$replicate == 5)),]
+
+# Now were at 538 accession which is what is expected
+write.csv(designdf, "design.csv", row.names = FALSE, quote = FALSE)
+
+
+# Let's select a subset for testing.
+# Let's randomly sample
+targs <- unique(designdf$group)
+targs <- targs[!grepl("control",targs)]
+# Randomly sample which groups we'll take for the test sample sheet
+set.seed(123209)
+test_groups <- targs[sample(1:length(targs),10,replace = FALSE)]
+testdesigndf <- designdf %>% filter(group %in% test_groups)
+testdesign_controls <- unique(testdesigndf$control)
+testdesigndf_controls <- designdf %>% filter(group %in% testdesign_controls)
+test_design <- bind_rows(testdesigndf, testdesigndf_controls)
+write.csv(test_design, "test_design.csv", row.names = FALSE, quote = FALSE)
+
+# let's make an md5sum file for the whole dataset and for the test design
+query_results$fiji_file <- paste0("fastq/encode/", query_results$file_accession,".fastq.gz")
+
+md5sums <- query_results %>% select(md5sum, fiji_file)
+write.table(md5sums, "md5sums.txt", row.names = FALSE, col.names = FALSE,
+            quote = FALSE, sep = "  ")
+
+test_md5sums <- query_results %>% 
+  filter(fiji_file %in% c(test_design$fastq_1, test_design$fastq_2)) %>%
+  select(md5sum, fiji_file)
+write.table(test_md5sums, "test_md5sums.txt", row.names = FALSE, col.names = FALSE,
+            quote = FALSE, sep = "  ")
+
+
+write.csv(query_results, "samplesheet.csv", row.names = FALSE, quote = FALSE)
+
+write.csv(query_results %>% filter(fiji_file %in% c(test_design$fastq_1, test_design$fastq_2)),
+          "test_samplesheet.csv", row.names = FALSE, quote = FALSE)
+
+```
+
+
+
+
+
+
+
+
+
