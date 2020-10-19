@@ -37,3 +37,29 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+*.bam
+*.pdf
+*.Rproj
+*.Rproj
+*.pdf
+*.png
+*results*
+*figures*
+*bam*
+*.tmp
+*.html
+*.bed
+*_rslurm*
+*.chain
+*.bed*
+*data*
+*.txt
+*.csv
+*archive*
+
