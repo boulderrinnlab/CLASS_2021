@@ -93,6 +93,9 @@ ls
 
 Nice and tidy. However that could be quite laborious if you wanted to move a bunch of files. So we can use WILDCARDS
 
+
+http://www.linfo.org/wildcard.html
+
 ```
 mv *.txt /practice
 ls
@@ -100,7 +103,29 @@ ls
 This will move any file that ends in .txt the star means anything counts :)
 There are many useful wild cards such as ? , [] etc here:
 
-http://www.linfo.org/wildcard.html
+__________________________________
+Imagine how much time one uses typing long file paths in the terminal. For example, in this class we will be using:
+
+/Shares/rinn_class/data/CLASS_2021
+
+That is no fun to type everytime and then go to the directory of interest. 
+
+Good news there is a solution (used by nextflow and just how useful later) its called a sym-link and you have probably used them beofre. 
+
+Let's make a sym-link to the class folder in your home directory 
+
+```
+cd ~/
+ln -s /Shares/rinn_class/data/CLASS_2021 CLASS
+ls
+```
+
+Now you see a sim-link called CLASS. You just cd CLASS and voila you are in class :)
+
+
+
+
+
 
 |||||||||||||||||||||||||||||||||
 The pipe
