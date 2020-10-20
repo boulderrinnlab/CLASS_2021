@@ -122,9 +122,16 @@ ls
 
 Now you see a sim-link called CLASS. You just cd CLASS and voila you are in class :)
 
+Another handy short cut is to see how big a folder is. Often you are downloading to
+or working on a folder and need to see if it became bigger or smaller. This is best
+done wtih disk usage (du)
 
+```
+cd ~/
+du -sh ~/
+```
 
-
+The -sh flag is for "s"ummary and "h"uman readable
 
 
 |||||||||||||||||||||||||||||||||
@@ -132,6 +139,42 @@ The pipe
 |||||||||||||||||||||||||||||||||
 
 
+The pipe and xargs are two of the most elegant aspects of BASH. Let's try something
+simple, so simple it may end up being used quite often :)
+
+Many times a folder you are indexing may have hundreds or thousands of files.
+There is no way we want to count them manually. So we can use the pipe to list (ls) 
+the files in a directory and pipe it to word count (wc) to count the number of files.
+
+Let's see:
+
+```
+cd ~/
+ls | wc -l
+```
+Here the list output becomes the standard input to the word count owing to the pipe.
+Or the pipe passed along the standard output of ls to standard input of wc. The 
+-l flag is for the line count. 
+
+
+Let's dig deeper into the pipe with something fun -- download a youtube video
+from your terminal:
+
+youtube-dl $1 -q -o - | ffmpeg -i - $2
+
+downloads a video from the given youtube url passed by $1 and outputs it as the file given by $2. Note how the file is quietly -q output to STDOUT -o -, piped to ffmpeg and used as input there by -i -.
+
+
+
+
+
+
+
+
+[*~*]$ find . -type f -name '*.jpg' -exec mv -i {} ../compiled/ \;
+
+
+[*~*]$ find . -type f -name '*.mov' -exec mv -i {} ../compiled_movies/ \;
 
 
 TSV fie
