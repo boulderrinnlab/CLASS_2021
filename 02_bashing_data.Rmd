@@ -157,31 +157,140 @@ Or the pipe passed along the standard output of ls to standard input of wc. The
 -l flag is for the line count. 
 
 
-Let's dig deeper into the pipe with something fun -- download a youtube video
+||||||||||||||||||||||||||||||||||||||||||||||||
+General Regularized Expression Print (GREP)
+||||||||||||||||||||||||||||||||||||||||||||||||
+
+Some fun background reading of the story behind GREP:
+https://www.quora.com/Where-did-GREP-come-from
+
+It's like the search bar, before there was a search bar. Grep will go look for
+the search key in a file. If there is a match then you can return just about anything
+in the file. If you have ever done Vlookup in Xcel it maybe familiar in that sense. 
+But the reality it is so simple, elegnat and powerful we will use GREP a lot in class.
+
+Let's play with the encode .TSV file we downloaded.
+
+```
+head encode_awk_lesson
+```
+
+Yikes ok, so you see all the "/" that means it is tab deliminated. We would see
+commas if it was a .csv.
+
+So this is not very readable. Let's use GREP to get what we want. Let's say we are 
+interested in all the samples that start with POL for POL II or POLR2A, there are 
+many ways to spell but we can search for anything that starts with POL.
+
+
+```
+grep -ia 'pol' encode_awk_lessons.tsv | wc -l
+```
+I guess we see that there are 11 enteries for anything matching the text of pol.
+We used the -i flag which is very useful to match any type of the same letters.
+People spell gene names all kinds of different ways (with and with out capitals etc).
+So the -i will match Pol POl adn POL as well as poL. Try running with out the -i (no matches!).
+The -a is simply saying we are looking for a text match.
+
+Note that we piped to wc -l, if you take that out what happens?
+
+Now open up the same file in XCEL and search for pol -- do you find 11 enteries?
+
+So grep likes to go look but needs to be told where to disseminate what was found!
+So let's print the grep standard output to a file using ' > ' 
+'>' is a very powerful "pipe" if yoy will to say "take standard out to print"
+
+Let's take a look at these 11 matches.
+
+```
+grep -ia 'pol' encode_awk_lessons.tsv > grep_out.txt
+ls
+cat grep_out.txt
+```
+
+So we see a new file was printed, but let's open in xcel for ease.
+
+Ok, so this is a great example of how to be careful with grep. We loosened the 
+search a bit too much and it turns out some of those weird encode acessions had pol 
+in the string! But we do see the samples we want are "POLR2A" -- let's revamp our
+grep.
+
+
+
+#TODO DEBUG to exact match?
+```
+grep -aw 'POLR2A' encode_awk_lessons.tsv > grep_out.txt
+cat grep_out.txt
+```
+Here the -w requires an exact match and -x means the entire line has to match.
+We get nothing with these requirements. However we can see that column 6 has the 
+key term we are trying to match. 
+
+Let's now bring in AWK to our BASH vocab. This is like moving columns and rows in
+excel.
+
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||
+Alfred Aho peter Weinberger brian Kernighan = AWK
+|||||||||||||||||||||||||||||||||||||||||||||||||||||||
+
+So we can use AWK in a similar way to grep:
+
+
+TODO debug gives only 2 of 4
+```
+awk '{if ($6 == "POLR2A") print $0;}' encode_awk_lesson.tsv > awk.txt
+```
+
+Let's use awk to remove columns that we don't need from this .tsv file such as
+age.
+
+
+TODO debug 
+```
+grep -aw 'POLR2A' encode_awk_lessons.tsv > grep_out.txt
+awk '!($21="")' grep_out.txt
+```
+
+
+_________________________ Bonus Bash Fun _________________________ 
+
+#### Bonus
+pipe with something fun -- download a youtube video
 from your terminal:
 
+```
 youtube-dl $1 -q -o - | ffmpeg -i - $2
-
-downloads a video from the given youtube url passed by $1 and outputs it as the file given by $2. Note how the file is quietly -q output to STDOUT -o -, piped to ffmpeg and used as input there by -i -.
-
+```
 
 
+downloads a video from the given youtube url passed by $1 and outputs it as the file given by $2. Note how the file is quietly -q output to STDOUT -o -, piped to ffmpeg and used as input there by -i -. The only downside is you have to install ffmpeg -- but it's not that bad:
+
+http://ericholsinger.com/install-ffmpeg-on-a-mac
+####
 
 
 
 
+### Bonus. Have you ever had a folder of folders of folders? This is often the case
+with photo libraries, music and other large archives. But let's say you simply just
+want to retreive all the photos on an app before the app goes extinct etc. 
 
-[*~*]$ find . -type f -name '*.jpg' -exec mv -i {} ../compiled/ \;
+You can do this very easily with BASH alone: with the powerful find command:
 
 
-[*~*]$ find . -type f -name '*.mov' -exec mv -i {} ../compiled_movies/ \;
+```
+man find
+find . -type f -name '*.jpg' -exec mv -i {} ../compiled/ \;
+```
 
+with this snippet we call find to look in the directory we are in (. = here)
+we used the -type flag to look for files with -name that is anything that ends in
+.jpg ('*.jpg'). Then the cool stuff starts happening. We call -exec for execute the 
+next command. In otherwords standard out put is going to be "piped" into the move
+command (mv). So we floated all the file paths ending in .jpg to the mv funciton and
+last we just tell the computer where to move the files (or copy (cp)). The back slash
+semi-colon ends the bash script. Not so bad -- just standard input and output movements.
 
-TSV fie
-
-Grep 
-
-AWK
 
 
 
