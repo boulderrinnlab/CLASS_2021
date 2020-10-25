@@ -367,6 +367,75 @@ for i in $(awk -F "\t" '{print $19}' metadata.tsv | uniq); do
 
 
 
+
+Let's use a for loop and radnom number generator to make the class groups:
+
+
+beginer version (JR first for loop)
+
+```
+plist=(1 2 3 4 5)
+for i in ${plist[@]}; do
+    echo "$i"
+done > file.txt
+cat file.txt file.txt > file2.txt
+cat file2.txt file.txt > file3.txt
+paste -d ' ' file3.txt bchm.csv 
+
+```
+This is pretty simple, but still may have some scary parts. let's break it down:
+
+first we set a variable plist to the numbers 1-5 (for 5 members in the group)
+then we start the for loop for the first object i in plist (1,2,3,4 or 5). But as 
+we can see it's slightly more complicated we used ${ } to index into our plist.
+The computer is sorting 1-5 in a "hash" which is usally indexed with [@]. 
+
+Indexing is very fundemental to what we will do, but don't worry if it seems confusing
+right now -- we will do it so much it will become second nature :) 
+
+The first command ends with ; then we invoke the do command in bash. It's doing what 
+it says it's doing telling the computer to do what's next in line. Echo simply prints 
+what is in standard output currently (i) in the ${plist[@]}. 
+
+Finally we say done to end the loop. 
+
+This simply prints 1-5 into a file.txt. Then I merge the same two files to get 
+two sets of 1-5 and a third merge (cat). This is a terrible for loop :) 
+
+Here is a more advanced version from Michael
+
+```
+awk -F "," '{print $1}' bchm_5631_enrollment.csv | tail -n +2 > names.txt
+# we saw this above, now with comma seperator to print column 1. then piped to
+# take only the last two enteries and print to names.txt
+
+num_students=$(cat names.txt | wc -l)
+#setting a variable like plist above called num_students
+
+RANDOM=45208908
+# This is setting a random seed so the randomness is even reproducible :)
+echo -n "" > random_list.txt
+# NOt sure
+
+for i in `seq $num_students`
+do
+	echo $RANDOM >> random_list.txt
+done
+# The for loop that is using echo to print the current random number so each
+# student gets a random number in sets of 5
+
+paste -d',' random_list.txt names.txt > names_w_random.txt
+# printing out the file
+
+sort -t" " -n -k2 names_w_random.txt > names_sorted.txt
+# sorting the output file by random number column
+
+awk '{print} NR %3 == 0 { print "" }' names_sorted.txt
+## NOT SURE
+```
+
+
+
 _________________________ Bonus Bash Fun _________________________ 
 
 #### Bonus
