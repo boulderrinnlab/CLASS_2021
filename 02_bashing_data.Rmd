@@ -172,7 +172,7 @@ But the reality it is so simple, elegnat and powerful we will use GREP a lot in 
 Let's play with the encode .TSV file we downloaded.
 
 ```
-head encode_awk_lesson
+head encode_awk_lesson.tsv
 ```
 
 Yikes ok, so you see all the "/" that means it is tab deliminated. We would see
@@ -217,29 +217,82 @@ grep.
 
 
 
-#TODO DEBUG to exact match?
 ```
 grep -aw 'POLR2A' encode_awk_lessons.tsv > grep_out.txt
 cat grep_out.txt
 ```
 Here the -w requires an exact match and -x means the entire line has to match.
-We get nothing with these requirements. However we can see that column 6 has the 
-key term we are trying to match. 
+Now we see a file with just the POLR2A experiments -- as we wanted.
 
-Let's now bring in AWK to our BASH vocab. This is like moving columns and rows in
-excel.
+Let's say we wanted to know how many unique DBPs we are about to study. We can
+bring AWK in, which is like selecting and moving columns in excel. So we could awk
+the column with DBP names and put it into "unique" to know the number of unique DBPS.
+
 
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||
 Alfred Aho peter Weinberger brian Kernighan = AWK
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||
 
-So we can use AWK in a similar way to grep:
+So we can use AWK in a similar way to grep to get started:
+
+```
+awk '{if ($6 == "POLR2A") print $0;}' encode_awk_lessons.tsv > awk.txt
+```
+The syntax for awk is:
+awk -options 'selection _criteria {action }' input-file > output-file
+
+so here we see the selection criteria is an if statement that if column 6 ($6)
+is equal to (exactly ==) the "POLR2A" term. print $0 means to print the lines that
+match these arguments and ; means end. Then, somewhat counter intuitive we put the
+file we want to operate on and then > output file. 
 
 
-TODO debug gives only 2 of 4
+We see that we get only the two TRUE POLR2A and not the phospho samples. This is 
+why grep is better suited for this kind of thing. Let's now use awk to acomplish
+the goal of seeing how many unique DBPs are in this file.
+
+First let's make a file with just the names of DBPs.
+
+TODO debug
 ```
-awk '{if ($6 == "POLR2A") print $0;}' encode_awk_lesson.tsv > awk.txt
+awk -F "/t" '{print $6}' encode_awk_lessons.tsv | wc -l
+#this works but this does not
+awk -F "/t" '{print $6}' encode_awk_lessons.tsv > dbp.tsv
 ```
+alrigh we now see there are 500 or so lines in column 6 checking xcel that seems
+right. 
+
+Now we can print it to a new file 
+
+TODO debug
+```
+awk -F "/t" '{print $6}' encode_awk_lessons.tsv > dbp.tsv
+```
+
+Let's use sort or unique unix commands to determine the number of unique dbps
+
+TODO STILL NO OUTPUT FILE ???
+```
+awk -F "/t" '{print $6}' encode_awk_lessons.tsv | sort -u > test.txt
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Let's use awk to remove columns that we don't need from this .tsv file such as
 age.
@@ -272,6 +325,11 @@ This puts the contents of column 4 “in” to a term called ‘array’ but is 
 ```
 
 
+
+
+
+
+
 --------------------------------
 for loops in BASH
 # For / in / do / done will always be used
@@ -293,6 +351,20 @@ for *.gz; do mv $file ${file%??}; done
     
 the do mv ${file%??} part is removing the last two characters (??) from the variable file
 % is called a parameter extension which means remove text (could also use !)— the number of ?s is the number of characters removed from end of line (so 2 in this case)
+
+
+
+```
+
+#!/bin/bash
+for i in $(awk -F "\t" '{print $19}' metadata.tsv | uniq); do
+        echo $i
+        awk -F "\t" '{OFS = ","}{print $1,$4,$19,$31,$37,$41,$43,$47}' metadata.tsv > selectcols.csv
+        base_name='_filtered_meta.csv'
+        head -n 1 selectcols.csv > "$i$base_name"
+        grep $i selectcols.csv | grep 'fastq' >> "$i$base_name"
+```
+
 
 
 _________________________ Bonus Bash Fun _________________________ 
