@@ -246,6 +246,7 @@ Alfred Aho peter Weinberger brian Kernighan = AWK
 So we can use AWK in a similar way to grep to get started:
 
 ```
+man awk
 awk -F $'\t' '{if ($6 == "POLR2A") print $0;}' data/encode_awk_lessons.tsv | wc -l 
 ```
 
@@ -269,51 +270,66 @@ First let's make a file with just the names of DBPs.
 
 
 ```
-awk -F $"/t" '{print $6}' data/encode_awk_lessons.tsv | wc -l
 awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv
-awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv | sort -u | wc -l|
+```
+Here we see one of many ways to wrtie the same thing in AWK. The awk arguements
+are encapsulated in the ' ' statement(s) inside { }. It is good practice to tell
+awk what type of deliminator there are betweeen columns. This being done in the first
+statement BEGIN means start with this statement {FS = "\t"}; this is saying the 
+Field Seperator (FS) is a tab deliminated file "\t". The semicolon ends this argument.
+
+
+The next statement is using the funciton print to "print" the column of choice.
+In this case we are choosing column 6 as it has the names of all the DBPs.
+
+The final argument after the awk instructions is the file in which to perform the
+awk instructions on -- data/encode_awk_lessons.tsv
+
+Cool, but it's all in standard output right now -- let's get back to the quesiton:
+How many unique DBPs could we analyze?
+
+To do so we will just take advantage of the pipe and sort command.
+```
+man sort
+```
+Let's put it together:
+
+```
+awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv | sort -u | wc -l
+```
+We piped out the awk arguments from standard in put to standard output of sort.
+We used the -u flag to sort and then collapse the sort to unique string names.
+then we simply count the lines to see if it worked?
+
+YES! How many??
+
+Let's print this out to a file:
+
+```
 awk -F $"/t" '{print $6}' encode_awk_lessons.tsv > dbp.tsv
 ```
-alrigh we now see there are 500 or so lines in column 6 checking xcel that seems
-right. 
 
-Now we can print it to a new file 
-
-TODO debug
-```
-awk -F "/t" '{print $7}' encode_awk_lessons.tsv > dbp.tsv
-```
-
-Let's use sort or unique unix commands to determine the number of unique dbps
-
-TODO STILL NO OUTPUT FILE ???
-```
-awk -F "/t" '{print $6}' encode_awk_lessons.tsv | sort -u > test.txt
-
-```
-
-
-
-
-Let's use awk, grep and pipes to make a new file from the .tsv
+Let's use awk, grep and pipes to make a new file from the .tsv. Very similar to
+above, but now showing the power of awk in doing many things for you at once!
 
 ```
 awk 'BEGIN {FS="\t"}; {print $1,$2,$3}' data/encode_awk_lessons.tsv > test.txt
-awk 'BEGIN {FS="\t"}; {print NF}' test.txt 
-awk --field-separator="\t" "{print NF}" data/encode_awk_lessons.tsv
 ```
+What happened here? How could you test if it was the right file output?
 
 
-
---------------------------------
+->O<-->O<-->O<-->O<-->O<-->O<-->O<-->O<-
 for loops in BASH
-# For / in / do / done will always be used
+->O<-->O<-->O<-->O<-->O<-->O<-->O<-->O<-
+
+# For / in / do / done will always be used in a for loop
+
+### TO DO START HERE ### SIMPLE FOR LOOP WITH ENCODE LESSONS FILE
 
 
 ```
 for file in *read*; do mv $file ${file%??}; done
 ```
-
 
 # for is beginning to set up a term “file” 
 # I was in an SFTP folder that I wanted to remove the extensions .1 and .2 from duplicate files
@@ -328,7 +344,7 @@ the do mv ${file%??} part is removing the last two characters (??) from the vari
 % is called a parameter extension which means remove text (could also use !)— the number of ?s is the number of characters removed from end of line (so 2 in this case)
 
 
-
+### Fit this to encode file
 ```
 
 #!/bin/bash
@@ -339,8 +355,6 @@ for i in $(awk -F "\t" '{print $19}' metadata.tsv | uniq); do
         head -n 1 selectcols.csv > "$i$base_name"
         grep $i selectcols.csv | grep 'fastq' >> "$i$base_name"
 ```
-
-
 
 
 Let's use a for loop and radnom number generator to make the class groups:
@@ -356,7 +370,7 @@ done > file.txt
 cat file.txt file.txt > file2.txt
 cat file2.txt file.txt > file3.txt
 paste -d ' ' file3.txt bchm.csv 
-
+#man paste
 ```
 This is pretty simple, but still may have some scary parts. let's break it down:
 
@@ -381,31 +395,51 @@ Here is a more advanced version from Michael
 
 ```
 awk -F "," '{print $1}' bchm_5631_enrollment.csv | tail -n +2 > names.txt
+```
 # we saw this above, now with comma seperator to print column 1. then piped to
 # take only the last two enteries and print to names.txt
 
+```
 num_students=$(cat names.txt | wc -l)
+```
 #setting a variable like plist above called num_students
 
+```
 RANDOM=45208908
+```
+
 # This is setting a random seed so the randomness is even reproducible :)
+
+```
 echo -n "" > random_list.txt
+```
 # NOt sure
 
+```
 for i in `seq $num_students`
 do
 	echo $RANDOM >> random_list.txt
 done
+```
+
 # The for loop that is using echo to print the current random number so each
 # student gets a random number in sets of 5
 
+```
 paste -d',' random_list.txt names.txt > names_w_random.txt
+```
+
 # printing out the file
 
+```
 sort -t" " -n -k2 names_w_random.txt > names_sorted.txt
+```
 # sorting the output file by random number column
 
+```
 awk '{print} NR %3 == 0 { print "" }' names_sorted.txt
+```
+
 ## NOT SURE
 ```
 
