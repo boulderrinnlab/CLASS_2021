@@ -33,6 +33,7 @@ that are often very important. the -lah is called a flag that gives us more info
 
 ```
 man ls
+#q to escape
 ```
 -l for long
 -a for all
@@ -50,7 +51,7 @@ woah a new file shows up! What is in it? lets use Nano
 ```
 nano test.txt
 # type whatever
-# ctrl x to get out and enter
+# ctrl x, Y for yes -- then enter -- to exit nano
 ```
 
 Now let's take a look at the file with cat
@@ -66,6 +67,15 @@ tail -10 test.txt
 ```
 
 Let's make another file and combine two files to highlight other functinality of the cat command
+First let's remove (using rm command) the test.txt file and make a new one.
+
+```
+rm test.txt
+touch test.txt
+nano test.txt
+"add whatever text"
+```
+Now we will make a second file and merge the two files into one file with cat.
 
 ```
 tocuh test2.txt
@@ -184,7 +194,7 @@ many ways to spell but we can search for anything that starts with POL.
 
 
 ```
-grep -ia 'pol' encode_awk_lessons.tsv | wc -l
+grep -ia 'pol' data/encode_awk_lessons.tsv | wc -l
 ```
 I guess we see that there are 11 enteries for anything matching the text of pol.
 We used the -i flag which is very useful to match any type of the same letters.
@@ -203,7 +213,7 @@ So let's print the grep standard output to a file using ' > '
 Let's take a look at these 11 matches.
 
 ```
-grep -ia 'pol' encode_awk_lessons.tsv > grep_out.txt
+grep -ia 'pol' data/encode_awk_lessons.tsv > grep_out.txt
 ls
 cat grep_out.txt
 ```
@@ -218,7 +228,7 @@ grep.
 
 
 ```
-grep -aw 'POLR2A' encode_awk_lessons.tsv > grep_out.txt
+grep -aw 'POLR2A' data/encode_awk_lessons.tsv > grep_out.txt
 cat grep_out.txt
 ```
 Here the -w requires an exact match and -x means the entire line has to match.
@@ -236,8 +246,12 @@ Alfred Aho peter Weinberger brian Kernighan = AWK
 So we can use AWK in a similar way to grep to get started:
 
 ```
-awk '{if ($6 == "POLR2A") print $0;}' encode_awk_lessons.tsv > awk.txt
+awk -F $'\t' '{if ($6 == "POLR2A") print $0;}' data/encode_awk_lessons.tsv | wc -l 
 ```
+
+## TODO explain flags and syntax
+
+
 The syntax for awk is:
 awk -options 'selection _criteria {action }' input-file > output-file
 
@@ -253,11 +267,12 @@ the goal of seeing how many unique DBPs are in this file.
 
 First let's make a file with just the names of DBPs.
 
-TODO debug
+
 ```
-awk -F "/t" '{print $6}' encode_awk_lessons.tsv | wc -l
-#this works but this does not
-awk -F "/t" '{print $6}' encode_awk_lessons.tsv > dbp.tsv
+awk -F $"/t" '{print $6}' data/encode_awk_lessons.tsv | wc -l
+awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv
+awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv | sort -u | wc -l|
+awk -F $"/t" '{print $6}' encode_awk_lessons.tsv > dbp.tsv
 ```
 alrigh we now see there are 500 or so lines in column 6 checking xcel that seems
 right. 
@@ -266,7 +281,7 @@ Now we can print it to a new file
 
 TODO debug
 ```
-awk -F "/t" '{print $6}' encode_awk_lessons.tsv > dbp.tsv
+awk -F "/t" '{print $7}' encode_awk_lessons.tsv > dbp.tsv
 ```
 
 Let's use sort or unique unix commands to determine the number of unique dbps
@@ -280,53 +295,13 @@ awk -F "/t" '{print $6}' encode_awk_lessons.tsv | sort -u > test.txt
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Let's use awk to remove columns that we don't need from this .tsv file such as
-age.
-
-
-TODO debug 
-```
-grep -aw 'POLR2A' encode_awk_lessons.tsv > grep_out.txt
-awk '!($21="")' grep_out.txt
-```
-
-What if you want everything except the POLR2A? we simply need to add the -v (for invert match)
-If you want to grep through a folder you can use -r (grep -r 'term' folder/*)
-
-
 Let's use awk, grep and pipes to make a new file from the .tsv
 
 ```
-awk -F "/t" '{print $1 "/t" $2}' data/encode_awk_lessons.tsv > test.txt
+awk 'BEGIN {FS="\t"}; {print $1,$2,$3}' data/encode_awk_lessons.tsv > test.txt
+awk 'BEGIN {FS="\t"}; {print NF}' test.txt 
+awk --field-separator="\t" "{print NF}" data/encode_awk_lessons.tsv
 ```
-
-```
-awk ‘ {print $4} ‘ | awk ‘!($0 in array) { array[$0]; print} '
-```
-This puts the contents of column 4 “in” to a term called ‘array’ but is looking for all the contents in the array ($0) that are not in the array then prints unique values
-
-
-```
- awk -F '/T' '{print $5}' data/encode_awk_lessons.tsv | sort -u data/encode_awk_lessons.tsv > test.txt
-```
-
-
-
-
 
 
 

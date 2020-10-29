@@ -3,21 +3,21 @@ title: "MS_Design_Explorer"
 author: "JR"
 date: "10/15/2020"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ENCODExplorer)
 library(tidyverse)
+library(janitor)
+library(httr)
 ```
 
 Michaels Encode Explorer
 
 ```{r}
-library(tidyverse)
-library(httr)
-library(janitor)
-#install.packages("janitor")
 contstruct_query <- function(experiment_accession,
                              base_url = "https://www.encodeproject.org/report.tsv?",
                              file_format = "fastq",
@@ -41,6 +41,8 @@ get_fastq_info <- function(experiment_accession) {
   body <- read_tsv(content(request, "text"), skip = 1)
   return(body)
 }
+
+
 # Read in the experiment report downloaded from Encode
 # we will only use the Accession column 
 # Here we'll retrieve the read_count and md5 sum 
