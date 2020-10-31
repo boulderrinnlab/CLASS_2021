@@ -250,9 +250,6 @@ man awk
 awk -F $'\t' '{if ($6 == "POLR2A") print $0;}' data/encode_awk_lessons.tsv | wc -l 
 ```
 
-## TODO explain flags and syntax
-
-
 The syntax for awk is:
 awk -options 'selection _criteria {action }' input-file > output-file
 
@@ -381,7 +378,6 @@ A in the second loop, then to B and C before it returns back to the first loop t
 move to the next position 2.
 
 
-
 We would probably rather do a for loop while reading in a file and changing something.
 Let's change the text in our encode practice file. 
 
@@ -410,47 +406,44 @@ still the new variable being made "while" is similar to the "for" statemetnt but
 saying while there is something to read print each line :)
 
 Typically we would want to maniputate or change the name of a column in a file
-systematically. 
+systematically with "sed". Sed is a simple elegant and powerful unix commnad that
+can parse and transform text. Let's give it a spin.
 
+```
+man sed
+```
 
+This basically distills down to 
 
+sed -i 's/old-word/new-word/g' *.txt 
+the s/ is a substitute command 
 
+Let's try changing POLR2A to POL2
 
-### TO DO START HERE ### SIMPLE FOR LOOP WITH ENCODE LESSONS FILE
+```
+sed -i 's/$POLR2A/$POL2/g' data/encode_awk_lessons.tsv
+```
+
+Did you see a change?
+sed is a really nice way to change chromosome annotations that tend to change in time
+for example chromosome 1 maybe chr1 C1 or 1 -- in one file and a differnet spelling
+in another but if they ever need to connect you will want them in the same format.
+
+one line with sed and golden -- can also use in a for loop to replace many files.
 
 
 ```
-for file in *read*; do mv $file ${file%??}; done
+for f in $(cat data/encode_awk_lessons.tsv)
+do
+sed -i 's/USF2/USA/g' data/encode_awk_lessons.tsv
+do 
+echo "$f"
+done
+
 ```
 
-# for is beginning to set up a term “file” 
-# I was in an SFTP folder that I wanted to remove the extensions .1 and .2 from duplicate files
-    ## so I did “
-    
-```
-for *.gz; do mv $file ${file%??}; done
-```
-
-    
-the do mv ${file%??} part is removing the last two characters (??) from the variable file
-% is called a parameter extension which means remove text (could also use !)— the number of ?s is the number of characters removed from end of line (so 2 in this case)
-
-
-### Fit this to encode file
-```
-
-#!/bin/bash
-for i in $(awk -F "\t" '{print $19}' metadata.tsv | uniq); do
-        echo $i
-        awk -F "\t" '{OFS = ","}{print $1,$4,$19,$31,$37,$41,$43,$47}' metadata.tsv > selectcols.csv
-        base_name='_filtered_meta.csv'
-        head -n 1 selectcols.csv > "$i$base_name"
-        grep $i selectcols.csv | grep 'fastq' >> "$i$base_name"
-```
-
-
-Let's use a for loop and radnom number generator to make the class groups:
-
+This is a very silly for loop becuase sed already kinda has it built in...sed is just 
+like find and replace. 
 
 
 *********************
@@ -554,7 +547,6 @@ from your terminal:
 ```
 youtube-dl $1 -q -o - | ffmpeg -i - $2
 ```
-
 
 downloads a video from the given youtube url passed by $1 and outputs it as the file given by $2. Note how the file is quietly -q output to STDOUT -o -, piped to ffmpeg and used as input there by -i -. The only downside is you have to install ffmpeg -- but it's not that bad:
 
