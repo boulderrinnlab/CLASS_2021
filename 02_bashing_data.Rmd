@@ -306,7 +306,7 @@ YES! How many??
 Let's print this out to a file:
 
 ```
-awk -F $"/t" '{print $6}' encode_awk_lessons.tsv > dbp.tsv
+awk 'BEGIN {FS="\t"}; {print $6}' encode_awk_lessons.tsv > dbp.tsv
 ```
 
 Let's use awk, grep and pipes to make a new file from the .tsv. Very similar to
@@ -322,7 +322,99 @@ What happened here? How could you test if it was the right file output?
 for loops in BASH
 ->O<-->O<-->O<-->O<-->O<-->O<-->O<-->O<-
 
-# For / in / do / done will always be used in a for loop
+For loops are probably one of the most fundemental aspects of computing. It allows 
+us to do many repetitive tasks with only a few instruction.
+
+The syntax in bash is:
+
+For X in $Y do 
+
+#For / in / do / done will always be used in a for loop
+
+
+Let's start with a really simple example that helps us understand how the computer
+thinks about this:
+
+
+```
+For x in 1 1 1 1
+do 
+echo BCHM5631
+done
+```
+
+What we get out is 4 prints of BCHM5631 -- what happens if we change the numbers?
+
+```
+For x in 1 3 11 14
+do 
+echo BCHM5631 $x
+done
+```
+
+Same result, you could even change it to apple, banana or anything -- the number
+of objects after "in" are the inputs for each loop until there is nothing more to 
+be "in". Notice the added "$x" this means it will print the value it's "in" currently.
+
+
+Let's use the 'seq' command to set the variables to be "in"
+
+```
+for x in $(seq 1 5)
+do 
+for y in A B C
+do
+echo "$x:$y"
+done
+done
+
+#for x in $(seq 1 5); do for y in A B C; do echo "$x:$y"; done ; done
+```
+
+Ok so there is a lot going on in this simple little loop. Notice that we didn't 
+have to type in 1 2 3 4 5 -- instead we used the $ to set a "variable" or string.
+inside the $ is the seq command which will go from 1 until it hits 5. This way 
+you can specify a range of your choosing. The other thing we see if the for loop 
+starts with 1 and then does another for loop with a new varible "y". In this order the 
+loop is going to stage itself in position 1 of the first for loop then go to position
+A in the second loop, then to B and C before it returns back to the first loop to 
+move to the next position 2.
+
+
+
+We would probably rather do a for loop while reading in a file and changing something.
+Let's change the text in our encode practice file. 
+
+```
+for line in $(cat /data/encode_awk_lessons.tsv)
+do 
+echo "$line"
+done
+```
+Woah in the blink of an eye we just used cat to print each line of the file :)
+
+We basically just did cat but used a for loop to print one line at a time.
+
+This is identical to do this with "read" command too.
+
+```
+while read line
+do
+echo "$line"
+done < data/encode_awk_lessons.tsv
+```
+
+Notice we have the same structure but we are putting the input file at end with
+< arrow sort of counter intutively putting the input file last .... also line is
+still the new variable being made "while" is similar to the "for" statemetnt but 
+saying while there is something to read print each line :)
+
+Typically we would want to maniputate or change the name of a column in a file
+systematically. 
+
+
+
+
 
 ### TO DO START HERE ### SIMPLE FOR LOOP WITH ENCODE LESSONS FILE
 
@@ -360,7 +452,16 @@ for i in $(awk -F "\t" '{print $19}' metadata.tsv | uniq); do
 Let's use a for loop and radnom number generator to make the class groups:
 
 
-beginer version (JR first for loop)
+
+*********************
+EXCERCISE
+*********************
+
+Use a for loop to create a random set of three groups of 5 students in the class.
+What does the input file need to look like 
+
+
+Beginer version 
 
 ```
 plist=(1 2 3 4 5)
@@ -441,7 +542,6 @@ awk '{print} NR %3 == 0 { print "" }' names_sorted.txt
 ```
 
 ## NOT SURE
-```
 
 
 
