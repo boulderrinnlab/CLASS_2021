@@ -1,6 +1,6 @@
 ### University of Colorado Boulder Biochemsitry 6531: Computational and statistical analysis of the human genome.
 
-[class syllabus](https://github.com/boulderrinnlab/CLASS_2021/wiki/Syllabus)
+[Class syllabus](https://github.com/boulderrinnlab/CLASS_2021/wiki/Syllabus)
 
 [Class Youtube Channel of Video Lectures](https://www.youtube.com/channel/UC7vZD35eUp4_SxsHnJLthJw?view_as=subscriber)
 
