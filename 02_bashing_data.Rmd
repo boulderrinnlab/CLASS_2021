@@ -340,6 +340,7 @@ echo BCHM5631
 done
 ```
 
+
 What we get out is 4 prints of BCHM5631 -- what happens if we change the numbers?
 
 ```
@@ -357,7 +358,7 @@ be "in". Notice the added "$x" this means it will print the value it's "in" curr
 Let's use the 'seq' command to set the variables to be "in"
 
 ```
-for x in $(seq 1 5)
+for x in $(seq 1 50)
 do 
 for y in A B C
 do
@@ -366,6 +367,17 @@ done
 done
 
 #for x in $(seq 1 5); do for y in A B C; do echo "$x:$y"; done ; done
+```
+
+E.g. for class
+
+```
+for x in $(seq 1 42)
+do 
+echo BCHM5631
+done
+
+#for x in $(seq 1 42); do echo BCHM5631 is great $x; done
 ```
 
 Ok so there is a lot going on in this simple little loop. Notice that we didn't 
