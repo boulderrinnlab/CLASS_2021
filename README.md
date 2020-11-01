@@ -1,6 +1,18 @@
-### CLASS_2021 Statistical and computational analysis of the human genome
+### University of Colorado Boulder Biochemsitry 6531: Computational and statistical analysis of the human genome.
 
-### /Shares/rinn_class/data/CLASS_2021
+[class syllabus](https://github.com/boulderrinnlab/CLASS_2021/wiki/Syllabus)
 
-### /Scratch/IDENTIKEY
+[Class Youtube Channel of Video Lectures](https://www.youtube.com/channel/UC7vZD35eUp4_SxsHnJLthJw?view_as=subscriber)
+
+[Class lecture Slides](https://www.lncrna.io/bchm-5631-lectures-info)
+
+[Class pre-cooked excercises in markdown files](https://github.com/boulderrinnlab/CLASS_2021)
+
+CLass Slack Channel: bchm5631.slack.com
+
+
+#### Common file paths:
+/Shares/rinn_class/data/CLASS_2021
+
+/Scratch/IDENTIKEY
 
