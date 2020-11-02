@@ -29,7 +29,16 @@ and some have technical replicates, which we won't use.
 So now we need to make a sample sheet that connects the file id to the DBP and 
 then use that for batch download from ENCODE.
 
-The exact report can be found here: 
+First navigate to a directory in your computer of your choosing -- for example:
+
+```
+cd ~/
+```
+
+This will take you to your home directory
+
+
+The exact ENCODE report can be found here: 
 
 https://www.encodeproject.org/report/?type=Experiment&status=released&assay_slims=DNA+binding&biosample_ontology.term_name=HepG2&assay_title=TF+ChIP-seq&biosample_ontology.classification=cell+line&files.read_length=100&files.read_length=76&files.read_length=75&files.read_length=36&assay_title=Control+ChIP-seq&assay_title=Histone+ChIP-seq&files.run_type=single-ended
 
@@ -38,7 +47,16 @@ You now have a .TSV (tab seperated file or /t)
 
 Next we need to get the FASTQ link for each of the replicates.
 Go to the same ENCODE website selection where the experiments are listed and 
-click dowload. This is a list of URLs for the FASTQs. Let's use unix to grab a file
+click dowload. 
+
+To see these files in your director
+
+```
+ls -lah
+# we will go over this more in next lecture
+```
+
+Teh text file is a list of URLs for the FASTQs. Let's use unix to grab a file
 using:
 
 ```
@@ -71,59 +89,88 @@ So let's make our first file copy and paste the url file you downloaded (with on
 You can do this by these simple commands.
 NANO is very useful and we will use a lot! Vi and EMACS are alternatives.
 
-```{BASH}
-# In the terminal type
+
+In the terminal type
+
+```
 nano files.txt
-#this automatically opens a nano window, but also creates a new file at same time
-#PASTE in the URL
-# To escape the window hit cntrol X, then return
-# now let's see what happened with:
-nano files.txt
-#Voila it's there!
-#Just remmeber if you accidently hit a key there is no ctrol Z :)
 ```
 
-Cool we have a text file in the directory we are in named files.txt
+This automatically opens a nano window, but also creates a new file at same time
+Now let's PASTE in the URL
+To escape the window hit cntrol X, then return
+Now let's see what happened:
+
+```
+nano files.txt
+```
+
+Voila it's there! Just remmeber if you accidently hit a key there is no ctrol Z :)
+
+So now we have a text file in the directory we are in named files.txt
+
+Let's paste in some URLs from the ENCODE download list (just 2 for now :)
+
+Now let's paste these two URLs where we can download raw data files.
+
+
+```
+https://www.encodeproject.org/files/ENCFF212GYT/@@download/ENCFF212GYT.fastq.gz
+https://www.encodeproject.org/files/ENCFF434BJG/@@download/ENCFF434BJG.fastq.gz
+```
+
+Let's read the file with cat.
+
+```
+cat files.txt
+```
+
+Do you see the URLS?
+
 Now we can use CURL or WGET to read this file and go grab the actual file from WWW
 we need to know some more BASH commands first:
-
-```
-XARGS
-```
-
-
-This invokes the shell to redirect the output of a command as the argument of another command
-or in otherwords it passes whatever the computer is thinking about into the next
-argument or command. 
 
 If we only had one URL in the file we could just do 
 
 ```
+man curl
 curl URL.com
 ```
 
-
 But since we have a file with multiple lines we want to envoke the shell to 
 read all of the URLS and then pass all those onto the CURL command.
-Let's take a look:
-
-```{BASH}
-xargs -L 1 curl -O -J -L < files.txt
-```
-We almost want to read this right to left. Ultimately files.txt is put into
-curl and that is put into the memory of the computer to go to URL and grab file.
+Let's take a look at xargs.
 
 ```
 man xargs
 ```
 
+Xargs invokes the shell to redirect the output of a command as the argument of another command
+or in otherwords it passes whatever the computer is thinking about into the next
+argument or command.
+
+```
+xargs -L 1 curl -O -J -L < files.txt
+```
+This may look a bit scary at first but let's break it down.
+
+We almost want to read this right to left. Ultimately files.txt is put into
+curl and that is put into the memory of the computer to go to URL and grab file.
+xargs will ultimately be invoked to skip empty lines.
+
 Here we see that the -L flag will skip to next non empty line. Since there is 
 a header in the file we are saying "make the first line empyt and go to next"
+
+So the file is inputed to curl which can check for updated links etc and then 
+xargs cleans it all up to ensure curl loops through all non-empty lines.
+
+Let's take a look at what curl is thinking about.
 
 ```
 man curl
 ```
-# Here we see that 
+
+Here we see that 
 
 # -O (output) 
 by default unix keeps everything in "standard output" or "memory" then it wants you 
@@ -142,7 +189,8 @@ one monster compiled file of all the URLS!
 if the URL has been changed to a new one it will be sent forward to the new
 location
 
-Enough let's run it !
+Enough let's run it -- NOTE these files are large so make sure you are working
+somewhere and erase them after -- we won't be using these long term.
 
 ```
 xargs -L 1 curl -O -J -L < files.txt
@@ -160,7 +208,7 @@ and standard output and how this information can be passed along.
 man wget
 ```
 here we see there is a flag for a "list" or -i
-# Try:
+Try:
 
 ```
 wget -i files.txt
@@ -191,10 +239,6 @@ in the data? Yikes!
 
 # Bash solution: m5sum 
 
-```
-md5sum
-```
-
 The original generator of this file will often provide a md5sum with the file you
 want to download from them. This is a digital key that represents the exact nature
 of the original file. md5sum is a command that can scan a file and produce this key
@@ -205,15 +249,16 @@ sequencing platform -- you typically download through and FTP site. Do you know
 if your download was 100% successful? Not with out md5sum checks. Always request
 an md5sum for any sequencing data you download *** 
 
+```
+man md5sum
+```
+
 *** In fact the pre-run 17 of 1099 downloads failed to have the exact same file!
 
 # So let's see if we downloaded the right files? 
 First let's get the md5sum values for the two URLS. Use "accession" in url 
 to search encode portal and see what the md5sum is for the two files.
 
-```
-man md5sum
-```
 
 you may have another name for it on your computer such as md5 on macosx. but
 on most servers it will be md5sum
@@ -234,14 +279,29 @@ Probably not so luckily we can check a list! let's make a list with nano
 nano md5sums.txt
 ```
 
-paste in the two md5sums from the ENCODE website, ctrl x and enter now we have a
-file with two md5sums now try:
+First we need the file accession number which is embedded in the URL above
+
+Paste these into md5sums.txt
+```
+ENCFF212GYT
+ENCFF434BJG
+```
+
+Now we need the md5sum values from ENCODE website by searching these accession in
+portal.
 
 ```
-md5sum *.gz md5sums.txt
+4b3e7dc77448bc4971367a3b40196cc0
+14fcf34bf1846ba82c4341838bc6e1b4
 ```
 
-# Were the files right?
+paste in the two md5sums from the ENCODE website --- with two spaces ----, ctrl x and enter now we have a
+file with two md5sums.
+
+```
+md5sum -c *.gz md5sums.txt > md5sums_status.txt
+# we will talk more about the > and printing files in next lecture
+```
 
 Typically this works out alright and if you want to just see if the number of
 matched md5sum checks is same as number of files you can add: " | wc -l ""
@@ -252,7 +312,7 @@ many lines of matched md5sums were found -- check the number is not less than
 files downloaded.
 
 ```
-md5sum *.gz md5sums.txt | wc -l
+md5sum -c *.gz files.txt | wc -l
 ```
 
 We will go over the pipe and lots of other basic bash commands in the next lecutre.
