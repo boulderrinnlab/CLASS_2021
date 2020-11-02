@@ -319,6 +319,10 @@ What happened here? How could you test if it was the right file output?
 for loops in BASH
 ->O<-->O<-->O<-->O<-->O<-->O<-->O<-->O<-
 
+```
+for x in $(seq 1 42); do echo BCHM5631 is great $x; done
+```
+
 For loops are probably one of the most fundemental aspects of computing. It allows 
 us to do many repetitive tasks with only a few instruction.
 
