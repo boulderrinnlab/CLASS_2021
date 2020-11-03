@@ -61,5 +61,6 @@ vignettes/*.pdf
 *data*
 *.txt
 *.csv
+*.gz
 *archive*
 
