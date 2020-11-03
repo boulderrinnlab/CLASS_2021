@@ -7,8 +7,6 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(ENCODExplorer)
-library(tidyverse)
 ```
 
 Description:
@@ -57,11 +55,13 @@ ls -lah
 ```
 
 Teh text file is a list of URLs for the FASTQs. Let's use unix to grab a file
-using:
+using curl and wget bash commands. First let's take a look at their manual. One
+of the best things in bash is the manual page for each command! We recommend 
+checking the manual for any function (google will have them too :).
 
 ```
-Curl 
-wget
+man curl 
+man wget
 ```
 
 These two commands will go to the internet and download a file(s) into your current
@@ -71,14 +71,9 @@ Let's use this to start playing with unix commands. First delete the URLS so the
 is are only two URLs to download (it would take a very long time otherwise)
 
 Navigate to a directory using your terminal. We can make a files.txt document using
-the command:
+the command nano.
 
-```
-Nano
-```
-
-
-Let's see waht that is using "man" function
+Let's take a peak
 ```
 man nano
 ```
@@ -156,7 +151,8 @@ This may look a bit scary at first but let's break it down.
 
 We almost want to read this right to left. Ultimately files.txt is put into
 curl and that is put into the memory of the computer to go to URL and grab file.
-xargs will ultimately be invoked to skip empty lines.
+xargs will ultimately be invoked to skip empty lines. Notice pipe is not needed
+xargs is how the computer will think and or manipulate standard input.
 
 Here we see that the -L flag will skip to next non empty line. Since there is 
 a header in the file we are saying "make the first line empyt and go to next"
@@ -167,9 +163,13 @@ xargs cleans it all up to ensure curl loops through all non-empty lines.
 Let's take a look at what curl is thinking about.
 
 ```
+xargs -L 1 curl -O -J -L < files.txt
+```
+Lets look at curl 
+
+```
 man curl
 ```
-
 Here we see that 
 
 # -O (output) 
@@ -189,7 +189,8 @@ one monster compiled file of all the URLS!
 if the URL has been changed to a new one it will be sent forward to the new
 location
 
-Enough let's run it -- NOTE these files are large so make sure you are working
+
+NOTE these files are large so make sure you are working
 somewhere and erase them after -- we won't be using these long term.
 
 ```
@@ -279,12 +280,19 @@ Probably not so luckily we can check a list! let's make a list with nano
 nano md5sums.txt
 ```
 
+The syntax for this is md5sum# " two spaces " and file.
+For example:
+
+```
+4b3e7dc77448bc4971367a3b40196cc0  ENCFF434BJG.fastq.gz
+```
+
 First we need the file accession number which is embedded in the URL above
 
 Paste these into md5sums.txt
 ```
-ENCFF212GYT
-ENCFF434BJG
+ENCFF212GYT.fastq.gz
+ENCFF434BJG.fastq.gz
 ```
 
 Now we need the md5sum values from ENCODE website by searching these accession in
@@ -295,12 +303,20 @@ portal.
 14fcf34bf1846ba82c4341838bc6e1b4
 ```
 
-paste in the two md5sums from the ENCODE website --- with two spaces ----, ctrl x and enter now we have a
-file with two md5sums.
+paste in the two md5sums from the ENCODE website --- with two spaces ----, 
+ctrl x and enter now we have a file with two md5sums.
+
+# Note this approach is not very useful for 1,000+ fastq files being downloaded in
+full class data set. In the design file lecture we will use BASH and ENCODE API to
+attach md5sums to each file automatically. Then download them all and check the
+files. So don't worry we will get there in a way that doesn't involve cutting 
+and pasting :) We are simply exploring the importance of these basic principles
+of data science. 
 
 ```
 md5sum -c *.gz md5sums.txt > md5sums_status.txt
 # we will talk more about the > and printing files in next lecture
+cat md5sums_status.txt
 ```
 
 Typically this works out alright and if you want to just see if the number of
@@ -312,7 +328,7 @@ many lines of matched md5sums were found -- check the number is not less than
 files downloaded.
 
 ```
-md5sum -c *.gz files.txt | wc -l
+md5sum -c *.gz md5sums.txt | wc -l
 ```
 
 We will go over the pipe and lots of other basic bash commands in the next lecutre.
