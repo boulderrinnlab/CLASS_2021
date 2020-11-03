@@ -166,6 +166,24 @@ Here the list output becomes the standard input to the word count owing to the p
 Or the pipe passed along the standard output of ls to standard input of wc. The 
 -l flag is for the line count. 
 
+# Excercise what is the difference in outcome of these pipe choices?
+
+```
+ls -lah | cat file.txt | wc -l
+
+#versus#
+
+ls -lah | wc -l | cat file.txt
+```
+
+
+Same three commands but in different order -- this is just a simple example of 
+how to think along with the standard input and output -- becomes much more relevant
+if used in more complex bash scripts. 
+
+
+
+#Let's move on the find and replace or the GREP command
 
 ||||||||||||||||||||||||||||||||||||||||||||||||
 General Regularized Expression Print (GREP)
@@ -197,10 +215,13 @@ many ways to spell but we can search for anything that starts with POL.
 grep -ia 'pol' data/encode_awk_lessons.tsv | wc -l
 ```
 I guess we see that there are 11 enteries for anything matching the text of pol.
-We used the -i flag which is very useful to match any type of the same letters.
+We used the 
+
+#-i flag which is very useful to match any type of the same letters.
 People spell gene names all kinds of different ways (with and with out capitals etc).
-So the -i will match Pol POl adn POL as well as poL. Try running with out the -i (no matches!).
-The -a is simply saying we are looking for a text match.
+So the -i will match Pol POl and POL as well as poL. Try running with out the -i (no matches!).
+
+#-a is simply saying we are looking for a text match.
 
 Note that we piped to wc -l, if you take that out what happens?
 
