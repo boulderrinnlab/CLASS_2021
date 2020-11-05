@@ -115,8 +115,17 @@ http://www.linfo.org/wildcard.html
 mv *.txt /practice
 ls
 ```
-This will move any file that ends in .txt the star means anything counts :)
-There are many useful wild cards such as ? , [] etc here:
+This will move any file that ends in .txt the star means anything counts.
+
+Now let's say you want to move the files back to the orignal directory:
+
+```
+cd practice
+mv *.txt ../
+```
+
+The ../ means one directory up from the current path. If oyu want to go up two 
+directories you can just add more ../../ etc...
 
 __________________________________
 Imagine how much time one uses typing long file paths in the terminal. For example, in this class we will be using:
