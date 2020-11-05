@@ -37,10 +37,13 @@ ssh key for each connection. We can easily do this by:
 ssh-keygen -t rsa
 ```
 Then save this to your id_rsa.pub file using nano and paste in. Also copy to clipboard.
+Or you ssh-keygen will ask you to make a file name in which to put this generated ssh key.
 
-Now let's got to your github website. On the top rigth ther is a drop down 
+Now let's got to your github website. You will need to sign into your github account first.
+
+On the top rigth there is a drop down 
 menu. Click on "settings". Now you will see on the left side there is a list of
-options. Click on "SSH and CPG keys". There already be some keys in there or blank.
+options. Click on "keys to deploy". There already be some keys in there or blank.
 Either way click "Add new key" on top right (green button). Paste in the new
 public SSH key we just generated. 
 
@@ -82,13 +85,14 @@ Voila you are connected to our class 2021 git repository.
 Let's try it out:
 
 ```
-Nano test.txt
+Nano test.Rmd
 #Type in something
 # exit nano
+git add test.Rmd
 git status
 ```
 
-Do you see a new item (test.txt) that git noticed was made and ready to sync?
+Do you see a new item (test.Rmd) that git noticed was made and ready to sync?
 
 Let's sync so we are up to date. But we don't really want to ever do this on the
 master branch on github. We usually make a "branch" to work on and then "merge"
@@ -106,30 +110,25 @@ buggy so you can also trying forcing a branch move:
 git push -u origin NEW-BRANCH-NAME
 ```
 
-Let's sync a new file:
+Or you may receive an error something like: 
+fatal: The current branch students has no upstream branch.
+To push the current branch and set the remote as upstream, use
 
+    git push --set-upstream origin students
 
-#############################
-Either specify the URL from the command-line or configure a remote repository using
+Just paste in that and it will work.
 
-    git remote add <name> <url>
-
-and then push using the remote name
-
-    git push <name>
-    
-    git remote add origin
-    
-##############################
+Ok let's update the github website from the terminal!
 
 ```
 git status
-git add test.txt
-git commit -m (put the notes you want on what was done)
+git add test.Rmd
+git commit -m "(put the notes you want on what was done inside the quotes)"
 git push
 # type git push again and you should see "up to date"
 
-! ALWAYS REMEBER TO PUSH BEFORE YOU END A SESSION !
+! Always remember to PUSH before you END a session !
+! Always remember to PULL before you START a session !
 ```
 
 If you are collaborating on a git-branch when you start a session it's always good to "pull" any updates since you last logged in. this can easily be done by:
