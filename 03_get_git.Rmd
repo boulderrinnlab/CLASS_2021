@@ -149,6 +149,14 @@ This will show you all the changes -- you can also do this a bit more user frien
 Finally we need a text file titled ".gitignore" put all the file types you don't want to track. These are large files such as .csv or .pdf etc here are some examples
 
 
+```
+touch .gitignore
+nano .gitignore
+# add extensions of files that are large (pdf, images etc)
+# for this class copy and paste the following into .gitignore using nano
+```
+
+
 .Rproj.user
 .Rhistory
 .RData
