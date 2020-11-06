@@ -20,9 +20,41 @@ source("util/intersect_functions.R")
 source("util/plotting_functions.R")
 ```
 
-### Here we are going to learn how to read in files and things to consider.
-### We will start with a .csv file that shows how many times a protein is bound to
-### DNA (promoters specifically) it seems scary but we will walk through it slow
+Here we are going to learn how to read in files and things to consider.
+We will start with a .csv file that shows how many times a protein is bound to
+DNA (promoters specifically) it seems scary but we will walk through it slow
+
+
+First we need to learn how to install packages.
+
+```{r}
+?install.packages()
+install.packages(GenomicRanges)
+```
+Now try installing the packages listed above. just paste in the name above into 
+the install packages R function.
+
+One typically starts with a list of packages that will be used. These are many of packages we will use and explain in later classes. For now we just want to gain some fundemental R programming skills.
+
+The source calls below the library calls are the file path to functions we will
+code or use later in class. For now we will just focus on the fundemental coding
+while introducing the packages and functions as they come into play.
+
+Once the libraries are loaded you have official run an r program :)
+
+Now let's use an example data file we will produce and how we can use R to do
+some quick analyses (e.g. how much space do exons take in the human genome?).
+
+
+Let's get started reading in a file "data/number_of_peaks_per_dbp.csv".
+All the files needed for this exeRcise can be downloaded here (note gencode
+annotation file is large). 
+
+https://www.dropbox.com/sh/76etjxl10v2hcuc/AAAIk9a6aMhw8CvUtKlFnMn6a?dl=0
+
+Please make a directory called data and place the files
+there to keep file paths consistent. 
+
 
 ```{r}
 # lets read in the bed using read_csv or read.csv (but it is slower)
@@ -100,8 +132,8 @@ plot( x = file$num_peaks, y = file$total_peak_length)
 ```
 
 
-## Defined gene list subsetting, let's say we want to subset some of this file
-## for several genes.
+Now let's dig into the data file to subset it into the genes we are interested in.
+
 ```{r}
 ### First let's make a list of genes we want. 
 genes <- c("POLR2A","POLR2B", "SUPT5H")
