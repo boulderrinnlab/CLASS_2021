@@ -65,7 +65,7 @@ there to keep file paths consistent.
 
 ```{r}
 # lets read in the bed using read_csv or read.csv (but it is slower)
-
+ 
 file <- read_csv("data/number_of_peaks_per_dbp.csv")
 
 # Now we have an object in the environment that is called file -- click to look!
