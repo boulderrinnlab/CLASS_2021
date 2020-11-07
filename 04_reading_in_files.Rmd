@@ -75,7 +75,9 @@ file <- read_csv("data/number_of_peaks_per_dbp.csv")
 # Now we have an object in the environment that is called file -- click to look!
 # or we can take a peak with head
 head(file)
-
+# This is a Tibble file or data frame you can think of like excel sheet for now
+# More on Tibble here:
+https://tibble.tidyverse.org/
 # Cool we see the gene name, number of times it bound to a gene promoter adn
 # the length of the peak. We see that gene name is in character, and the others
 # in "dbl" which means they are numeric-with floating points
