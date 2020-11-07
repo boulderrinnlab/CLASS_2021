@@ -32,7 +32,11 @@ working together.
 Navigate to /Shares/rinn_class/data/CLASS_2021/students
 # clone git repository
 # make a directory called "data"
-# instal source functions
+# instal source functions by adding the util folder with these functions -- we will
+go over this in more detail later. We are only going to use a couple of these
+packages and functions. The main goal is to move into R-viz or R-studio and have 
+these packages ready to go for the future! It's not bad practice to plan ahead when
+you move into a new environment. Also a good way to learn install.packages :)
 
 ```{r}
 ?install.packages()
@@ -219,6 +223,7 @@ back_to_long <- gather(wide_file, key = "dbp", value = "num_peaks")
 ### Let's take a look at file real quick
 head(file)
 ### The total peak length is quite long, let's make it in Millions
+### NOTE: PIPE "%>%"
 new_file <- file %>% mutate(length_million = file$total_peak_length / 1000000) %>%
 head(new_file)
 ### Cool now we have a new column that is much easier to read for total length.
@@ -229,6 +234,7 @@ new_file2 <- file %>%
   mutate(total_peak_length = file$total_peak_length / 1000000) 
 head(new_file2)
 ### Sweet we can mutate and just overide columns -- but we can also perform a FUN!
+### NOTE IFELSE
 ### Let's give it a go:
 new_file3 <- new_file2 %>% 
   mutate(FUN_COL = ifelse(new_file2$total_peak_length < 1, "small",
