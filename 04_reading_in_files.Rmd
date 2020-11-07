@@ -25,7 +25,11 @@ We will start with a .csv file that shows how many times a protein is bound to
 DNA (promoters specifically) it seems scary but we will walk through it slow
 
 
-First we need to learn how to install packages.
+First we need to learn how to install packages. We will discuss the source functions
+at a later time, but have them set up in students directory where we will be 
+working together.
+
+Navigate to /Shares/rinn_class/data/CLASS_2021/students
 
 ```{r}
 ?install.packages()
