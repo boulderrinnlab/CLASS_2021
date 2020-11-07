@@ -30,6 +30,9 @@ at a later time, but have them set up in students directory where we will be
 working together.
 
 Navigate to /Shares/rinn_class/data/CLASS_2021/students
+# clone git repository
+# make a directory called "data"
+# instal source functions
 
 ```{r}
 ?install.packages()
