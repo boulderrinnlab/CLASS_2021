@@ -11,20 +11,50 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 library(ENCODExplorer)
 library(tidyverse)
-```
-
-# >>>>>>>>>>>>>>>>>>>>>>>>>>>
-
-## Let's see what to do here but likely the API hack
-
-
-
-```{r}
 library(tidyverse)
 library(httr)
-install.packages("janitor")
+#install.packages("janitor")
 library(janitor)
+```
 
+First we need to install "janitor"
+
+Here we are going to use our ENCODE.TSV report to make a design file for 
+Nextflow ChiP-seeker. You will need the report file that can be downloaded here:
+
+https://www.encodeproject.org/report/?type=Experiment&status=released&assay_slims=DNA+binding&biosample_ontology.term_name=HepG2&assay_title=TF+ChIP-seq&biosample_ontology.classification=cell+line&files.read_length=100&files.read_length=76&files.read_length=75&files.read_length=36&assay_title=Control+ChIP-seq&assay_title=Histone+ChIP-seq&files.run_type=single-ended
+
+Notice that the URL is very similar to the structure of the data file.
+
+For the input design file Nextflow needs a few things:
+
+group	replicate	fastq	antibody	control
+
+* group is the DBP and controls listed individually
+* replicate indicates which replicate of the given DBP 
+* Antibody same for all DBPs but input controls are blank
+* Control tells which "group" are the inputs.
+
+
+Now we start the hard part of coding such a simple sounding design file :)
+
+
+We are going to use the ENCODE API instead of the web interface. Some information
+cannot be retrieved such as MD5sum and other aspects in the .TSV
+
+You can see all the information you can gather using the API and what the code
+would look like here:
+
+https://app.swaggerhub.com/apis-docs/encodeproject/api/basic_search#/Experiment
+
+Notice the URL produced above has a lot of the information -- so we can use the 
+API to tell it exactly what we want in code rather than clicking buttons --
+
+
+First let's make a table with the 
+```{r}
+# write_csv(design, "design_full_file")
+## Grabbing some handy environment variables to .CSV :)
 contstruct_query <- function(experiment_accession,
                              base_url = "https://www.encodeproject.org/report.tsv?",
                              file_format = "fastq",
@@ -54,14 +84,17 @@ get_fastq_info <- function(experiment_accession) {
 # as well as the file accession (with some other metadata)
 # for the fastq files associated with each experiment.
 
+unique(missing_control_file)
 
+# We can do another encode query to get the experiment control_type
+# if we query experiments instead of files.
 
-
-
-fastq_info <- read.table("Best_class_full_controls.tsv",
-                        skip = 1, sep = "\t", header = T) %>%
-  dplyr::select(Accession) %>%
-  dplyr::rename(experiment_accession = Accession) %>%
+experiment_report <- read.table("data/Best_class_full_controls.tsv",
+                        skip = 1, sep = "\t", header = T)
+fastq_info <- data.frame(experiment_accession = c(experiment_report$Accession, c("ENCSR000EVT",
+                                                                                 "ENCSR945JOR",
+                                                                                 "ENCSR476TKW",
+                                                                                 "ENCSR770PLF"))) %>%
   distinct() %>%
   mutate(fastq_info = map(experiment_accession, ~get_fastq_info(.))) %>%
   unnest(fastq_info) %>%
@@ -69,55 +102,92 @@ fastq_info <- read.table("Best_class_full_controls.tsv",
   clean_names()
 
 
-write.csv(fastq_info, "final_files_md5sum.csv")
+write_csv(fastq_info, "final_files_md5sum.csv")
+
+
+fastq_info <- read_csv("final_files_md5sum.csv")
 ```
+
+
+
+Now that we have all the information we want in tables above we can tidy up
+file names with gsub. So the first part is just cleaning the naming we made above
+?gsub
+
+
 
 ```{r}
-controls <- fastq_info %>% filter(is.na(controlled_by)) %>%
-  dplyr::rename(control_accession = file_accession) %>%
-  dplyr::select(control_accession) %>%
-  mutate(has_control = TRUE)
-
-write.csv(controls, "controls.csv")
-
-experiments <- fastq_info %>% filter(!is.na(controlled_by)) %>%
-  mutate(control_accession = gsub("files", "", gsub("/", "", controlled_by))) %>%
-  separate_rows(control_accession, sep = ",") %>%
-  merge(controls, all.x = T)
-no_controls <- experiments %>%
-  filter(is.na(has_control))
-
-write.csv(experiments, "experiments.csv")
-write.csv(no_controls, "no_controls.csv")
+fastq_info$fastq_1 <- paste0("../fastq/", fastq_info$file_accession, ".fastq.gz")
+fastq_info$file_control <- gsub("/", "", gsub("/files/", "", fastq_info$controlled_by))
+fastq_info$fastq_2 <- ""
+fastq_info$antibody <- gsub("-human", "", gsub("/", "", gsub("/targets/", "", fastq_info$target)))
+fastq_info$group <- fastq_info$antibody
 
 
+contrls <- fastq_info %>% filter(is.na(file_control))
+contrls$group <- contrls$experiment_accession
+
+control2exp <- fastq_info %>% 
+  ungroup() %>% 
+  dplyr::select(file_control) %>%
+  distinct() %>%
+  filter(!is.na(file_control)) %>%
+  separate(file_control, into = c("one_control"), sep = ",", remove = FALSE)
+
+ctrl2exp <- contrls %>%
+ungroup() %>% 
+  dplyr::select(experiment_accession, file_accession) %>%
+  dplyr::rename(one_control = file_accession)
+
+control2exp <- merge(control2exp, ctrl2exp)
+
+control2exp <- control2exp %>%
+  dplyr::select(-one_control) %>%
+  dplyr::rename(control = experiment_accession)
+
+fastq_info <- merge(fastq_info, control2exp, all.x = T)
+
+fastq_info[is.na(fastq_info$controlled_by), "group"] <- fastq_info[is.na(fastq_info$controlled_by), "experiment_accession"]
+
+fastq_info <- fastq_info %>% 
+  group_by(group) %>%
+  mutate(replicate = 1:n())
 
 
+design <- fastq_info %>%
+  dplyr::select(group, replicate, fastq_1, fastq_2, antibody, control)
+
+experiments <- design %>% 
+  filter(!is.na(control)) %>%
+  dplyr::select(group) %>%
+  distinct() 
+experiments$exp_num <- 1:nrow(experiments)
+experiments$batch <- as.numeric(cut_number(experiments$exp_num, n = 6))
+experiments <- experiments %>% dplyr::select(group, batch) %>%
+  as.data.frame()
+
+design <- merge(design, experiments, all.x = T)
+
+batches <- design %>%
+  group_by(batch) %>%
+  group_split()
+
+controls <- batches[[7]]
+
+for (i in 1:6) {
+  batch <- batches[[i]]
+  ctrl_batch <- controls[controls$group %in% batch$control,]
+  batch <- bind_rows(ctrl_batch, batch)
+  # Change the NAs to ""
+  batch[is.na(batch$antibody),"antibody"] <- ""
+  batch[is.na(batch$control),"control"] <- ""
+  # Get rid of batch col
+  batch <- batch %>% dplyr::select(-batch)
+  dir.create(paste0("data/test_work/batch_",i))
+  write_csv(batch, paste0("data/test_work/batch_",i,"/design_",i,".csv"))
+}
 
 
-
-table(experiments$has_control)
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
