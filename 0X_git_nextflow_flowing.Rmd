@@ -1,0 +1,186 @@
+---
+title: "Nextlfow"
+author: "JR"
+date: "11/10/2020"
+output: html_document
+---
+
+Today we will install nextflow and install the Chip-seq pipeline. This way we can
+run hundreds of ChIP-seq files simultaneously through, alignments, qc, peak calling
+-- all the stuff you would ever want (even bigwig files for browsing raw data).
+
+Nextflow has amazing documentation and a good place to start is here:
+
+https://www.nextflow.io/docs/latest/getstarted.html
+
+
+
+****************
+Step 1 install:
+****************
+
+Next flow will install itself with this simple commmand below. However, you will
+want to think about where to install it. When you know where you want it (usually
+home directory or fairly high level up).
+
+I installed nextflow in home directory so output error messages etc are always
+located here:
+
+/Users/jori2700/.nextflow/assets/nf-core/chipseq/main.nf
+
+The main.nf will have all the code Nextflow's pipeline is running. If the pipeline
+has an error it will send you to the line of code in main.nf that failed.
+
+Alrighty, give it a go:
+
+```{BASH}
+
+wget -qO- https://get.nextflow.io | bash
+
+```
+
+Nice it's installed just like that! See what all you got in the .nextflow dir.
+
+If you ever want to update nextflow just run the above. at the time of this doc
+it is at: v20.10.0
+
+****************
+Step 2: $PATH
+****************
+
+The path is a default place the computer will look for commands. Imagine you
+had to tell Bash where list is?
+
+you would have to type something like this
+
+~/jori2700/.bash/ls to list files -- 
+
+Instead of ls
+
+So that path is an important aspect of unix/bash that you will never really hear
+about until it becomes a bug :) Just to be safe let's add nextflow to our $PATH
+
+```{BASH}
+
+$PATH
+# kinda hard to read with : seperated file
+# we can make it easier to read with TRANSFORM (tr) a powerful bash command to
+# repalce and find text. 
+echo $PATH | tr ":" "\n"
+# echo is just goint to print out the $PATH variable and pipe to transform to
+#take the : and make it a new line (\n) --- ahhh so much nicer to read!
+
+```
+
+Now let's add to the $PATH 
+
+!! Warning the order in the $PATH matters !! The computer will search for the
+first usage of the command -- so if there are two commands with similar names 
+be careful the first one will be used and may not be the intended program called.
+
+
+We will use the script to tell the time as script in a new folder we are going to 
+make -- that is NOT in our $PATH. Look throuhg the bash for tr, cut, but don't 
+worry about the bash we are just using this to make a program in a folder and add
+to our $PATH
+
+Run each of these lines in a row. 
+```{BASH}
+
+mkdir time_script
+cd time_script
+
+cat >> what-time-is-it.sh << 'EOF'
+#!/bin/bash
+
+current_time=$(date | tr -s " " "\t" | cut -f 4 | cut -d ":" -f 1,2)
+
+echo "The time is $current_time.
+I'm glad to see you're making good use of it :)"
+
+EOF
+
+chmod +x what-time-is-it.sh
+
+ls
+cat what-time-is-it.sh
+
+## Notice it wrote out the file what-time-is-it with the "cat >>" command.
+```
+
+Ok so we have a time telling script that only works in the current directory:
+
+This is where I made it:
+
+/Users/jori2700/CLASS/time_script
+
+So now we can add this to $PATH and run the script whenever just like ls, cat etc.
+
+First we are going to add the .sh script to our $PATH temporarily.
+
+```{BASH}
+
+pwd
+#copy and paste path to the directoy the .sh script is in
+
+
+export PATH="$PATH:/Users/Users/jori2700/CLASS/time_script"
+what_time_is_it.sh #(notice we don't need the ./ now that the path is set)
+
+```
+
+
+Now how to permenantly add to you $PATH
+
+```{BASH}
+
+echo 'export PATH="$PATH:/Users/jori2700/CLASS/time_script"' >> ~/.bash_profile
+# nice let's take a look
+echo $PATH | tr ":" "\n"
+# we need to activate our new $PATH with
+source ~/.bash_profile
+
+cd anywhere
+what-time-is-it.sh
+```
+
+Voila we can use the script anytime. Also this is a nice idea to have new scripts
+etc in this folder as they will automatically be in $PATH now.
+
+Let's add nextflow to our $PATH
+
+```{BASH}
+
+cd ~/
+ls -lah
+cd .nextflow
+pwd
+#/Users/jori2700/.nextflow
+echo 'export PATH="$PATH:/Users/jori2700/.nextflow"' >> ~/.bash_profile
+source ~/.bash_profile #or start a new session.
+```
+
+Alright we have next flow installed and we never have to worry about fiji finding
+the commands again!
+
+
+****************
+Step 3: Design file
+****************
+
+
+nextflow pull nf-core/chipseq
+
+-r 1.2.1
+
+
+## TODO ## for some reason i am still running older nextflow is it because I added 
+to my path and then updated after?
+
+## Also can't see to update chip-seq pipeline -- should we use the same as before?
+
+
+
+
+
+

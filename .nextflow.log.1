@@ -1,0 +1,11 @@
+Nov-10 09:06:37.858 [main] DEBUG nextflow.cli.Launcher - $> nextflow run nf-core/chipseq -profile test
+Nov-10 09:06:37.957 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 19.10.0
+Nov-10 09:06:38.662 [main] DEBUG nextflow.scm.AssetManager - Git config: /Users/jori2700/.nextflow/assets/nf-core/chipseq/.git/config; branch: master; remote: origin; url: https://github.com/nf-core/chipseq.git
+Nov-10 09:06:38.673 [main] DEBUG nextflow.scm.AssetManager - Git config: /Users/jori2700/.nextflow/assets/nf-core/chipseq/.git/config; branch: master; remote: origin; url: https://github.com/nf-core/chipseq.git
+Nov-10 09:06:38.888 [main] DEBUG nextflow.cli.Launcher - Operation aborted
+nextflow.exception.AbortOperationException: Project `nf-core/chipseq` currently is sticked on revision: 1.1.0 -- you need to specify explicitly a revision with the option `-r` to use it
+	at nextflow.scm.AssetManager.checkout(AssetManager.groovy:876)
+	at nextflow.cli.CmdRun.getScriptFile(CmdRun.groovy:328)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:229)
+	at nextflow.cli.Launcher.run(Launcher.groovy:457)
+	at nextflow.cli.Launcher.main(Launcher.groovy:639)
