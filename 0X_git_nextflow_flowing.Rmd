@@ -165,7 +165,7 @@ the commands again!
 
 
 ****************
-Step 3: Design file
+Step 3: SLURM
 ****************
 
 
@@ -180,7 +180,13 @@ to my path and then updated after?
 ## Also can't see to update chip-seq pipeline -- should we use the same as before?
 
 
+## Bash ps command to print all current processes running abit cumbersume can 
+pipe to grep.
 
+tail -f to follow process updates
 
+****************
+Step 4: Design file
+****************
 
 
