@@ -17,7 +17,8 @@ You can go over what is included in the pipeline (everything you need :) here:
 
 https://nf-co.re/chipseq
 
-Scroll down to the bottom and see that you will already get a lot of results!
+Scroll down to the bottom of the link above and see that you will already get
+a lot of results!
 
 
 ****************
@@ -46,8 +47,11 @@ wget -qO- https://get.nextflow.io | bash
 
 Nice it's installed just like that! See what all you got in the .nextflow dir.
 
-If you ever want to update nextflow just run the above. at the time of this doc
+If you ever want to update nextflow just run the above. At the time of this doc
 it is at: v20.10.0
+
+Note that the install is in the "framework" dir and will keep older versions.
+??? It's ok to remove them???
 
 ****************
 Step 2: $PATH
@@ -89,6 +93,10 @@ make -- that is NOT in our $PATH. Look throuhg the bash for tr, cut, but don't
 worry about the bash we are just using this to make a program in a folder and add
 to our $PATH
 
+Here is more on $PATH and where the code below was derived.
+
+https://astrobiomike.github.io/unix/modifying_your_path
+
 
 This is the example in the resource for $PATH mentioned above. It is an example of 
 how to make a custom script, put it in path so you have a new command. It's quite basic, 
@@ -121,7 +129,8 @@ EOF
 
 chmod +x what-time-is-it.sh
 
-# chmod changes the permissions to a file 
+# chmod changes the permissions to a file, the +x gives it "executable" permission
+# to go from shell to Kernel.
 
 ls
 cat what-time-is-it.sh
@@ -155,18 +164,19 @@ Now how to permenantly add to you $PATH
 
 ```{BASH}
 
-echo 'export PATH="$PATH:/Users/jori2700/CLASS/time_script"' >> ~/.bash_profile
+echo 'export PATH="$PATH:/Users/jori2700/CLASS/time_script/"' >> ~/.bash_profile
 # nice let's take a look
 echo $PATH | tr ":" "\n"
 # we need to activate our new $PATH with
 source ~/.bash_profile
 
 cd anywhere
-what-time-is-it.sh
+sh what-time-is-it.sh
 ```
 
 Voila we can use the script anytime. Also this is a nice idea to have new scripts
-etc in this folder as they will automatically be in $PATH now.
+etc in this folder as they will automatically be in $PATH now. To run a .sh file
+you want to type "sh filename" in this case sh waht-time-is-it.
 
 Let's add nextflow to our $PATH
 
@@ -177,13 +187,12 @@ ls -lah
 cd .nextflow
 pwd
 #/Users/jori2700/.nextflow
-echo 'export PATH="$PATH:/Users/jori2700/.nextflow"' >> ~/.bash_profile
+ecd
 source ~/.bash_profile #or start a new session.
 ```
 
 Alright we have next flow installed and we never have to worry about fiji finding
 the commands again!
-
 
 
 ****************
@@ -268,6 +277,15 @@ Here is an example of how we will invoke nextflow using BASH on our server.
 #SBATCH --time=100:00:00
 #SBATCH --output=nextflow.out
 #SBATCH --error=nextflow.err
+
+
+### Here we are setting up all the details of the run. Nextflow will go to the 
+# congfig file first and then, use those instructions to establish shell to run
+# the above commands. These are slurm instructions and nextflow learned it would 
+# be in slurm via the config file. The .out and .err files are estabished and we 
+# will be looking at these a lot. 
+
+## The other noteable is the "WALL CLOCK" 
 
 pwd; hostname; date
 echo "Here we go again $SLURM_CPUS_ON_NODE core."
