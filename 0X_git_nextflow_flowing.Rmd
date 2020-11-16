@@ -478,9 +478,9 @@ to perform scancel on the output of awk, the -n is telling xargs how many argume
 Voila your jobs are gone :)
 
 
-****************
+**********************
 Step 7: Design file
-****************
+**********************
 
 Nextflow documentation has a clear set up for the Chipseq pipeline. 
 You must have the folowing columns (seperated by ',')
