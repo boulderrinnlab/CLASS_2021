@@ -13,6 +13,11 @@ Nextflow has amazing documentation and a good place to start is here:
 
 https://www.nextflow.io/docs/latest/getstarted.html
 
+You can go over what is included in the pipeline (everything you need :) here:
+
+https://nf-co.re/chipseq
+
+Scroll down to the bottom and see that you will already get a lot of results!
 
 
 ****************
@@ -164,8 +169,49 @@ Alright we have next flow installed and we never have to worry about fiji findin
 the commands again!
 
 
+
 ****************
-Step 3: SLURM
+Step 4: Design file
+****************
+
+
+
+
+****************
+Step 4: Config_FILE
+****************
+
+Here we need to make a nextflow.config file. Here next flow will look for the:
+
+executor : here we see it is slurm (as we will describe more below). It stands
+for Simple Linux Utility for Resource Management. Basically a simple job scheduler.
+
+queue : there is a long and short queue, they describe themselves that one queue
+is short or faster, and the other is longer. 
+
+memory : your telling fiji or your server, computer etc how much RAM or memory to
+use for the process. This is something to think about and consult with your IT team.
+You don't want to over load the server or your computer!
+
+maxforks : this tells nextflow how many processes can be run in parallel. Let's 
+say you had 40 fastq files to run through a pipeline you can speed up the process
+of running 40 tasks in parallel!
+
+Here is all this put together in a simple few lines that schedules how nextflow
+will communicate with your machine and how to move forward with it's core processes.
+
+
+process {
+  executor='slurm'
+  queue='short'
+  memory='32 GB'
+  maxForks=40
+}
+
+
+
+****************
+Step 3: SLURM - run.sh
 ****************
 
 
@@ -185,8 +231,7 @@ pipe to grep.
 
 tail -f to follow process updates
 
-****************
-Step 4: Design file
-****************
 
+sqeue -identikey
 
+TODO other ways of checking on sbatch processes .... killing processess 
