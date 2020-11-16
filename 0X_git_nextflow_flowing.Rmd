@@ -53,9 +53,9 @@ it is at: v20.10.0
 Note that the install is in the "framework" dir and will keep older versions.
 ??? It's ok to remove them???
 
-****************
-Step 2: $PATH
-****************
+********************************
+Step 2: add next flow to $PATH
+********************************
 
 The path is a default place the computer will look for commands. Imagine you
 had to tell Bash where list is?
@@ -196,9 +196,11 @@ the commands again!
 
 
 ****************
-Step 4: Install Chip-seeker pipeline
+Step 3: Install Chip-seeker pipeline
 ****************
 
+```
+### TODO ### HELP ###
 nextflow pull nf-core/chipseq
 
 -r 1.2.1
@@ -214,11 +216,13 @@ to my path and then updated after?
 pipe to grep.
 
 tail -f to follow process updates
+```
 
 
-****************
+
+*********************
 Step 4: Config_FILE
-****************
+*********************
 
 Ok so we have next flow and the Chip seeker pipeline and our server. We need to 
 have them to talk to and instruct eachother on how best to proceed.
@@ -253,7 +257,7 @@ process {
 
 
 ********************************
-Step 3: SLURM - run.sh
+Step 5: SLURM - run.sh
 ********************************
 
 The config file above allows root communication for job instrucitons. However, 
@@ -424,13 +428,11 @@ at the beginign fo the pipeline each time.
 date: when the pipeline finishes it will print the bash date command (we used above)
 
 
-
-
 *******************************************
-Step 3:Running and Checking on slurm jobs
+Step 6:Running and Checking on slurm jobs
 *******************************************
 
-First thing we want to do is "run" the file. Since we set this up in SBATCH we
+First thing we want to do is "run" a .sh file. Since we set this up in SBATCH we
 simply type:
 
 ```
@@ -439,14 +441,14 @@ sbatch run.sh
 This will have sbatch send the scripts in the run.sh file to slurm to run them. 
 
 
---- what jobs are you running? You often want to see what job is running how long
-it is taking and other aspects. To that end we can use 'squeue' to see what is runnign
+--- what jobs are you running? You often want to see what job is running how long it is taking and other aspects. To that end we can use 'squeue' to see what is running
 
 ```
 squeue -u identikey
 ```
+
 the -u flag is for user.
-examine the information provided and google what it means.
+examine the information provided and google the column headers for more info.
 
 ---- canceling jobs
 
@@ -468,23 +470,53 @@ squeue -u identikey | grep commonjobid# | awk '{print $1}' | xargs -n 1 scancel
 squeue -u jori2700  | grep 591 | awk '{print $1}' | xargs -n 1 scancel
 ```
 
-Here we are using some bash to grab all the jobs running. They will typically have
-a common number (591 in example above -- would have aloso worked with just 5).
+Here we are using some bash to grab all the jobs running. They will typically have a common number (591 in example above -- would have aloso worked with just 5).
 
 Grep finds all your job id matches, then awk prints them, xargs is then going 
-to perform scancel on the output of awk, the -n is telling xargs how many arguments
-will follow. In this case just 1 -- scancel.
+to perform scancel on the output of awk, the -n is telling xargs how many arguments will follow. In this case just 1 -- scancel.
 
 Voila your jobs are gone :)
 
 
-
-
 ****************
-Step 4: Design file
+Step 7: Design file
 ****************
 
+Nextflow documentation has a clear set up for the Chipseq pipeline. 
+You must have the folowing columns (seperated by ',')
+
+```
 group,replicate,fastq_1,fastq_2,antibody,control
+```
+
+
+GROUP: the name of the gene targeted or sample information (e.g. POL2)
+
+REPLICATE: if you have replicates you number them 1,2 .... in each row. If you 
+have only one, you need to type in 1.
+
+fastq_1: file path to the fastq files you downloaded from ENCODE.
+fastq_2: if you have dual end reads the second read fastq file path.
+
+ANTIBODY: this is the target and same a group name for non-control samples.
+
+CONTROL: in our case this is input DNA from ChIP. ENCODE let us know what the 
+control accession is. 
+
+NOTE: the controls still need to be places as a 'group' entry. Howevever, their
+'control' column is empty.
+
+
+********************************
+Step 8: Test run of design file!
+********************************
+
+
+
+
+
+
+
 POLR2A,1,/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/fastq/ENCFF000XWJ.fastq.gz,,POLR2A,ENCSR000EEN
 POLR2A,2,../fastq/ENCFF000PNT.fastq.gz,,POLR2A,ENCSR000BLH
 POLR2A,3,../fastq/ENCFF000XWR.fastq.gz,,POLR2A,ENCSR000EEN
