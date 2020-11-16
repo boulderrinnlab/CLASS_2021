@@ -264,6 +264,13 @@ and start running.
 
 Here is an example of how we will invoke nextflow using BASH on our server.
 
+
+First we need to se up all the details of the run. Nextflow will go to the 
+congfig file first and then, use those instructions to establish shell to run
+the above commands. These are slurm instructions and nextflow learned it would 
+be in slurm via the config file. The .out and .err files are estabished and we 
+will be looking at these a lot. 
+
 ```{BASH}
 
 #!/bin/bash
@@ -271,21 +278,56 @@ Here is an example of how we will invoke nextflow using BASH on our server.
 #SBATCH --job-name=Hepg2_Pol_test
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=john.rinn@colorado.edu
+
+### This is setting up the very basics, that since this is for a lot of files we
+### want to be in the long queue. Name of the job, who to email etc...
+
 #SBATCH --nodes=1
+
+#### There are X nodes on Fiji, and N CPU 
+
 #SBATCH --ntasks=1
+
+#### This is how many tasks or commands are going to be run. We wil typically
+#### leave this at 1 so the run.sh command is one task in sequence rather than
+#### mutliple in parallel. Depending on the set up you may want more that one task.
+
+#### Take the example below. There are two commands called srun twice. But there is
+#### only one task set so this is an error. 
+
+#SBATCH --ntasks=1
+srun sleep 10 & 
+run sleep 12 &
+
+## Simply change ntasks=2.
+
 #SBATCH --mem=6gb
+
+#### Simply setting how much memory to use on Fiji. This is an important consideration
+#### depending on how big the files are etc.
+  
 #SBATCH --time=100:00:00
+
+## The other noteable is the "WALL CLOCK" 
+## THIS IS WHERE GOOD MANNERS come into play. You want to test this out on a few
+## files and then think about how it will scale. This run.sh file is for thousadnds
+## of FASTQ files, we will change teh wall clock.
+
+
+#### We also want to follow standard error and output. This will allow us to track
+#### the progress of the run. 
+
+
 #SBATCH --output=nextflow.out
 #SBATCH --error=nextflow.err
 
 
-### Here we are setting up all the details of the run. Nextflow will go to the 
-# congfig file first and then, use those instructions to establish shell to run
-# the above commands. These are slurm instructions and nextflow learned it would 
-# be in slurm via the config file. The .out and .err files are estabished and we 
-# will be looking at these a lot. 
 
-## The other noteable is the "WALL CLOCK" 
+
+
+
+
+
 
 pwd; hostname; date
 echo "Here we go again $SLURM_CPUS_ON_NODE core."
