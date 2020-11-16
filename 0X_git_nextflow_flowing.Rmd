@@ -89,7 +89,14 @@ make -- that is NOT in our $PATH. Look throuhg the bash for tr, cut, but don't
 worry about the bash we are just using this to make a program in a folder and add
 to our $PATH
 
-Run each of these lines in a row. 
+
+This is the example in the resource for $PATH mentioned above. It is an example of 
+how to make a custom script, put it in path so you have a new command. It's quite basic, 
+but we get to revisit some bash too :)! Let's make a quick command to tell the time.
+Then put in our $PATH and be able to tell the time no matter which directory 
+you are in :)
+
+To start Run each of these lines in a row. 
 ```{BASH}
 
 mkdir time_script
@@ -99,13 +106,22 @@ cat >> what-time-is-it.sh << 'EOF'
 #!/bin/bash
 
 current_time=$(date | tr -s " " "\t" | cut -f 4 | cut -d ":" -f 1,2)
+#notice use of transmute (tr) and cut -- these are just grabbing the information
+#bash date command output looks like: Sun Nov 15 18:06:10 MST 2020. Hint cut -f 4
+# grabs the 4th item which is the time.
+
+# Exercise see how transmute and cut grab the information more succinctly.
 
 echo "The time is $current_time.
 I'm glad to see you're making good use of it :)"
 
+# this is just adding silly text to output with the time.
+
 EOF
 
 chmod +x what-time-is-it.sh
+
+# chmod changes the permissions to a file 
 
 ls
 cat what-time-is-it.sh
@@ -171,17 +187,34 @@ the commands again!
 
 
 ****************
-Step 4: Design file
+Step 4: Install Chip-seeker pipeline
 ****************
 
+nextflow pull nf-core/chipseq
 
+-r 1.2.1
+
+
+## TODO ## for some reason i am still running older nextflow is it because I added 
+to my path and then updated after?
+
+## Also can't see to update chip-seq pipeline -- should we use the same as before?
+
+
+## Bash ps command to print all current processes running abit cumbersume can 
+pipe to grep.
+
+tail -f to follow process updates
 
 
 ****************
 Step 4: Config_FILE
 ****************
 
-Here we need to make a nextflow.config file. Here next flow will look for the:
+Ok so we have next flow and the Chip seeker pipeline and our server. We need to 
+have them to talk to and instruct eachother on how best to proceed.
+
+To this end we need to make a nextflow.config file. Here next flow will look for the:
 
 executor : here we see it is slurm (as we will describe more below). It stands
 for Simple Linux Utility for Resource Management. Basically a simple job scheduler.
@@ -214,24 +247,81 @@ process {
 Step 3: SLURM - run.sh
 ****************
 
+The config file above allows root communication for job instrucitons. However, 
+we still need to talk to our server or computer directly to allocate computer or 
+server resources, where all the files nextflow needs and much more. So we need 
+to run a script on our server to invoke next flow, give it the configurations
+and start running. 
 
-nextflow pull nf-core/chipseq
+Here is an example of how we will invoke nextflow using BASH on our server.
 
--r 1.2.1
+```{BASH}
+
+#!/bin/bash
+#SBATCH -p long
+#SBATCH --job-name=Hepg2_Pol_test
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=john.rinn@colorado.edu
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=6gb
+#SBATCH --time=100:00:00
+#SBATCH --output=nextflow.out
+#SBATCH --error=nextflow.err
+
+pwd; hostname; date
+echo "Here we go again $SLURM_CPUS_ON_NODE core."
+
+module load singularity/3.1.1
+
+nextflow run nf-core/chipseq -r 1.1.0 \
+-profile singularity \
+--single_end \
+--input pol_run_design.csv \
+--fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
+--gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
+--macs_gsize 2.7e9 \
+--blacklist hg38-blacklist.v2.bed \
+--email john.rinn@colorado.edu \
+-resume \
+-c nextflow.config
+
+date
+
+```
 
 
-## TODO ## for some reason i am still running older nextflow is it because I added 
-to my path and then updated after?
-
-## Also can't see to update chip-seq pipeline -- should we use the same as before?
 
 
-## Bash ps command to print all current processes running abit cumbersume can 
-pipe to grep.
 
-tail -f to follow process updates
+
+****************
+Step 3:Checking on proceesses 
+****************
 
 
 sqeue -identikey
 
 TODO other ways of checking on sbatch processes .... killing processess 
+
+
+
+****************
+Step 4: Design file
+****************
+
+group,replicate,fastq_1,fastq_2,antibody,control
+POLR2A,1,/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/fastq/ENCFF000XWJ.fastq.gz,,POLR2A,ENCSR000EEN
+POLR2A,2,../fastq/ENCFF000PNT.fastq.gz,,POLR2A,ENCSR000BLH
+POLR2A,3,../fastq/ENCFF000XWR.fastq.gz,,POLR2A,ENCSR000EEN
+POLR2A,1,../fastq/ENCFF000XWJ.fastq.gz,,POLR2A,ENCSR000EEN
+POLR2A,2,../fastq/ENCFF000PNT.fastq.gz,,POLR2A,ENCSR000EEN
+POLR2A,3,../fastq/ENCFF000XWR.fastq.gz,,POLR2A,ENCSR000EEN
+POLR2A,1,../fastq/ENCFF000XWJ.fastq.gz,,POLR2A,ENCSR000BLH
+POLR2A,2,../fastq/ENCFF000PNT.fastq.gz,,POLR2A,ENCSR000BLH
+POLR2A,3,../fastq/ENCFF000XWR.fastq.gz,,POLR2A,ENCSR000BLH
+ENCSR000EEN,1,../fastq/ENCFF000XTF.fastq.gz,,,
+ENCSR000BLH,1,../fastq/ENCFF000POO.fastq.gz,,,
+
+
+
