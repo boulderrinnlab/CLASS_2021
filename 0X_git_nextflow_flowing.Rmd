@@ -252,9 +252,9 @@ process {
 
 
 
-****************
+********************************
 Step 3: SLURM - run.sh
-****************
+********************************
 
 The config file above allows root communication for job instrucitons. However, 
 we still need to talk to our server or computer directly to allocate computer or 
@@ -347,6 +347,34 @@ Now that we have SBATCH all set up we need to set the nextflow parameters for th
 job. 
 
 
+Here is the second half of the run.sh file needed below. The description of each
+follows after the chunk.
+
+
+```{BASH}
+
+pwd; hostname; date
+echo "Here we go again $SLURM_CPUS_ON_NODE core."
+
+module load singularity/3.1.1
+
+nextflow run nf-core/chipseq -r 1.1.0 \
+-profile singularity \
+--single_end \
+--input pol_run_design.csv \
+--fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
+--gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
+--macs_gsize 2.7e9 \
+--blacklist hg38-blacklist.v2.bed \
+--email john.rinn@colorado.edu \
+-resume \
+-c nextflow.config
+
+date
+
+```
+
+
 The first step is telling the pathway, hostname and date of where and when job was run.
 the echo command is sort of silly and just let's you know SBATCH was successful!
 
@@ -396,38 +424,59 @@ at the beginign fo the pipeline each time.
 date: when the pipeline finishes it will print the bash date command (we used above)
 
 
-```{BASH}
 
-pwd; hostname; date
-echo "Here we go again $SLURM_CPUS_ON_NODE core."
 
-module load singularity/3.1.1
+*******************************************
+Step 3:Running and Checking on slurm jobs
+*******************************************
 
-nextflow run nf-core/chipseq -r 1.1.0 \
--profile singularity \
---single_end \
---input pol_run_design.csv \
---fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
---gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
---macs_gsize 2.7e9 \
---blacklist hg38-blacklist.v2.bed \
---email john.rinn@colorado.edu \
--resume \
--c nextflow.config
-
-date
+First thing we want to do is "run" the file. Since we set this up in SBATCH we
+simply type:
 
 ```
+sbatch run.sh
+```
+This will have sbatch send the scripts in the run.sh file to slurm to run them. 
 
 
-****************
-Step 3:Checking on proceesses 
-****************
+--- what jobs are you running? You often want to see what job is running how long
+it is taking and other aspects. To that end we can use 'squeue' to see what is runnign
+
+```
+squeue -u identikey
+```
+the -u flag is for user.
+examine the information provided and google what it means.
+
+---- canceling jobs
 
 
-sqeue -identikey
+Let's say you accidently hit the run button and want to cancel immediately.
 
-TODO other ways of checking on sbatch processes .... killing processess 
+'scancel' is the command
+
+```
+squeue -u identikey
+scancel jobid
+```
+
+--- canceling multiple jobs:
+
+```
+squeue -u identikey | grep commonjobid# | awk '{print $1}' | xargs -n 1 scancel
+
+squeue -u jori2700  | grep 591 | awk '{print $1}' | xargs -n 1 scancel
+```
+
+Here we are using some bash to grab all the jobs running. They will typically have
+a common number (591 in example above -- would have aloso worked with just 5).
+
+Grep finds all your job id matches, then awk prints them, xargs is then going 
+to perform scancel on the output of awk, the -n is telling xargs how many arguments
+will follow. In this case just 1 -- scancel.
+
+Voila your jobs are gone :)
+
 
 
 
