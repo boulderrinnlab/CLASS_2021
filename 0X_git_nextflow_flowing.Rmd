@@ -271,7 +271,17 @@ the above commands. These are slurm instructions and nextflow learned it would
 be in slurm via the config file. The .out and .err files are estabished and we 
 will be looking at these a lot. 
 
+We will use SBATCH to submit batch instructions to slurm. There are more complicated
+ways to use SBATCH for heterogenous job instructions. Here we just want to have
+SBATCH send all the needed inforamtion. 
+
+In otherwords: When the job allocation is finally granted for the batch script,
+Slurm runs a single copy of the batch script on the first node in the set of allocated nodes.
+
 ```{BASH}
+
+
+
 
 #!/bin/bash
 #SBATCH -p long
@@ -324,10 +334,69 @@ run sleep 12 &
 
 
 
+```
+
+So above SBATCH organized all the instructions needed for slurm to scehdule the job.
+However, now we need set the file paths for next flow. We are using nextflow
+command language that is in the documentation. 
 
 
+---- Setting the nextflow parameter and file paths ----
+
+Now that we have SBATCH all set up we need to set the nextflow parameters for the
+job. 
 
 
+The first step is telling the pathway, hostname and date of where and when job was run.
+the echo command is sort of silly and just let's you know SBATCH was successful!
+
+module load singularity/3.1.1 is going to load singularity and tell bash that it
+is using singularity:
+
+Singularity: this creates a empty compute environment where packages can be installed,
+run and version tracked. Thus, we are making a "container" of the nextflow pipeline
+in singularity.
+
+Profile: this has a single flag as it is in BASH and not nextflow. This tells the
+server to use the singularity container for instructions on running the pipeline
+that are set up by nextflow commands.
+
+-- double flags are for nextflow.
+
+Single end: the defualt is paired end for nextflow, if the data is single end
+read then we need to tell nextflow that.
+
+-- input: is the design file so next flow knows which are controls, replicates etc
+more on this below.
+
+-- fasta: one of the initial steps in the nextflow pipelien is alining the reads to
+the genome of interest. So to make sure that is precise and reporducible you 
+provide the file path to the genome (in our case it is preplaced in file path).
+
+-- gtf: this is the file of annotations in the human genome. Here we will use 
+Genocode. Gencode's website provides a GTF of whatever release you prefer here:
+
+https://www.gencodegenes.org/human/
+
+-- macs_gsize: this is the effective genome size that is required by the MACS 
+peak calling algorithm in the nextflow pipeline. The genome is about 3 billion
+bases is what we are saying here. 
+
+-- blacklist: the reason we didn't 3B above is that many regions of the genome are not good
+to align to for various reasons (low complexity etc). This is telling nextflow what
+regions of your genome are bad and it will stay away from these coordinates.
+
+-- email so nextflow can email you status on your job (SLURM will too :)
+
+-- resume: is nextflow command that if there is a failure you don't have to start
+at the beginign fo the pipeline each time.
+
+-c telling the c-shell to configure nextflow with the config file (described above)
+
+date: when the pipeline finishes it will print the bash date command (we used above)
+
+
+```{BASH}
 
 pwd; hostname; date
 echo "Here we go again $SLURM_CPUS_ON_NODE core."
@@ -349,10 +418,6 @@ nextflow run nf-core/chipseq -r 1.1.0 \
 date
 
 ```
-
-
-
-
 
 
 ****************
