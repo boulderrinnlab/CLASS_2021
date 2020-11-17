@@ -187,13 +187,10 @@ Let's add nextflow to our $PATH
 
 ```{BASH}
 
-cd ~/
-ls -lah
-cd .nextflow
-pwd
-#/Users/jori2700/.nextflow
-ecd
-source ~/.bash_profile #or start a new session.
+echo 'export PATH="$PATH:/Users/jori2700/.nextflow"' >> ~/.bash_profile
+
+source ~/.bash_profile
+#or start a new session.
 ```
 
 Alright we have next flow installed and we never have to worry about fiji finding
@@ -241,7 +238,7 @@ queue : there is a long and short queue, they describe themselves that one queue
 is short or faster, and the other is longer. 
 
 memory : your telling fiji or your server, computer etc how much RAM or memory to
-use for the process. This is something to think about and consult with your IT team.
+use for the nextflow process. This is something to think about and consult with your IT team.
 You don't want to over load the server or your computer!
 
 maxforks : this tells nextflow how many processes can be run in parallel. Let's 
@@ -252,41 +249,44 @@ Here is all this put together in a simple few lines that schedules how nextflow
 will communicate with your machine and how to move forward with it's core processes.
 
 
+```
 process {
   executor='slurm'
   queue='short'
   memory='32 GB'
   maxForks=40
 }
+```
 
+Above is a typical nextflow.config file that is needed to run nextflow.
+
+
+Note that the sbatch set up used less RAM etc. That is because the sbatch is 
+"controling the job flow" and doesn't need as much juice to do send and manage
+jobs. However, nextflow is calling on the server seperately for it's memory usage.
+This means nextflow will be running with more juice ...
 
 
 ********************************
 Step 5: SLURM - run.sh
 ********************************
 
-The config file above allows root communication for job instrucitons. However, 
-we still need to talk to our server or computer directly to allocate computer or 
+Next we need to talk to our server or computer directly to allocate computer or 
 server resources, where all the files nextflow needs and much more. So we need 
 to run a script on our server to invoke next flow, give it the configurations
 and start running. 
 
-Here is an example of how we will invoke nextflow using BASH on our server.
+The chunck below is an example of how we will invoke nextflow using BASH on our server.
 
 
-First we need to se up all the details of the run. Nextflow will go to the 
-congfig file first and then, use those instructions to establish shell to run
-the above commands. These are slurm instructions and nextflow learned it would 
-be in slurm via the config file. The .out and .err files are estabished and we 
-will be looking at these a lot. 
+Essentiall the run.sh file is everythign we need to set up all the details of the run.  These are slurm instructions and nextflow learned it would be in slurm via the config file. We will use SBATCH to submit batch instructions to slurm. 
 
-We will use SBATCH to submit batch instructions to slurm. There are more complicated
-ways to use SBATCH for heterogenous job instructions. Here we just want to have
-SBATCH send all the needed inforamtion. 
-
-In otherwords: When the job allocation is finally granted for the batch script,
+In otherwords: When the job allocation is finally granted for the sbatch script,
 Slurm runs a single copy of the batch script on the first node in the set of allocated nodes.
 
+
+First let's look at the sbatch / slurm communication set up. Each aspect is 
+described with a # below.
 ```{BASH}
 
 #!/bin/bash
@@ -536,7 +536,6 @@ ASH2L,2,../fastq/ENCFF525AYL.fastq.gz,,ASH2L,ENCSR055XHN
 ENCSR055XHN,1,../fastq/ENCFF162ADN.fastq.gz,,,
 
 
-
 Once you have all set:
 
 ```
@@ -547,7 +546,8 @@ tail -f nextflow.out
 This will run the pipeline and tail -f allows you to follow the end of the nextflow
 output as it is going.
 
-
+Excercise: Make a design file for a diferent DNA binding protein in the encode
+dowload list. We can debug all the problems in class.
 
 
 
