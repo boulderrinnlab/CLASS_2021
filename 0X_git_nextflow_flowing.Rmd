@@ -299,8 +299,8 @@ described with a # below.
 ### want to be in the long queue. Name of the job, who to email etc...
 
 #SBATCH --nodes=1
-
-#### There are X nodes on Fiji, and N CPU 
+### Fiji has multiple nodes and you will rarely want to run a job across more 
+### than one node. 
 
 #SBATCH --ntasks=1
 
@@ -509,6 +509,13 @@ NOTE: the controls still need to be places as a 'group' entry. Howevever, their
 ********************************
 Step 8: Test run of design file!
 ********************************
+You will need these files -- and change the file paths in the design file below
+to where the fastq files are. You can download them with these links and wget:
+
+https://www.encodeproject.org/files/ENCFF210PXS/@@download/NCFF210PXS.fastq.gz
+https://www.encodeproject.org/files/ENCFF525AYL/@@download/ENCFF525AYL.fastq.gz
+https://www.encodeproject.org/files/ENCFF162ADN/@@download/ENCFF162ADNP.fastq.gz
+
 
 
 Here is a mini design file -- you will have to change the file path to the fastq
@@ -517,10 +524,12 @@ files accordingly.
 I am putting then design below as a tab serpated file. Can you use transmute 
 to put it back to comma seperated?
 
+```
 group	replicate	fastq_1	fastq_2	antibody	control
 ASH2L	1	../fastq/ENCFF210PXS.fastq.gz		ASH2L	ENCSR055XHN
 ASH2L	2	../fastq/ENCFF525AYL.fastq.gz		ASH2L	ENCSR055XHN
 ENCSR055XHN	1	../fastq/ENCFF162ADN.fastq.gz
+```
 
 
 Hint:
@@ -535,6 +544,9 @@ ASH2L,1,../fastq/ENCFF210PXS.fastq.gz,,ASH2L,ENCSR055XHN
 ASH2L,2,../fastq/ENCFF525AYL.fastq.gz,,ASH2L,ENCSR055XHN
 ENCSR055XHN,1,../fastq/ENCFF162ADN.fastq.gz,,,
 
+NOTE: remember to make sure the file path is correct to the fastq on your computer.
+here i am saying the fastq directory is one directory above then the path to the
+file name.
 
 Once you have all set:
 
@@ -545,6 +557,10 @@ tail -f nextflow.out
 
 This will run the pipeline and tail -f allows you to follow the end of the nextflow
 output as it is going.
+
+Go check out all the results in the results folder created by nextflow! In the 
+next class we will go over all the output files and how to visualize the data
+produced (bigWig and peak_files)
 
 Excercise: Make a design file for a diferent DNA binding protein in the encode
 dowload list. We can debug all the problems in class.
