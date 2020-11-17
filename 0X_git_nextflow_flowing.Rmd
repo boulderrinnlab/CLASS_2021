@@ -50,8 +50,11 @@ Nice it's installed just like that! See what all you got in the .nextflow dir.
 If you ever want to update nextflow just run the above. At the time of this doc
 it is at: v20.10.0
 
+```
 Note that the install is in the "framework" dir and will keep older versions.
 ??? It's ok to remove them???
+```
+
 
 ********************************
 Step 2: add next flow to $PATH
@@ -81,7 +84,7 @@ echo $PATH | tr ":" "\n"
 
 ```
 
-Now let's add to the $PATH 
+Now let's use an exercise to explore $PATH 
 
 !! Warning the order in the $PATH matters !! The computer will search for the
 first usage of the command -- so if there are two commands with similar names 
@@ -125,6 +128,8 @@ I'm glad to see you're making good use of it :)"
 
 # this is just adding silly text to output with the time.
 
+
+# EOF is End of File we set on the first line.
 EOF
 
 chmod +x what-time-is-it.sh
