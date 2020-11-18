@@ -50,12 +50,6 @@ Nice it's installed just like that! See what all you got in the .nextflow dir.
 If you ever want to update nextflow just run the above. At the time of this doc
 it is at: v20.10.0
 
-```
-Note that the install is in the "framework" dir and will keep older versions.
-??? It's ok to remove them???
-```
-
-
 ********************************
 Step 2: add next flow to $PATH
 ********************************
@@ -198,24 +192,19 @@ the commands again!
 
 
 ****************
-Step 3: Install Chip-seeker pipeline
+Step 3: Install NF-Core Chip-seeker pipeline
 ****************
 
 ```
-### TODO ### HELP ###
-nextflow pull nf-core/chipseq
+nextflow -r 1.2.1 pull nf-core/chipseq
 
+
+Cloning git hub
 -r 1.2.1
 
-
-## TODO ## for some reason i am still running older nextflow is it because I added 
-to my path and then updated after?
-
-## Also can't see to update chip-seq pipeline -- should we use the same as before?
+nextflow run nf-core/chipseq -r 1.2.1 \
 
 
-## Bash ps command to print all current processes running abit cumbersume can 
-pipe to grep.
 
 tail -f to follow process updates
 ```
@@ -248,6 +237,8 @@ of running 40 tasks in parallel!
 Here is all this put together in a simple few lines that schedules how nextflow
 will communicate with your machine and how to move forward with it's core processes.
 
+40 processes simulanteously -- so if you have 10000 fastqs it will process 40 BWA
+alignments at a time. 
 
 ```
 process {
@@ -312,10 +303,8 @@ described with a # below.
 #### only one task set so this is an error. 
 
 #SBATCH --ntasks=1
-srun sleep 10 & 
-run sleep 12 &
-
-## Simply change ntasks=2.
+### Number of CPUs you want to use. But it is more complicated. If you had two
+### seperate slurm commands running it would error. 
 
 #SBATCH --mem=6gb
 
@@ -389,13 +378,12 @@ Singularity: this creates a empty compute environment where packages can be inst
 run and version tracked. Thus, we are making a "container" of the nextflow pipeline
 in singularity.
 
-Profile: this has a single flag as it is in BASH and not nextflow. This tells the
+Profile: this has a single flag is for an abbreviation of a command. Double flags
+are specifying directly to the command name. This tells the
 server to use the singularity container for instructions on running the pipeline
 that are set up by nextflow commands.
 
--- double flags are for nextflow.
-
-Single end: the defualt is paired end for nextflow, if the data is single end
+--Single end: the defualt is paired end for nextflow, if the data is single end
 read then we need to tell nextflow that.
 
 -- input: is the design file so next flow knows which are controls, replicates etc
@@ -423,7 +411,7 @@ regions of your genome are bad and it will stay away from these coordinates.
 -- resume: is nextflow command that if there is a failure you don't have to start
 at the beginign fo the pipeline each time.
 
--c telling the c-shell to configure nextflow with the config file (described above)
+-c abrreviation for config file.
 
 date: when the pipeline finishes it will print the bash date command (we used above)
 
@@ -460,6 +448,7 @@ Let's say you accidently hit the run button and want to cancel immediately.
 ```
 squeue -u identikey
 scancel jobid
+scancel -u identikey #cancels all running jobs
 ```
 
 --- canceling multiple jobs:
