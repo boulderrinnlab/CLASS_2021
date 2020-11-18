@@ -377,6 +377,7 @@ date
 
 ```
 
+Each line is a command ended by \
 
 The first step is telling the pathway, hostname and date of where and when job was run.
 the echo command is sort of silly and just let's you know SBATCH was successful!
@@ -509,8 +510,9 @@ NOTE: the controls still need to be places as a 'group' entry. Howevever, their
 ********************************
 Step 8: Test run of design file!
 ********************************
+
 You will need these files -- and change the file paths in the design file below
-to where the fastq files are. You can download them with these links and wget:
+to where the fastq files are for you. You can download them with these links and wget:
 
 https://www.encodeproject.org/files/ENCFF210PXS/@@download/NCFF210PXS.fastq.gz
 https://www.encodeproject.org/files/ENCFF525AYL/@@download/ENCFF525AYL.fastq.gz
