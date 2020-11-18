@@ -45,7 +45,10 @@ wget -qO- https://get.nextflow.io | bash
 
 ```
 
-Nice it's installed just like that! See what all you got in the .nextflow dir.
+Nice it's installed just like that! wget went and got a bash script (quietly -q)
+to output (-O) and then runs the bash script at the URL to install itself.
+
+Now let's see what all you got in the .nextflow dir.
 
 If you ever want to update nextflow just run the above. At the time of this doc
 it is at: v20.10.0
