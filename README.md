@@ -2,7 +2,7 @@
 
 [Class syllabus](https://github.com/boulderrinnlab/CLASS_2021/wiki/Syllabus)
 
-[Class Youtube Channel of Video Lectures](https://www.youtube.com/channel/UC7vZD35eUp4_SxsHnJLthJw/videos)
+[Class Youtube Channel of Video Lectures](https://www.youtube.com/playlist?list=PLK_W6cepCrQ0a-7OPdDGYrC_HvoFDnkvf)
 
 [Class lecture Slides](https://www.lncrna.io/bchm-5631-lectures-info)
 
