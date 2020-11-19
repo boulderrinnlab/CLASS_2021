@@ -66,6 +66,7 @@ vignettes/*.pdf
 *.nextflow*
 .nextflow.log
 .nextflow.log.1
+*.log*
 
 
 
