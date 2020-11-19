@@ -63,4 +63,4 @@ vignettes/*.pdf
 *.csv
 *.gz
 *archive*
-
+*.nextflow*
