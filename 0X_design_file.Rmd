@@ -1,7 +1,7 @@
 ---
-title: "sample_sheet_setup"
+title: "MS_Design_Explorer"
 author: "JR"
-date: "9/23/2020"
+date: "10/15/2020"
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -11,11 +11,74 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 library(ENCODExplorer)
 library(tidyverse)
-library(tidyverse)
-library(httr)
-#install.packages("janitor")
 library(janitor)
+library(httr)
 ```
+
+Michaels Encode Explorer
+
+```{r}
+contstruct_query <- function(experiment_accession,
+                             base_url = "https://www.encodeproject.org/report.tsv?",
+                             file_format = "fastq",
+                             type = "File", 
+                             status = "released",
+                             fields = c("accession", "read_count", "md5sum",
+                                        "controlled_by", "paired_end",
+                                        "paired_with", "replicate", "target", "read_length")) {
+  query <- paste(list(paste0("type=", type), 
+        paste0("status=", status),
+        paste0("file_format=", file_format),
+        paste0("dataset=%2Fexperiments%2F", experiment_accession, "%2F"),
+        map_chr(fields, ~paste0("field=", .))) %>%
+          flatten(),
+       collapse = "&")
+  url <- paste0(base_url, query)
+  return(url)
+}
+get_fastq_info <- function(experiment_accession) {
+  request <- GET(contstruct_query(experiment_accession)) 
+  body <- read_tsv(content(request, "text"), skip = 1)
+  return(body)
+}
+
+contstruct_query("ENCSR516DDO")
+resp <- GET("https://www.encodeproject.org/report.tsv?type=File&status=released&file_format=fastq&dataset=%2Fexperiments%2FENCSR516DDO%2F&field=accession&field=read_count&field=md5sum&field=controlled_by&field=paired_end&field=paired_with&field=replicate&field=target&field=read_length")
+read_tsv(content(resp, "text"), skip = 1)
+options(stringsAsFactors = FALSE)
+# Read in the experiment report downloaded from Encode
+# we will only use the Accession column 
+# Here we'll retrieve the read_count and md5 sum 
+# as well as the file accession (with some other metadata)
+# for the fastq files associated with each experiment.
+fastq_info <- read.table("data/class_encode_report.tsv",
+                        skip = 1, sep = "\t", header = T) %>%
+  dplyr::select(Accession) %>%
+  rename(experiment_accession = Accession) %>%
+  distinct() %>%
+  mutate(fastq_info = map(experiment_accession, ~get_fastq_info(.))) %>%
+  unnest(fastq_info) %>%
+  rename(file_accession = Accession) %>%
+  clean_names()
+write_csv(fastq_info, "data/design_input.csv")
+
+md5_txt <- fastq_info %>%
+  mutate(fastq_file = paste0(file_accession, ".fastq.gz")) %>%
+  dplyr::select(md5sum, fastq_file)
+
+write.table(md5_txt, "data/fastq/md5.txt", sep = "  ", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+Awesome now we have a text file of encode file names and md5sum.
+Let's run the md5sum test using -c to check a list and print the output to md5_status.txt
+
+```
+md5sum -c md5.txt 
+md5sum md5sum -c md5.txt > md5_status.txt
+```
+
+
+TODO : Decide on fastQ merge as next step -- explore the table in excel to get a feel?
 
 First we need to install "janitor"
 
@@ -116,6 +179,9 @@ file names with gsub. So the first part is just cleaning the naming we made abov
 
 
 
+# TODO # I think this is the new way of making the batch design files. So together
+with chunk above maybe all we need.
+
 ```{r}
 fastq_info$fastq_1 <- paste0("../fastq/", fastq_info$file_accession, ".fastq.gz")
 fastq_info$file_control <- gsub("/", "", gsub("/files/", "", fastq_info$controlled_by))
@@ -189,5 +255,10 @@ for (i in 1:6) {
 
 
 ```
+
+
+
+
+
 
 
