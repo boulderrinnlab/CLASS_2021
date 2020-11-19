@@ -72,10 +72,10 @@ about until it becomes a bug :) Just to be safe let's add nextflow to our $PATH
 ```{BASH}
 
 $PATH
+echo $PATH | tr ":" "\n"
 # kinda hard to read with : seperated file
 # we can make it easier to read with TRANSFORM (tr) a powerful bash command to
 # repalce and find text. 
-echo $PATH | tr ":" "\n"
 # echo is just goint to print out the $PATH variable and pipe to transform to
 #take the : and make it a new line (\n) --- ahhh so much nicer to read!
 
@@ -198,19 +198,28 @@ the commands again!
 Step 3: Install NF-Core Chip-seeker pipeline
 ****************
 
+Now we want to install the chipseq pipeline from NF-core. The cool thing about 
+this set up is essentially you are going to clone the latest github for chipseq
+by default. Simply run:
+
+
+```
+nextflow pull nf-core/chipseq
+```
+
+Next flow takes care of managing all the packages that need to be installed and 
+the versions that were installed etc. So this container is 100% reproducible.
+
+If you want a specific version you can use the flag to call that version.
+At the time of this document chipseq is at 1.2.1. 
+
 ```
 nextflow -r 1.2.1 pull nf-core/chipseq
-
-
-Cloning git hub
--r 1.2.1
-
-nextflow run nf-core/chipseq -r 1.2.1 \
-
-
-
-tail -f to follow process updates
 ```
+
+Good news and bad news: the run.sh file will also ask for the version. So it will
+install it on flow in nextflow. Bad news is if you don't change the run.sh you
+may run older version even if newer one is installed -- double check!
 
 
 
