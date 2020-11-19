@@ -435,6 +435,7 @@ Step 6:Running and Checking on slurm jobs
 First thing we want to do is "run" a .sh file. Since we set this up in SBATCH we
 simply type:
 
+Don't run yet though
 ```
 sbatch run.sh
 ```
