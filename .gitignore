@@ -64,3 +64,8 @@ vignettes/*.pdf
 *.gz
 *archive*
 *.nextflow*
+.nextflow.log
+.nextflow.log.1
+
+
+
