@@ -54,6 +54,9 @@ After watching the videos: enojy exploring all your new data !!
 Design file recipie - enjoy!
 *****************************
 
+-- Generating these large design files will require more advanced lessons in R.
+we will go over how we got to this design in later exeRcises. You will be able to
+do this on your own soon :)!
 
 group,replicate,fastq_1,fastq_2,antibody,control
 ENCSR000BLG,1,../../fastq/ENCFF000POU.fastq.gz,,,
