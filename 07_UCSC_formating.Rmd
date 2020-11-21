@@ -1,0 +1,111 @@
+---
+title: "UCSC custom tracks"
+author: "JR"
+date: "11/21/2020"
+output: html_document
+---
+
+Here we are going to upload our peak files from MACS (NF-Core Chipseq) to the
+UCSC Genome Browser.
+
+Unfortunately there are some file format issues. We will deal with this in bulk
+with Rcode. But for now let's mannually inspect a .broadpeak file.
+
+The nextflow MACS output is technically a bed6 +3 -- this means thatn it's a
+standard bed file with 3 additional fields.
+
+ALL .BED require first threee fields to be :
+
+```
+Chr start stop
+```
+
+This is our first step towards understanding Iranges or Genomic Ranges. These
+files will always be listed in "intervals" or ranges of features.
+
+Let's take a look at the first line of MACS broad.Peaks file:
+
+```
+chr1	827072	827564	ASH2L_R1_peak_12	61	.	5.22849	8.708	6.12277
+```
+
+So we see this peak is on chromosome 1 and the range of the peaks starts at 
+827072 and peak end range is 827564. Those are minimal requirements for a .bed file.
+
+We see additional information here now:
+
+Column 4: peak name
+Column 5: peak score #int(-10*log10pvalue) 
+Column 6: strand
+Column 7: fold change at peak summit
+column 8: -log10pvalue at peak summit (pval)
+column : -log10qvalue at peak summit (qval)
+
+
+Cool so now we know what is in the file, but we still need to do some formatting 
+to get the file into UCSC which loves standard Bed3 but get's confused if there is
+more and needs to have you tell it what type of file it is.
+
+IGV was nice as the files go straight in -- but UCSC will have a lot of information
+we can use to understand our results and better visualization outputs.
+
+
+Ok lets do the final formatting. If you head your broad.Peak file you will see
+some weird looking chromosome names like this:
+
+```
+GL000218.1	97231	97515	ASH2L_R1_peak_1	36	.	4.45278	6.12847	3.69243
+GL000219.1	99163	100121	ASH2L_R1_peak_2	48	.	3.60875	7.41229	4.88736
+GL000251.2	2243479	2243999	ASH2L_R1_peak_3	18	.	3.61082	4.06835	1.81115
+GL383563.3	324323	324616	ASH2L_R1_peak_4	45	.	4.90069	7.02559	4.52199
+KI270729.1	160787	161306	ASH2L_R1_peak_5	104	.	6.52922	13.3587	10.4542
+KI270830.1	16789	17306	ASH2L_R1_peak_6	17	.	3.52976	3.99846	1.75013
+```
+
+UCSC is ont going to like this at all :) It doesn't start with "Chr" then it will
+fail. These are contigs of the genome that aren't yet places on a chromsoome so its
+cool they kept them in but UCSC prefers complete genome draft sequences. 
+
+
+So let'remove those entries (usually only a dozen or so) 
+
+Ok so now the only issue is that UCSC is going to want a header to know what 
+information is in the file. Luckily broadPeak is so common we just have to tell
+UCSC that in a header like this:
+
+```
+track type=broadPeak name="ASH2L_2_old"
+```
+
+
+Ok now are peak files are ready to load into UCSC. Have a go!
+
+Earlier we saw that FASTQ (~1.5GB) files are the raw reads >> BAM (~1GB) file that is an index
+of where those reads are in the genome >> BIGWIG (~200MB) this is a compressed version of
+BAM alignments that allows you to visualize the "RAW data" relative to the peak files.
+
+BAD NEWS: You can't upload BigWig directly to the UCSC browser :(
+
+You have to have a URL to the file that UCSC can grab in Cache etc. Good news is
+we have the files publically available for everyone on AWS console. One cheap 
+solution if you are going to be generating a lot of data is to use "S3 storage"
+on the AWS console. This is really cheap storage for a lot of data that you can
+make public or keep private. You can grab the BigWig files for today here:
+
+
+ChIP BigWig ASH2L rep 1,2
+https://class2021.s3.us-east-2.amazonaws.com/ASH2L_R1.mLb.clN.bigWig
+https://class2021.s3.us-east-2.amazonaws.com/ASH2L_R2.mLb.clN.bigWig
+
+Input BigWig
+
+
+
+
+
+
+
+
+```
+awk -v OFS="\t" '$1=$1' your_peaks.broadPeaks > fixed_your_peaks.broadPeaks
+```
