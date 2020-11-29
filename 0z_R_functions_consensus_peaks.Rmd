@@ -114,11 +114,122 @@ import_peaks <- function(consensus_file_path = "/Shares/rinn_class/data/CLASS_20
 ## it either sets or get's the names in an onject (e.g. peak_list)
 ## so we are running names on the "peak_list" object and then indexing into "peak_list"
 ## using [ ] that we have seen before.
-## whats new here is running a function in the indexing!
+## whats new here is running a function (lenght) in the indexing!
+## length will set the length of names to be the length of peak list -- remember
+## 'peak_list' is getting populated each time in the for loop so we need to have
+## names add until there are no more files coming into 'peak_list' from the for loop.
 
+## finally we made 'tf_name' above which is connected to each file in the loop (i:legnth peak_files)
+## we are now going to plug this into the name of the file currently in 'peak_list'
+    
   }
   return(peak_list)
 }
 
+## simply closing out the function and has the funciton return the peak_list object
+## a function will always want a return command at the end.
 ```
+
+
+
+
+
+
+Now we have our peak_files in an object that knows where the peaks are on
+each chromosome. Next we want to merge the peaks called in each replicate to 
+"consensus peaks" that are consistent in all replicates. Thus we will compress
+our peak_list into a final set of peaks that are reliable across biological replicates.
+
+
+We start with a similar funciton set up:
+
+
+```{r}
+#' intersect replicates into a "consensus peak list" 
+#' 
+#' @description 
+#' this function will take the intersect and union of peak widths across replicates for a given DNA binding protein. the function that will take a list of granges objects and return 
+# one granges object with merged peaks that are in all replicates
+#' 
+#' @param 
+#'  the path to consensus peak files
+#' # We're going to iterate over all the files to make it work. 
+
+```
+
+
+Now we are going to put the function to work and give it the same file path
+paramater as above. 
+```{r}
+create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files") {
+  
+  
+  fl <- list.files(broadpeakfilepath, 
+                   full.names=TRUE)
+  fl <- fl[grep("peaks.broadPeak", fl)]
+  
+  tf_name <- sapply(fl, function(x){
+    y <-  unlist(strsplit(x, "/"))[[11]]
+    unlist(strsplit(y, "_"))[[1]]
+  })
+  
+  unique_tf <- unique(tf_name)
+  
+  consensus_peaks <- list()
+  # This for loop will iterate over all dna binding proteins.
+  for(i in 1:length(unique_tf)) {
+    
+    # load all the peak files corresponding to this dna binding proteins.
+    tf <- unique_tf[i]
+    tf_index <- grep(tf, tf_name)
+    tf_files <- fl[tf_index]
+    
+    peak_list <- c()
+    for(j in 1:length(tf_files)) {
+      # See the read peaks function to know what subfunctions are called.
+      peak_list <- c(peak_list, read_peaks(tf_files[j]))
+    }
+    
+    canonical_chr <- c(paste0("chr", 1:22), "chrM", "chrX", "chrY")
+    for(i in 1:length(peak_list)) {
+      peak_list[[i]] <-peak_list[[i]][which(seqnames(peak_list[[i]]) %in% canonical_chr)]
+    }
+    
+    final_peakset <- intersect_peaks(peak_list = peak_list)
+    if(length(final_peakset) > 0) {
+      final_peakset$name <- paste0(tf, "_", 1:length(final_peakset))
+    }
+    
+    consensus_peaks <- c(consensus_peaks, list(final_peakset))
+    names(consensus_peaks)[length(consensus_peaks)] <- tf
+  }
+  return(consensus_peaks)
+}
+
+# TODO: refactor
+read_peaks <- function(broad_peak_file, filter_to_canonical_chr = FALSE) {
+  # A broad peak file is just a tab separated file 
+  dat <- read.table(broad_peak_file, sep = "\t")
+  if(filter_to_canonical_chr == TRUE) {
+    dat <- dat[dat$V1 %in% c(paste0("chr", 1:22), "chrM", "chrX", "chrY"),]
+  }
+  gr <- GRanges(seqnames = dat$V1,
+                ranges = IRanges(start=dat$V2,end=dat$V3))
+  return(gr)
+}
+# This is the function that will be doing the core of the work here. 
+# When two peaks intercept, we will take their outer boundaries to be the new
+# peak -- using the reduce function.
+intersect_peaks <- function(peak_list) {
+  combined_peaks <- peak_list[[1]]
+  for(i in 2:length(peak_list)) {
+    suppressWarnings(pl_ov <- findOverlaps(combined_peaks, peak_list[[i]]))
+    pl1 <- combined_peaks[unique(pl_ov@from)]
+    pl2 <- peak_list[[i]][unique(pl_ov@to)]
+    suppressWarnings(combined_peaks <- GenomicRanges::reduce(union(pl1, pl2)))
+  }
+  return(combined_peaks)
+}
+```
+
 
