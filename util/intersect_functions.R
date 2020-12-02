@@ -95,7 +95,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/
 }
 
 # TODO: refactor
-read_peaks <- function(broad_peak_file, filter_to_canonical_chr = FALSE) {
+read_peaks <- function(broad_peak_file, filter_to_canonical_chr = TRUE) {
   # A broad peak file is just a tab separated file 
   dat <- read.table(broad_peak_file, sep = "\t")
   if(filter_to_canonical_chr == TRUE) {
