@@ -51,7 +51,7 @@ So now we will see the function get set up to work. The goal is to read in all
 the files using this function. 
 
 We will start by naming the function "import_peaks" 
-We next call the function and give the parameter -- this is fead into "consensus peaks"
+We next call the function and give the parameter -- this is fed into "consensus peaks"
 
 Now we are going to make some objects:
 
@@ -91,6 +91,7 @@ import_peaks <- function(consensus_file_path = "/Shares/rinn_class/data/CLASS_20
 ## We will make an empyt object called peak_lists using <- () 
   for(i in 1:length(peak_files)) {
 ## next we set up the for loop to populate peak_list, for i through (:) the legnth of (peak_files).
+    ## length is a base R function (? length)
 ## This starts the for loop to run through each of the file names in peak_files
     peaks <- rtracklayer::import(peak_files[i])
 ## here we are going to import the "ranges" or locations of the peaks in each file
