@@ -113,10 +113,12 @@ Below we will go through each step of the function that occcurs in between { }.
 ```{r}
 create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files") {
   
-  
   fl <- list.files(broadpeakfilepath, 
                    full.names = TRUE)
-  fl <- fl[grep("broadPeak", fl)]
+  
+  
+  #fl <- fl[grep("broadPeak", fl)]
+  #This is for safety if you want to grab the right file type from 'macs' output.
 
 # fl: this is just going to be a list of the peak file names
 # this used the R function "list.files" -- take a look:
@@ -182,87 +184,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/
     peak_list <- c()
     # making a new object peak list that will be populated by the loop below.
     # we leave it empty until the loop runs by simpling putting c()
-    for(j in 1:length(tf_files)) {
-    # setting up a second for loop, i is reading in the files and j is going to
-    # merge peaks of replicates after the input from i.
-      
-      peak_list <- c(peak_list, read_peaks(tf_files[j]))
-    }
-
-## As the last step in the j for loop we call a function we made 'read_peaks'! So now we get
-## to see how handy it is to make a function call in a function and not have to 
-## type all the code out. 
-    
-## ? read_peaks is a cool function in genomicRanges package. It will make a list 
-## of ranges (coordinates) for the peaks. This will be used to find overlapping ranges.
-## in this for loop we will filter out non-cannonical chromosome names (first)
-    
-    canonical_chr <- c(paste0("chr", 1:22), "chrM", "chrX", "chrY")
-    # we are using paste0 to make a list of chr1 - chr22 and chrM etc
-    # these are the only chromosomes we want so setting this up for below
-    
-    for(i in 1:length(peak_list)) {
-      peak_list[[i]] <- peak_list[[i]][which(seqnames(peak_list[[i]]) %in% canonical_chr)]
-    }
-  
-## This for loop is going to look throuhg the peak_list and retreive only the
-## seqnames (?seqnames) (? which) that are %in% (handy r function!) our cannonical chr list.
-   
-     final_peakset <- intersect_peaks(peak_list = peak_list)
-
-     # Here we are going to run a function we made to intersect peaks!
-     # note we sourced the function "intersect_peaks" from above
-     # source("../util/intersect_functions.R")
-     
-## intersect peaks is a function we made in the util folder intersect_functions.R
-## It basically uses the genomicRanges package findOverlaps that does the bulk 
-## of the intersecting peaks between files in 'peak_files'
-## the only parameter this function needs is the peak list object (they are named the same)
-## Here is the intersect_peaks function below
-
-#    intersect_peaks <- function(peak_list) {
-#     combined_peaks <- peak_list[[1]]
-#     for(i in 2:length(peak_list)) {
-#     suppressWarnings(pl_ov <- findOverlaps(combined_peaks, peak_list[[i]]))
-#   pl1 <- combined_peaks[unique(pl_ov@from)]
-#   pl2 <- peak_list[[i]][unique(pl_ov@to)]
-      # we will go over the indexes @from and @to in environment pane.
-#   suppressWarnings(combined_peaks <- GenomicRanges::reduce(union(pl1, pl2)))
-# }
-#  return(combined_peaks)
-#}
-     
-## of note the function reduce, that is a function that will merge two overlaping
-## ranges. We take teh union of peak in list 1 and 2 (pl1, pl2). This means if they
-## overlap it will take the furtherst ends of the ranges. 
-     
-     
-## now we return to the for loop with an 'if' statement that will only operate
-## if the condition of the if statement are true. Here saying the final peak list
-## needs to be greater than 0 -- otherwise there were no peaks.
-## if greater than 0 peaks are found it will name each peak and put it into an
-## object final_peakset. Essentially we have another named (DBP) list of Granges (peak coordinates)
-     
-## IF the peak list isn't empty, then we assign a unique name to each peak. 
-## the DBP (or TF) name with an underscore followed by the 1 through all the peaks
-## that are in the final_peakset of overlapping peaks.
-    if(length(final_peakset) > 0) {
-      final_peakset$name <- paste0(tf, "_", 1:length(final_peakset))
-    }
-    
-    consensus_peaks <- c(consensus_peaks, list(final_peakset))
-    names(consensus_peaks)[length(consensus_peaks)] <- tf
-    
-## Now we are just tidying and finalizing the consensus_peaks. First concatinating
-## consensus_peaks with all the peaks in final_peakset. The list function is 
-## listing all the peaks in final_peakset and printing them to consensus_peaks.
-## lastly using names to name each peak by the DBP (or TF) using <- to input the
-## DBP name.
-    
   }
-  return(consensus_peaks)
-}
-
 # Write the consensus peaks to a file and take the name of the file
 # from the name of the list element -- which   should be the DBP name.
 for (i in 1:length(consensus_peaks)) {
@@ -270,6 +192,9 @@ for (i in 1:length(consensus_peaks)) {
                       paste0("results/consensus_peaks/", 
                              names(consensus_peaks)[i],".bed"))
 }
+}
+
+
 
 ```
 
