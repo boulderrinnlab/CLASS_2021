@@ -166,42 +166,68 @@ create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/
 ## here we see the unique function provide information to index each DBP as a unique 
 ## entry.
 
-  
+ 
   consensus_peaks <- list()
   
   # This for loop will iterate over all dna binding proteins.
-  for(i in 1:length(unique_tf)) {
+  for (i in 1:length(unique_tf)) {
   # this is why we set up unique_tf above so the for loop will only run on one DBP
   # at a time, and merges the peaks of the replicate files associated with each DBP.
   # then the for loop will move onto the next unique_tf and merge those peak files.
     
     dbp <- unique_tf[i]
+    
+    cat("Now I'm running", dbp, "\n")
+    # this is just a fun way of seeing the progress of the for loop -- also good
+    # for debugging when a file fails -- you know the last successful run.
+    
     tf_files <- fl[grep(dbp, fl)]
     # here we are creating dbp to use in grep to grab the dbp entry and find it in fl
     # this way we only intersect the replicate files that have the same dbp name.
     # this is why we indexed into unique_tf[i]. Then the next unique DBP name will
     # run in the next iteration of the loop.
-    
+    if (length(tf_files) > 1) {
+    # turns out some files don't have replicates :( so we are saying here that if
+    # the current (i) entry for 'tf_files' is equal or less than 1 to stop running.
+    # we can't intersect peaks if there is only one peak file :)
+      
     peak_list <- c()
     # making a new object peak list that will be populated by the loop below.
     # we leave it empty until the loop runs by simpling putting c()
     
-    for(j in 1:length(tf_files)) {
-## ? read_peaks is a cool function in genomicRanges package. It will make a list 
-## of ranges (coordinates) for the peaks. This will be used to find overlapping ranges.
-## in this for loop we will filter out non-cannonical chromosome names
+    for (j in 1:length(tf_files)) {
+## This for loop is going to go through each peak file and store it in peak_list
       
       peak_list <- c(peak_list, read_peaks(tf_files[j]))
     }
+    # read_peaks is a function we already made in .util. It's pretty basic and 
+    # commented out below
+    
+    # read_peaks <- function(broad_peak_file, filter_to_canonical_chr = TRUE) {
+  
+    # dat <- read.table(broad_peak_file, sep = "\t")
+  # if(filter_to_canonical_chr == TRUE) {
+    # dat <- dat[dat$V1 %in% c(paste0("chr", 1:22), "chrM", "chrX", "chrY"),]
+ # }
+  # gr <- GRanges(seqnames = dat$V1,
+               # ranges = IRanges(start=dat$V2,end=dat$V3))
+  #return(gr)
+#}
+    
+## Read peaks is a good example of 'ranges' in action. notice the redundant cleaning up
+## to cannonical chromosomes (which is also below).
+    
 ## Setting up peak_list and printing 'c()' the information of read_peaks for a unique
 ## DBP that we set up above. This will result in read_peaks reading in the peaks from 
 ## the replicate files in tf_files will both be read in.
+    
+
     canonical_chr <- c(paste0("chr", 1:22), "chrM", "chrX", "chrY")
     # we are using paste0 to make a list of chr1 - chr22 and chrM etc
     # these are the only chromosomes we want so setting this up for below
     
-    for(i in 1:length(peak_list)) {
-      peak_list[[i]] <-peak_list[[i]][which(seqnames(peak_list[[i]]) %in% canonical_chr)]
+    for (i in 1:length(peak_list)) {
+      peak_list[[i]] <- peak_list[[i]][which(seqnames(peak_list[[i]]) %in% canonical_chr)]
     }
   
 ## This for loop is going to look throuhg the peak_list and retreive only the
@@ -236,7 +262,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/
 ## object final_peakset and make a new column 'name' that consists of 
 ## the DBP (or TF) name with an underscore followed by the 1 through all the peaks
 ## that are in the final_peakset of overlapping peaks.
-    if(length(final_peakset) > 0) {
+    if (length(final_peakset) > 0) {
       final_peakset$name <- paste0(dbp, "_", 1:length(final_peakset))
     }
     
@@ -248,24 +274,22 @@ create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/
 ## listing all the peaks in final_peakset and printing them to consensus_peaks.
 ## lastly using names to name each peak by the DBP (or TF) using <- to input the
 ## DBP name.
-    
+    }
   }
   return(consensus_peaks)
 }
     
 
-  
+consensus <- create_consensus_peaks()
+
+
 # Write the consensus peaks to a file and take the name of the file
 # from the name of the list element -- which   should be the DBP name.
-for (i in 1:length(consensus_peaks)) {
-  rtracklayer::export(consensus_peaks[[i]], 
+for (i in 1:length(consensus)) {
+  rtracklayer::export(consensus[[i]], 
                       paste0("results/consensus_peaks/", 
-                             names(consensus_peaks)[i],".bed"))
+                             names(consensus)[i],".bed"))
 }
-
-
-
-
 ```
 
 
