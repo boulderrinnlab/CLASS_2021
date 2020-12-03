@@ -205,7 +205,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/
     }
   
 ## This for loop is going to look throuhg the peak_list and retreive only the
-## seqnames (?seqnames) that are %in% (handy r function!) our cannonical chr list.
+## seqnames 'which' (?seqnames) that are %in% (handy r function!) our cannonical chr list.
    
      final_peakset <- intersect_peaks(peak_list = peak_list)
 ## intersect peaks is a function we made in the util folder intersect_functions.R
