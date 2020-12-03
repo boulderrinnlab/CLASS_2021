@@ -45,7 +45,7 @@ inputs and maps it to outputs, let's take a look at a classic polynomial functio
 # This function has two parameters, and we have to let R know
 # that we want to be able to change the values of x and y.
 # f(x) = x * y
-# We also have to decide on a name for the function
+# We also have to decide on a name for the function, we will call it 'fun'
 fun <- function(x, y) { }
 # Inside the curly braces is where we'll put the operations that the
 # function will carry out.
@@ -148,7 +148,9 @@ create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/
   
 # string: the input vector of coerciable data (e.g. character string) -- peak_files
 # here we are using x that is being read in by the function which is an individual file name.
-# pattern: the pattern to look for across the input vector. this is using regular
+
+  
+#pattern: the pattern to look for across the input vector. this is using regular
 # expression (regex). You don't need to know this much regex, but if you are ever 
 # curious you can use the online regex calculator :)
 # 
