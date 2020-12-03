@@ -1,0 +1,57 @@
+---
+title: "hacky_analyses"
+author: "JR"
+date: "12/3/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+# This data frame will be the start of what we build into peak_occurence_df
+# Plotting distributions of number of peaks that concur between replicates (note many @ 0)
+
+```{r}
+num_peaks_df <- data.frame("dbp" = names(consensus),
+                           "num_peaks" = sapply(consensus, length))
+
+
+
+num_peaks_threshold <- 250
+threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
+filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+
+
+```
+
+
+```{r}
+g <- ggplot(num_peaks_df, aes(x = num_peaks))
+g + geom_histogram(bins = 70) +
+  geom_vline(xintercept = num_peaks_threshold, lty = 2,
+             size = 1.1, color = "#a8404c") +
+  annotate(geom = "text", x = num_peaks_threshold + 3e3, y = 35, 
+           color = "#a8404c", label = paste0("t=", num_peaks_threshold)) +
+    annotate(geom = "text", x = num_peaks_threshold + 2.2e3, y = 32, 
+           color = "#a8404c", label = paste0(round(threshold_percentile,0), "%")) +
+  xlab("Number of consensus peaks") +
+  ylab("Count") +
+  ggtitle("Distribution of number of consensus peaks")
+
+ggsave("figures/consensus_peaks_histogram.pdf")
+```
+
+
+
+```{r}
+i <- 1
+for(i in 1:length(filtered_consensus_peaks)) {
+  rtracklayer::export(filtered_consensus_peaks[[i]], paste0("results/consensus_peaks/filtered_by_peaks/", names(filtered_consensus_peaks)[i], 
+"_consensus_peaks_filter.bed"))
+}
+```
+
