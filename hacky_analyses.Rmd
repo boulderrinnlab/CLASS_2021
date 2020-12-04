@@ -9,15 +9,36 @@ editor_options:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+library(Gviz)
+library(ggpubr)
 ```
 
+```{r}
+# reading in the filtered consensus files:
+
+
+
+fl <- list.files("results/consensus_peaks", full.names=TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
+
+names(consensus_peaks) <- sapply(consensus_peaks, function(x){
+  unlist(strsplit(x$name[[1]], "_"))[[1]]
+  })
+
+
+
+```
 
 # This data frame will be the start of what we build into peak_occurence_df
 # Plotting distributions of number of peaks that concur between replicates (note many @ 0)
 
 ```{r}
-num_peaks_df <- data.frame("dbp" = names(consensus),
-                           "num_peaks" = sapply(consensus, length))
+num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
+                           "num_peaks" = sapply(consensus_peaks, length))
 
 
 
@@ -48,10 +69,171 @@ ggsave("figures/consensus_peaks_histogram.pdf")
 
 
 ```{r}
-i <- 1
+
 for(i in 1:length(filtered_consensus_peaks)) {
-  rtracklayer::export(filtered_consensus_peaks[[i]], paste0("results/consensus_peaks/filtered_by_peaks/", names(filtered_consensus_peaks)[i], 
+  rtracklayer::export(filtered_consensus_peaks[[i]], paste0("results/filtered_peaks/", names(filtered_consensus_peaks)[i], 
 "_consensus_peaks_filter.bed"))
 }
 ```
+
+
+```{r}
+num_peaks_df <- num_peaks_df %>% filter(dbp %in% names(filtered_consensus_peaks))
+
+
+num_peaks_df$total_peak_length <- sapply(filtered_consensus_peaks, function(peaks) sum(width(peaks)))
+
+
+g <- ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length, label = dbp))
+g + geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black", lty = 2,
+              formula = 'y ~ x') +
+  geom_text() +
+  ylab("BP covered") +
+  xlab("Number of peaks") +
+  ggtitle("Peak count vs. total bases covered")
+```
+
+```{Gencode Import}
+
+gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
+
+
+num_peaks_df <- data.frame("dbp" = names(filtered_consensus_peaks),
+                           "num_peaks" = sapply(filtered_consensus_peaks, length))
+
+
+lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
+rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.gtf")
+lncrna_promoters <- get_promoter_regions(gencode_gr, biotype = "lncRNA")
+rtracklayer::export(lncrna_promoters, "results/lncrna_promoters.gtf")
+mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
+
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "counts")
+
+num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
+num_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[,lncrna_promoters$gene_id])
+num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
+
+
+
+
+ggplot(num_peaks_df,
+       aes(x = num_peaks, y = peaks_overlapping_promoters)) +
+  xlab("Peaks per DBP") +
+  ylab("Number of peaks overlapping promoters") +
+  ggtitle("Relationship Between Number of DBP Peaks and Promoter Overlaps")+
+  geom_point() +
+  geom_abline(slope = 1, linetype="dashed") +
+  geom_smooth(method = "lm", se=F, formula = 'y ~ x',
+              color = "#a8404c") +
+  stat_regline_equation(label.x = 35000, label.y = 18000) +
+  ylim(0,60100) +
+  xlim(0,60100)
+```
+
+```{r}
+lncrna_mrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
+                                     gencode_gr$gene_type %in% c("lncRNA", "protein_coding")]
+genebody_peak_counts <- count_peaks_per_feature(lncrna_mrna_genebody, 
+                                                filtered_consensus_peaks, 
+                                                type = "counts")
+# Check ordering
+stopifnot(all(rownames(genebody_peak_counts) == num_peaks_df$dbp))
+num_peaks_df$peaks_overlapping_genebody <- rowSums(genebody_peak_counts)
+#### FIGURE: Figure 1D
+# Plotting the number of peaks per DBP and how many gene bodies were overlapped.
+ggplot(num_peaks_df,
+       aes(x = num_peaks, y = peaks_overlapping_genebody)) +
+  xlab("Peaks per DBP") +
+  ylab("Number of peaks overlapping genes") +
+  ggtitle("Relationship Between Number of DBP Peaks and Gene Body Overlaps")+
+  geom_point() +
+  geom_abline(slope = 1, linetype="dashed") +
+  geom_smooth(method = "lm", se=F, formula = 'y ~ x',
+              color = "#a8404c") +
+  stat_regline_equation(label.x = 35000, label.y = 18000) +
+  ylim(0,60100) +
+  xlim(0,60100)
+```
+
+
+```{r}
+# First we will establish the promoter peak occurence matrix (rows = promoters, cols = dbp binding {0,1})
+promoter_peak_occurence <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, 
+                                               type = "occurrence")
+# Output to promoter_peak_occurecne_matrix
+write.table(promoter_peak_occurence, "results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+# Now we want to make into a data frame using the promoter annotations as rows and attributes as columns.
+# We will use lncrna_mrna_promoters to index "all promoters"
+# First make sure promoter_peak_occurence and lncrna_mrna_promoters are in the same order
+stopifnot(all(colnames(promoter_peak_occurence) == lncrna_mrna_promoters$gene_id))
+# Make a data frame of binding events per promoter.
+peak_occurence_df <- data.frame("gene_id" = colnames(promoter_peak_occurence),
+                                "gene_name" = lncrna_mrna_promoters$gene_name,
+                                "gene_type" = lncrna_mrna_promoters$gene_type,
+                                "chr" = lncrna_mrna_promoters@seqnames,   
+                                "3kb_up_tss_start" = lncrna_mrna_promoters@ranges@start,
+                                "strand" = lncrna_mrna_promoters@strand,
+                                "number_of_dbp" = colSums(promoter_peak_occurence))
+# This is the CSV file we will start building upon adding columns of properties as we analyze them
+# The output file name will change based on what is added later, but the "peak_occurence_df" will be used throughout.
+write_csv(peak_occurence_df, "results/peak_occurence_dataframe.csv")
+```
+
+
+
+
+```{Rcount peaks per feature function}
+count_peaks_per_feature <- function(features, peak_list, type = "counts") {
+  
+  if(!(type %in% c("counts", "occurrence"))) {
+    stop("Type must be either occurrence or counts.")
+  }
+  
+  peak_count <- matrix(numeric(), ncol = length(features), nrow = 0)
+  
+  for(j in 1:length(peak_list)) {
+    suppressWarnings(ov <- countOverlaps(features, peak_list[[j]]))
+    peak_count <- rbind(peak_count, ov)
+    rownames(peak_count)[nrow(peak_count)] <- names(peak_list)[j]
+    colnames(peak_count) <- features$gene_id
+  }
+  
+  peak_matrix <- peak_count
+  
+  if(type == "occurrence") {
+    peak_occurrence <- matrix(as.numeric(peak_count > 0), 
+                              nrow = dim(peak_count)[1],
+                              ncol = dim(peak_count)[2])
+    rownames(peak_occurrence) <- rownames(peak_count)
+    colnames(peak_occurrence) <- colnames(peak_count)
+    peak_matrix <- peak_occurrence
+  }
+  
+  return(peak_matrix)
+  
+}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

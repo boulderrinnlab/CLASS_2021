@@ -19,7 +19,7 @@
 #' @param consensus_file_path the path to consensus peak files
 
 
-import_peaks <- function(consensus_file_path = "/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files/") {
+import_peaks <- function(consensus_file_path = "data/test_work/all_peak_files") {
   peak_files <- list.files(consensus_file_path, full.names = T)
   file_names <- str_extract(peak_files, "[\\w-]+\\.bed")
   tf_name <- str_extract(file_names, "^[^_]+(?=_)")
@@ -49,7 +49,7 @@ import_peaks <- function(consensus_file_path = "/Shares/rinn_class/data/CLASS_20
 #'  the path to consensus peak files
 #' # We're going to iterate over all the files to make it work. 
 
-create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files") {
+create_consensus_peaks <- function(broadpeakfilepath = "data/test_work/all_peak_files") {
   
   
   fl <- list.files(broadpeakfilepath, 
