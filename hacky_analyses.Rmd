@@ -13,6 +13,7 @@ library(tidyverse)
 library(GenomicRanges)
 source("util/intersect_functions.R")
 source("util/plotting_functions.R")
+source("util/_setup.R")
 library(Gviz)
 library(ggpubr)
 ```
@@ -185,52 +186,58 @@ write_csv(peak_occurence_df, "results/peak_occurence_dataframe.csv")
 
 
 
-```{Rcount peaks per feature function}
-count_peaks_per_feature <- function(features, peak_list, type = "counts") {
-  
-  if(!(type %in% c("counts", "occurrence"))) {
-    stop("Type must be either occurrence or counts.")
-  }
-  
-  peak_count <- matrix(numeric(), ncol = length(features), nrow = 0)
-  
-  for(j in 1:length(peak_list)) {
-    suppressWarnings(ov <- countOverlaps(features, peak_list[[j]]))
-    peak_count <- rbind(peak_count, ov)
-    rownames(peak_count)[nrow(peak_count)] <- names(peak_list)[j]
-    colnames(peak_count) <- features$gene_id
-  }
-  
-  peak_matrix <- peak_count
-  
-  if(type == "occurrence") {
-    peak_occurrence <- matrix(as.numeric(peak_count > 0), 
-                              nrow = dim(peak_count)[1],
-                              ncol = dim(peak_count)[2])
-    rownames(peak_occurrence) <- rownames(peak_count)
-    colnames(peak_occurrence) <- colnames(peak_count)
-    peak_matrix <- peak_occurrence
-  }
-  
-  return(peak_matrix)
-  
-}
+```{r}
+g <- ggplot(peak_occurence_df, aes(x = number_of_dbp))
+g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes") 
 
+```
+
+```{r}
+
+unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp < 1)
+write_csv(unbound_promoters, "results/unbound_lncrna_mrna_promoters.csv")
+
+length(unbound_promoters)
 ```
 
 
 
 
+```{r}
+# Determining how many DBPs don't bind to any promoters.
+dbp_promoter_ovl <- get_overlapping_peaks(lncrna_mrna_promoters, filtered_consensus_peaks)
+num_ovl <- sapply(dbp_promoter_ovl, length)
+min(num_ovl)
+summary(num_ovl)
+table(num_ovl)
+```
 
 
-
-
-
-
-
-
-
-
+```{r}
+num_peaks_dfl <- num_peaks_df %>%
+  dplyr::select(-peaks_overlapping_promoters) %>%
+  pivot_longer(cols = peaks_overlapping_lncrna_promoters:peaks_overlapping_mrna_promoters,
+               names_to = "gene_type",
+               values_to = "peaks_overlapping_promoters") %>%
+  mutate(gene_type = gsub("peaks_overlapping_", "", gene_type))
+ggplot(num_peaks_dfl, aes(x = num_peaks, y = peaks_overlapping_promoters, 
+                         col = gene_type)) +
+         geom_point() +
+         geom_abline(slope = 1, linetype="dashed") +
+  geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+  stat_regline_equation() +
+  scale_color_manual(values = c("#a8404c", "#424242"))+
+  xlab("Peaks per DBP") +
+  ylab("Peaks Overlapping Promoters") +
+  ggtitle("Number of DBP Peaks and Promoter Overlaps")
+ggsave("figures/peaks_overlaps_relationship_by_gene_type.png", height = 5, width = 8)
+ggsave("figures/peaks_overlaps_relationship_by_gene_type.pdf", height = 5, width = 8)
+```
 
 
 
