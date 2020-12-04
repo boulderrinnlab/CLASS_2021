@@ -30,7 +30,8 @@ We have used many of R's built in base functions that require paramters too.
 
 R has many built in functions such as mutate that needs parameters. For example,
 table and summary we used before requires a parameter of an object to summarize etc.
-But the cool part is you can make your own functions just like these base R funcitons.
+But the cool part is you can make your own functions just like these base R funcitons. 
+
 
 How and why would we write a function in R?
 
