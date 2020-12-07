@@ -82,7 +82,6 @@ seqnames(gencode_gr) %>% head()
 #### adding summary and table to see values inside the seqnames.
 table(seqnames(gencode_gr)) %>% summary()
 table(seqnames(gencode_gr)) %>% head()
-#TODO is this right?
 #### This is telling us how many features are associated with each chromosome.
 #### This includes number of exons, start, stop and other information. Notice
 #### @elemnentMetadata has the individual features above that INDEXABLE! by 
@@ -98,7 +97,8 @@ runValue(seqnames(gencode_gr))[1:50]
 
 #### Let's get the length of values in the ranges with runLength.
 runLength(seqnames(gencode_gr))
-### Ok so we got back the lengths 
+### Ok so we got back the sum of Ranges (length of features on each chromosome)
+### Note we see the Mitochondrial ([25] index) has very few features as expected
 
 
 
@@ -109,8 +109,8 @@ table(gencode_gr@elementMetadata$gene_id) %>% head()
 
 # Let's see what we get with gene_name
 table(gencode_gr@elementMetadata$gene_name)
-# Ok a bit better with gene names in ENSEMBLE ID which has a unique id for each
-# transcript variant.
+# Ok a bit better with gene names in ENSEMBLE ID and the number of isoforms of 
+# that geneid.
 ```
 ### Excercise go look at different aspects of $index in @elementMetadata. Also
 try indexing with [] in combination and or seperately to find specific values.
@@ -131,6 +131,10 @@ gencode_gr_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
                            "width" = gencode_gr@ranges@width)
 
 ### Ok so now we have a new data frame with the information we want from gencode_gr
+## Note we see that we can index the RANGES for each gene with @ranges "level"
+## in there we can get the start and width (thus infer the stop).
+
+
 
 ### Let's look at the width for mRNA genes
 ### We are introducing a new R base function "filter" it does as it seems.
@@ -147,7 +151,8 @@ hist(mrna_df$width, breaks = 2)
 
 lncrna_df <- filter(gencode_gr_length, gene_type == "lncRNA")
 hist(lncrna_df$width, breaks = 2)
-### Huh it looks the same -- notice there are 240K and 250K lncRNA and mRNA values.
+### Huh it looks like lncRNAs cover half the space of mRNAs!
+### notice there are 240K and 250K lncRNA and mRNA values.
 ### certainly there are not that many genes in the genome. So what is happening
 ### these widths are associated with different properties of each gene 
 ### (e.g., TSS = 1 and gene body maybe 0.5 to 1 MB)
@@ -248,10 +253,16 @@ gencode_gm <- gencode_gr %>%
   #### applying filter step to
   filter(type == "gene_name") %>%
   dplyr::select(seqnames, start, end, width, gene_type,
+  # Here dplyr select will grab the seqnames, start, end, width adn genetype for all   # genes
                 gene_id, gene_name, transcript) 
 names(gencode_gm) <- c("chromosome", "start", "end", "width",
+  # names is adding the names to the columns of features we outlined above
                        "gene_id", "gene_name", "transcript")
+
+# Now we hav a handy data frame of the start and stop of all genes. We can write it 
+# out with write_csv
 write_csv(gencode_gm, "../util/gencode_genemodel_for_Gviz.csv")
+
 
 ```
 
@@ -266,6 +277,8 @@ write_csv(gencode_gm, "../util/gencode_genemodel_for_Gviz.csv")
 
 pol2_chip <- rtracklayer::import("data/POLR2A_consensus_peaks_filter.bed")
 
+
+## TODO discuss file types this maybe a good error and then fix
 findOverlaps(pol2_chip, gencode_gr@elementMetadata$gene_id)
 
 
