@@ -126,7 +126,7 @@ Now we can use CURL or WGET to read this file and go grab the actual file from W
 we need to know some more BASH commands first:
 
 If we only had one URL in the file we could just do 
-
+ 
 ```
 man curl
 curl URL.com
