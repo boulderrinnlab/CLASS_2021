@@ -237,9 +237,6 @@ total_exon_length/3.2e9
 
 
 
-
-
-
 # Now lets' select features from gencode and make a data_frame of useful info
 ```{r}
 gencode_gr <- rtracklayer::import("data/gencode.v32.annotation.gtf")
@@ -284,15 +281,5 @@ findOverlaps(pol2_chip, gencode_gr@elementMetadata$gene_id)
 
 ```
 
-
-some deep indexing
-```{r}
-
-oh_no <- gencode_gr[which(seqnames(gencode_gr == "gene_id"))]
-
-
-
-```
-
-
+Now let's move to working with Gencode and genomic ranges on our data set!
 
