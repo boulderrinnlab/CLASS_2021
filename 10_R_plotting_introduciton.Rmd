@@ -1,0 +1,11 @@
+---
+title: "10_Intro_plotting_R"
+author: "JR"
+date: "12/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
