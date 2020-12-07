@@ -19,7 +19,7 @@ https://nf-co.re/chipseq
 
 Scroll down to the bottom of the link above and see that you will already get
 a lot of results!
-
+ 
 
 ****************
 Step 1 install:
