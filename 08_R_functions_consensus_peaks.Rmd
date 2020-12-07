@@ -14,7 +14,7 @@ library(GenomicRanges)
 source("util/intersect_functions.R")
 ```
 
-
+ 
 First we are going to go over a "function" in R. This is a really nice feature of 
 defining a function for R that you may run frequently. For example we have over 
 1,000 peak files we have to import into R using the function below. 
