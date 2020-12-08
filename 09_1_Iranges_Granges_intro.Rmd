@@ -1,0 +1,101 @@
+---
+title: "9_1_Iranges_GRanges_basics"
+author: "JR"
+date: "12/8/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+library(ggpubr)
+library(Gviz)
+library(IRanges)
+library(ggbio)
+source("util/_setup.R")
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+```
+
+Goal: to understand the basic usage of Iranges and Granges. These are core to almost
+all analyses we will perform so it's worth taking sometime to review the fundementals.
+
+? Iranges
+? GRanges
+
+These two packages both keep track and can be operated on are: 
+start
+end
+width
+
+You really only need two of these to infer the third. In our case the start and stop
+could be a long list of the start and stop of all ChiP-peaks for a given DBP.
+
+Let's make a list of ranges and see what this looks like.
+* Note plotRanges is a common function to add to plotting_functions.R
+
+```{r}
+# Let's use an example of 2 ChiP-peak-files each with three peaks. We can use
+# this simple example to construct and intersect ranges -- a common procedure
+
+ir1 <- IRanges(start = c(1,200, 1000), end = c(30, 299, 1200))
+ir1
+start(ir1)
+end(ir1)
+plotRanges(ir1)
+
+# Cool let's make a second set of peak ranges.
+
+ir2 <- IRanges(start = c(17,100, 1010), end = c(49, 199, 1201))
+ir2 
+
+# nice, so let's concatonate these and plot:
+ir3 <- c(ir1, ir2)
+plotRanges(ir3)
+
+
+
+
+
+
+
+
+
+
+# ok we can see the first and third peak are overlapping but not the second.
+# lets find the overlaps between the peaks using "reduce" which will keep the 
+# overlapping regions as a range. "findOverlaps" is really powerful 
+
+
+
+
+
+ir4 <- union(ir1, ir2)
+plotRanges(ir4)
+
+
+
+
+ir4.2 <- findOverlaps(ir1, ir2)
+plotRanges(ir4.2)
+
+ir5 <- c(ir1, ir2, ir4)
+plotRanges(ir5)
+
+# The nice thing about IRanges as we can track values associated with each range
+# for example we may want to name these replicate 1 and replicate 2
+# let's give it a try
+
+
+ir1 <- names(ir1) <- paste("replicate_1")
+# notice the ir1 values are now associated with character string "replicate_1"
+ir2 <- names(ir2) <- paste("replicate_2")
+
+
+```
+

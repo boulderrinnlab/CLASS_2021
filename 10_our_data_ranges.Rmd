@@ -106,10 +106,6 @@ g + geom_histogram(bins = 70) +
   ggtitle("Distribution of number of consensus peaks")
 
 
-## TODO trying to get max peak somehow get AFF4 which is not max :)
-
-table(which.max(num_peaks_df$num_peaks))
-rownames(num_peaks_df[apply(num_peaks_df, 1, which.max), ])
 
 ggsave("figures/consensus_peaks_histogram.pdf")
 ```
