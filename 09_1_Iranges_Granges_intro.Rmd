@@ -189,7 +189,7 @@ GRanges(ranges = Iranges(start = c(20, 40, 60), levels(chrY)
                          
                          #or index directly?
                          
-                  
+                        # sapply(levels(gr(=chrY"), IRanges(start = c(20, 40, 60), end = c(37, 47, 67)))
 # let's add genome:
 
 genome(gr) = c("hg38")
