@@ -1,5 +1,5 @@
 ---
-title: "hacky_analyses"
+title: "our_data_in_ranges"
 author: "JR"
 date: "12/3/2020"
 output: html_document
@@ -70,7 +70,7 @@ threshold_percentile <-
 # we are going to calculate what percentile of the data 250 peaks would account for.
 # it looks scary but can be distilled pretty easy. 
 # round is rounding the number that comes out of the inner functions.
-# ecdf is empircal cumulative distribution function. This will work on the number of # peaks for each DBP in our num_peaks_df. So it will generate a 483 ECDFs one for
+# ecdf is empircal cumulative distribution function. This will work on the number of  # peaks for each DBP in our num_peaks_df. So it will generate a 483 ECDFs one for
 # the list of peaks for each DBP. Then it is filtering out all samples with less
 # than 250 peaks. 
   
@@ -92,7 +92,7 @@ filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_t
 g <- ggplot(num_peaks_df, aes(x = num_peaks))
 
 # ?ggplot
-# We see that we are going to plot from num_peaks_df. The first parameter is data   # then where the data maps (aes). Since we are only looking at number of peaks we just need the x axis and a histogram -- with some fancy formatting we will get into later for now we just want to focus on the AES layer.
+# We see that we are going to plot from num_peaks_df. The first parameter is data     # then where the data maps (aes). Since we are only looking at number of peaks we just # need the x axis and a histogram -- with some fancy formatting we will get into later # for now we just want to focus on the AES layer.
 
 g + geom_histogram(bins = 70) +
   geom_vline(xintercept = num_peaks_threshold, lty = 2,
@@ -115,7 +115,7 @@ ggsave("figures/consensus_peaks_histogram.pdf")
 ```{r Let's make a nice table of our filtered consensus peaks}
 
 # we need to run a for loop over all the files in filtered_consensus_peaks (460)
-# for each interaction the function (the good stuff is betwee {} ) will use         # rtracklayer::export function for file 1 and make a bed file for each filtered     # consensus peak file.
+# for each interaction the function (the good stuff is betwee {} ) will use           # rtracklayer::export function for file 1 and make a bed file for each filtered       # consensus peak file.
 
 for(i in 1:length(filtered_consensus_peaks)) {
   rtracklayer::export(filtered_consensus_peaks[[i]], paste0("results/filtered_peaks/", names(filtered_consensus_peaks)[i], 
@@ -347,6 +347,8 @@ write_csv(peak_occurence_df, "results/peak_occurence_dataframe.csv")
 # colsums function across the promoter peak occurence matrix. So it essentially
 # returns the number of times a DBP overlaps a promoter (we didn't include genebody)
 g <- ggplot(peak_occurence_df, aes(x = number_of_dbp))
+
+#AES layer will know to make a histogram since there is only one set of values for x.
 g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
   theme_paperwhite() +
   xlab(expression("Number of DBPs")) +

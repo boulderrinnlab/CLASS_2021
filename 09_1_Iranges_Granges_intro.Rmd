@@ -11,9 +11,6 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 knitr::opts_chunk$set(echo = TRUE)
 library(GenomicRanges)
-library(rtracklayer)
-library(tidyverse)
-library(ggpubr)
 library(Gviz)
 library(IRanges)
 source("util/_setup.R")
@@ -146,7 +143,11 @@ of DNA that we need to keep track of.
 
 The GenomicRanges package was developed to include the addition information of chr1 and other aspects associated with a given interval in IRanges. Essentially GenomicRanges is a genome specific version of IRanges. 
 
-Let's create a GRange using IRange logic.
+Let's create a GRange using IRange logic. What we need is:
+
+Chromosome
+Strand
+Ranges
 
 ```{r}
 
@@ -182,6 +183,13 @@ seqlevels(gr)
 gr
 # but we don't have any values for the Y chromosome :) let's add some.
 
+
+## ??? TODO how to paste in new values for Chry
+GRanges(ranges = Iranges(start = c(20, 40, 60), levels(chrY)
+                         
+                         #or index directly?
+                         
+                  
 # let's add genome:
 
 genome(gr) = c("hg38")
