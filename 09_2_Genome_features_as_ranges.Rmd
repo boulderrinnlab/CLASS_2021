@@ -86,21 +86,8 @@ table(seqnames(gencode_gr)) %>% head()
 #### This includes number of exons, start, stop and other information. Notice
 #### @elemnentMetadata has the individual features above that INDEXABLE! by 
 ####  @elemnentMetadata$X (where X is the genome feature of interest)
-
-
-#### we can get values using runValue()
-#### let's say we want the values in the seqnames
-runValue(seqnames(gencode_gr))[1:25]
-runValue(seqnames(gencode_gr))[1:50]
-#### same result since there are only 25 levels for seqnames to grab.
-
-
-#### Let's get the length of values in the ranges with runLength.
-runLength(seqnames(gencode_gr))
 ### Ok so we got back the sum of Ranges (length of features on each chromosome)
 ### Note we see the Mitochondrial ([25] index) has very few features as expected
-
-
 
 ### Now let's dig in a little deeper
 table(gencode_gr@elementMetadata$gene_id) %>% head()
@@ -124,11 +111,16 @@ try indexing with [] in combination and or seperately to find specific values.
 ## a difference for long noncoding RNA genes and mRNA genes. 
 ### let's organize the data frame first
 
+
+#table(gencode_gr_length$type)
+#table(gencode_gr_length$gene_type)
+
 gencode_gr_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
                            "gene_name" = gencode_gr@elementMetadata$gene_name,
                            "gene_type" = gencode_gr@elementMetadata$gene_type,
                            "start" = gencode_gr@ranges@start,
-                           "width" = gencode_gr@ranges@width)
+                           "width" = gencode_gr@ranges@width,
+                           "type" = gencode_gr@elementMetadata$type)
 
 ### Ok so now we have a new data frame with the information we want from gencode_gr
 ## Note we see that we can index the RANGES for each gene with @ranges "level"
@@ -143,14 +135,14 @@ gencode_gr_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
 # use the unintended version. We want : Globally add filters to an EnsDb databas
 # lets put it to use and make an mrna_df
 
-mrna_df <- filter(gencode_gr_length, gene_type == "protein_coding")
-hist(mrna_df$width, breaks = 2)
+mrna_df <- filter(gencode_gr_length, gene_type == "protein_coding", type == "gene")
+hist(log10(mrna_df$width), breaks = 60)
 # We filterned our gencode_gr_length variable by "gene_type" setting it to only
 #"protein_coding" specified by Gencode in $gene_type (take a look at other gene types)
 # We see that most of the widths are 0.5 - 1 MB large, what about lncRNA?
 
-lncrna_df <- filter(gencode_gr_length, gene_type == "lncRNA")
-hist(lncrna_df$width, breaks = 2)
+lncrna_df <- filter(gencode_gr_length, gene_type == "lncRNA", type == "gene")
+hist(log10(lncrna_df$width), breaks = 60)
 ### Huh it looks like lncRNAs cover half the space of mRNAs!
 ### notice there are 240K and 250K lncRNA and mRNA values.
 ### certainly there are not that many genes in the genome. So what is happening
@@ -193,15 +185,13 @@ longest_gene_index <- gencode_genes %>%
   width() %>%
   which.max()
 
-## So which gene is it !! There are lots of ways to find out.
-summary(longest_gene_index)
-## This gives us the same as the values table in environment it's about 44Kb long
 
 ## Let's try some deeper indexing.
 ## we have gencode genes filtered to genes, take a look at this in the environment
 ## we still have all the metadata associated with genes. We can now use our 
 ## longest_gene_index to call out the one gene that is the longest
 gencode_genes$gene_name[longest_gene_index]
+width(gencode_genes[longest_gene_index])
 
 ## We immediately see that RBFOX1 is the longest gene in the human genome.
 ## How would you find the smallest gene?
@@ -237,34 +227,6 @@ total_exon_length/3.2e9
 
 
 
-# Now lets' select features from gencode and make a data_frame of useful info
-```{r}
-gencode_gr <- rtracklayer::import("data/gencode.v32.annotation.gtf")
-#### Here we see a "pipe" that is going to do a lot to our gencod_gr GRranges.
-#### First read in gencode_gr -- we will deal with what is happening here
-#### later in the GRanges .RMD
-
-gencode_gm <- gencode_gr %>%
-  #### converting the GRanges to data.frame
-  as.data.frame() %>%
-  #### applying filter step to
-  filter(type == "gene_name") %>%
-  dplyr::select(seqnames, start, end, width, gene_type,
-  # Here dplyr select will grab the seqnames, start, end, width adn genetype for all   # genes
-                gene_id, gene_name, transcript) 
-names(gencode_gm) <- c("chromosome", "start", "end", "width",
-  # names is adding the names to the columns of features we outlined above
-                       "gene_id", "gene_name", "transcript")
-
-# Now we hav a handy data frame of the start and stop of all genes. We can write it 
-# out with write_csv
-write_csv(gencode_gm, "../util/gencode_genemodel_for_Gviz.csv")
-
-
-```
-
-
-
 ### FIND OVERLAPS: who has ever wanted to find the overlaps of their data with
 ### a feature of the human genome? Let's load in a chip-seq peak file and find
 ### the overlaps at promoter regions.
@@ -274,11 +236,19 @@ write_csv(gencode_gm, "../util/gencode_genemodel_for_Gviz.csv")
 
 pol2_chip <- rtracklayer::import("data/POLR2A_consensus_peaks_filter.bed")
 
-
+# We'll need to define the promoters 
+gencode_promoters <- promoters(gencode_gr[gencode_gr$type == "gene"], 
+                               upstream = 3e3, 
+                               downstream = 3e3)
+# ?promoters
+# Thing to think about how does this function know which is upstream and downstream
 ## TODO discuss file types this maybe a good error and then fix
-findOverlaps(pol2_chip, gencode_gr@elementMetadata$gene_id)
-
-
+promoter_overlaps <- findOverlaps(pol2_chip, gencode_promoters)
+# Note @from @to
+hmm <- c(pol2_chip[1], gencode_promoters[32], gencode_promoters[52], gencode_promoters[53])
+plotRanges(hmm)
+length(pol2_chip)
+length(unique(promoter_overlaps@from))/length(pol2_chip)
 ```
 
 Now let's move to working with Gencode and genomic ranges on our data set!
