@@ -30,7 +30,7 @@ library(ggpubr)
 fl <- list.files("results/consensus_peaks", full.names=TRUE)
 consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
 
-consensus_peaks[[1]]$name %>%
+consensus_peaks[[42]]$name %>%
   head()
 # Now we are going to use an unamed or annonymous function to add the name of 
 # the DBP associated with it's Granges. Here the function simply uses 'strsplit'
@@ -66,8 +66,12 @@ num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
 num_peaks_threshold <- 250
 # Setting a threshold number in an object to be called below
 
-threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
+
 filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+
+# fun exeRcise to find what percentil 250 peaks is in the distribution of all 483 ChIP-seq data sets
+# hint ?ecdf (google it too :)
+#threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
 
 # we are going to calculate what percentile of the data 250 peaks would account for.
 # it looks scary but can be distilled pretty easy. 
