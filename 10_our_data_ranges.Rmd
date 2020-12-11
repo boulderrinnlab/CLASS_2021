@@ -37,7 +37,7 @@ consensus_peaks[[42]]$name %>%
 # function to split the current consensus peak in X and append the name column
 # with the index of the name of the DPB being 1.
 names(consensus_peaks) <- sapply(consensus_peaks, function(x){
-  unlist(strsplit(x$name[[1]], "_"))[[1]]
+  unlist(strsplit(x$name, "_"))[[1]]
 })
 
 ## Now we have a named list of consensus peaks in the environment -- let's take a look
@@ -68,6 +68,7 @@ num_peaks_threshold <- 250
 
 
 filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+
 
 # fun exeRcise to find what percentil 250 peaks is in the distribution of all 483 ChIP-seq data sets
 # hint ?ecdf (google it too :)
@@ -379,8 +380,8 @@ unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_db
 # here is just a simple index and filter of the index to have at least 1 dbp bound.
 write_csv(unbound_promoters, "results/unbound_lncrna_mrna_promoters.csv")
 
-length(unbound_promoters)
-# Huh same as last year = 7, wonder if they are the same 7.
+
+
 
 ```
 
