@@ -91,14 +91,7 @@ ov1
 # data with union
 
 
-# reduce
 
-ov2 <- reduce(c(ir1,ir2))
-plotRanges(ov2)
-# reduce does the same thing where we saw above it reduced the overlapping ranges
-# into one start and stop covering both ranges. The same thing happened here.
-# it merged the two overlapping peaks and same for the non overlapping interval.
-# it took the largest window in the ranges and made two ranges one.
 
 # intersect
 
