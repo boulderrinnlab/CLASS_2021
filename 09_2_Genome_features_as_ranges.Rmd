@@ -118,9 +118,10 @@ try indexing with [] in combination and or seperately to find specific values.
 gencode_gr_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
                            "gene_name" = gencode_gr@elementMetadata$gene_name,
                            "gene_type" = gencode_gr@elementMetadata$gene_type,
+                           "type" = gencode_gr@elementMetadata$type,
                            "start" = gencode_gr@ranges@start,
-                           "width" = gencode_gr@ranges@width,
-                           "type" = gencode_gr@elementMetadata$type)
+                           "width" = gencode_gr@ranges@width)
+                           
 
 ### Ok so now we have a new data frame with the information we want from gencode_gr
 ## Note we see that we can index the RANGES for each gene with @ranges "level"
@@ -223,6 +224,7 @@ total_exon_length/3.2e9
 
 
 
+
 ```
 
 
@@ -242,13 +244,14 @@ gencode_promoters <- promoters(gencode_gr[gencode_gr$type == "gene"],
                                downstream = 3e3)
 # ?promoters
 # Thing to think about how does this function know which is upstream and downstream
-## TODO discuss file types this maybe a good error and then fix
 promoter_overlaps <- findOverlaps(pol2_chip, gencode_promoters)
 # Note @from @to
-hmm <- c(pol2_chip[1], gencode_promoters[32], gencode_promoters[52], gencode_promoters[53])
-plotRanges(hmm)
+
+
 length(pol2_chip)
-length(unique(promoter_overlaps@from))/length(pol2_chip)
+length(unique(promoter_overlaps@from))
+       
+percent_promoter_overlap <- length(unique(promoter_overlaps@from))/length(pol2_chip)
 ```
 
 Now let's move to working with Gencode and genomic ranges on our data set!
