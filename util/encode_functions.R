@@ -1,3 +1,7 @@
+library(tidyverse)
+library(httr)
+library(janitor)
+
 contstruct_query <- function(experiment_accession,
                              base_url = "https://www.encodeproject.org/report.tsv?",
                              file_format = "fastq",
