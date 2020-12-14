@@ -11,8 +11,17 @@ options(stringsAsFactors = FALSE)
 source("../util/encode_functions.R")
 ```
 
+[Encode Query]("https://www.encodeproject.org/report/?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&assay_title=polyA+plus+RNA-seq&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all")
+
 ```{bash}
+# Retrieve experiment info table
 wget -O samples.txt "https://www.encodeproject.org/report.tsv?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&assay_title=polyA+plus+RNA-seq&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all"
+
+# Retrieve fastq file urls
+wget -O files.txt "https://www.encodeproject.org/batch_download/?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&assay_title=polyA+plus+RNA-seq&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50"
+
+# Download the fastq files -- ~50 GB
+xargs -L 1 curl -O -J -L < files.txt
 ```
 
 
@@ -24,20 +33,42 @@ samples <- read.table("samples.txt",
   unnest(file_info) %>% 
   group_by(experiment_accession) %>%
   mutate(rep_number = as.numeric(factor(replicate))) %>%
-  unite(sample_id, experiment_accession, rep_number, sep = "-")
+  unite(sample_id, experiment_accession, rep_number, sep = "_rep") %>%
+  dplyr::select(sample_id, accession, Assay.title,
+                Biosample.summary, md5sum, paired_end_identifier) %>%
+  unite(fastq_file, sample_id, paired_end_identifier, sep = "_read", remove = F) %>%
+  mutate(fq_extension = ".fastq.gz") %>%
+  unite(fastq_file, fastq_file, fq_extension, sep = "", remove = F) %>%
+  unite(original_file, accession, fq_extension, sep = "")
 
+# Rename the fastq files so that they contain the sample ID.
+rename_script <- samples %>%
+  dplyr::select(fastq_file, original_file) %>%
+  mutate(command = "mv") %>%
+  unite(command, command, original_file, fastq_file, sep = " ")
+write_lines(c("#!/bin/bash", rename_script$command), "fastq/rename.sh")
+system("cd fastq; chmod u+x rename.sh; ./rename.sh")
 
-colnames(samples)
-
-hmm <- samples %>% dplyr::select(sample_id, accession, Assay.title,
-                                Biosample.summary, md5sum, paired_end_identifier)
+# Let's create an md5.txt to run the checksums
+md5 <- samples %>% 
+  dplyr::select(md5sum, fastq_file) %>%
+  unite(line, md5sum, fastq_file, sep = "  ")
+write_lines(md5$line, "fastq/md5.txt")
+system("cd fastq; md5sum -c md5.txt")
 ```
 
 
 ```{r}
-# NExt we'll grab the fastq file info using the API.
-
-
-
+# Let's create the sample sheet that we will use later
+# to do the RNA-seq analysis in R.
+samplesheet <- samples %>%
+  dplyr::rename(fastq = fastq_file,
+                seq_type = Assay.title,
+                sample_name = Biosample.summary) %>%
+  dplyr::select(-original_file) %>%
+  pivot_wider(id_cols = c("sample_id", "seq_type", "sample_name"),
+              names_from = paired_end_identifier,
+              values_from = c("fastq", "md5sum"))
+write_csv(samplesheet, "samplesheet.csv")
 ```
 

@@ -65,6 +65,11 @@ vignettes/*.pdf
 .nextflow.log
 .nextflow.log.1
 *.log*
-
+*.err
+*.out
+*.sh
+*fastq*
+*results*
+*work*
 
 
