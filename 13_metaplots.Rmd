@@ -1,0 +1,320 @@
+---
+title: "TSS profiles: plotting & clustering"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+options(stringsAsFactors = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+
+# library(gridExtra)
+# library(boot)
+# library(tidyverse)
+# library(pheatmap)
+source("util/intersect_functions.R")
+source("util/_setup.R")
+```
+
+# TSS profile plots
+
+## Import the data we need
+
+We'll be using the consensus peaks we generated previously (MACS peak calls filtered to those that are overlapping across replicates) and the Gencode gene annotations. 
+
+```{r import}
+data_path <- "/Shares/rinn_class/data/CLASS_2021/CLASS_2021"
+
+gencode_gr <- rtracklayer::import(file.path(data_path,"data/gencode.v32.annotation.gtf"))
+consensus_peaks <- import_peaks(file.path(data_path, "results/filtered_peaks"))
+```
+
+## Step 1: Create promoter windows
+
+Here we're going to create a GRanges object that contains 6kb promoter windows for each gene in the Gencode annotation. First we'll need to filter the Gencode GRanges object to just the genes and then we can use the promoter function from GRanges that will allow us to specify how big of a window we want upstream and downstream of the TSS (you can have asymmetrical windows).
+
+```{r}
+# Recall: The gencode annotation contains an entry for each exon, transcript, etc.
+# Use table(gencode_gr$type) to see how many of each entry there are. 
+# We don't want to create a "promoter" window around each exon for example
+# which is why we need to filter to just the genes.
+genes <- gencode_gr[gencode_gr$type == "gene"]
+all_promoters <- promoters(genes, upstream = 3e3, downstream = 3e3)
+```
+
+## Step 2: Transform peaks into a coverage object
+
+In order to calculate what the peak coverage across each promoter is we'll convert the peaks GRanges object which currently holds a range for each peak into a run-length encoded list where 0 represents the genomic coordinates where there is no peak present and 1 represents the locations where a peak is present. The reason for run length encoding is that storing this vector without this compression means that we would be storing a numeric value for each of the 3.2 billion base pairs. This would mean allocating a vector in memory that's ~180 GB -- instead with run-length encoding we're in the ~100 KB range. 
+
+```{r}
+# We can use any binding protein here (use names(consensus_peaks) to see the available DBPs)
+peak_coverage <- coverage(consensus_peaks[["POLR2A"]])
+```
+
+### Step 2.1: Some housekeeping to keep our chromosomes straight
+
+This step will accomplish two things: filter out promoters that fall outside the bounds of our coverage vectors and filter out chromosomes that are not in common between the promoters object and the peak coverage object. The reason we need to do this is because the peaks may not extend to the end of each chromosome and therefore there is likely to be promoters that fall outside of the peak coverage vectors -- since we know that there are no peaks on those promoters and therefore they don't give us any extra information about where peaks are relative to promoters we'll filter them out. Also, it creates problems for the Views command that we'll use to subset the coverage vectors to just the promoter windows.
+
+```{r}
+##### Filter promoters to bounds of peak coverage vectors
+
+# This is the length of each run-length encoded vector in the peak_coverage object
+# If the last peak on each chromosome falls near the end of that chromosome then
+# these lengths will be approximately the length of the chromosomes.
+coverage_length <- elementNROWS(peak_coverage)
+# This will create a GRanges object where there is one range per chromosome
+# and it is the width of the coverage vector -- we can use these ranges to 
+# filter the promoters falling outside of these boundaries in the next step.
+coverage_gr <- GRanges(seqnames = names(coverage_length),
+                       IRanges(start = rep(1, length(coverage_length)), 
+                               end = coverage_length))
+# Okay, now we're all ready to filter out those promoters that fall beyond the bounds of the 
+# coverage vector. 
+all_promoters <- subsetByOverlaps(all_promoters, 
+                                  coverage_gr, 
+                                  type="within", 
+                                  ignore.strand=TRUE)
+
+##### Keep track of the chromosomes that are in common and filter/reorder to match
+
+# This creates a vector of the chromosomes that are in common between the peak_coverage and promoters.
+# Keeping track of this will fix a similar problem to the step above since this DBP may not
+# bind on all chromosomes. 
+chromosomes <- intersect(names(peak_coverage), unique(as.character(seqnames(all_promoters))))
+# We can also ensure they're in the same order and contain the same chromosomes
+# by indexing with this vector
+peak_coverage <- peak_coverage[chromosomes]
+# In order to match the list format of the peak_coverage object
+# we'll also coerce the GRanges object into an IntegerRangesList.
+# If you recall, one of the main features of GRanges object is capturing
+# the chromosome information -- when converting to an IRanges list, 
+# each chromosome will be represented by a named element in the list.
+all_promoters <- as(all_promoters, "IntegerRangesList")[chromosomes]
+```
+
+## Step 3: Subset the peak coverage vector to just the promoter windows
+
+```{r}
+promoter_peak_view <- Views(peak_coverage, all_promoters)
+# Still in run-length encoding format.
+hmm <- promoter_peak_view[[1]]
+```
+
+## Step 4: 
+
+```{r}
+# Converts the Rle objects to vectors -- this is now a small enough size to do so
+promoter_peak_view <- lapply(promoter_peak_view, function(x) t(viewApply(x, as.vector)))
+# Convert this to a matrix. 
+tagMatrix <- do.call("rbind", tagMatrixList)
+```
+
+
+```{r}
+
+
+
+
+# Split the promoters by chromosome
+idx_list <- split(1:length(windows),  as.factor(seqnames(windows)))
+idx <- do.call("c", idx_list)
+idx
+
+rownames(tagMatrix) <- idx
+tagMatrix <- tagMatrix[order(idx),]
+
+minus_idx <- which(as.character(strand(windows)) == "-")
+tagMatrix[minus_idx,] <- tagMatrix[minus_idx, ncol(tagMatrix):1]
+tagMatrix <- tagMatrix[rowSums(tagMatrix)!=0,]
+
+xlim = c(-3000, 3000)  
+ss <- colSums(tagMatrix)
+ss <- ss/sum(ss)
+pos <- value <- NULL
+dd <- data.frame(pos=c(xlim[1]:(xlim[2]-1)), value=ss)
+g <- ggplot(dd, aes(x = pos, y = value))
+g + geom_line()    
+
+dd
+    conf = 0.95
+resample=500
+ncpus = 6   
+    
+     RESAMPLE_TIME <- resample
+  trackLen <- ncol(tag_matrix)
+  if (Sys.info()[1] == "Windows") {
+    tagMxBoot <- boot(data = tag_matrix, statistic = get_sgn, R = RESAMPLE_TIME)
+  } else {
+    tagMxBoot <- boot(data = tag_matrix, statistic = get_sgn, R = RESAMPLE_TIME,
+                      parallel = "multicore", ncpus = ncpus)
+  }
+  cat(">> Running bootstrapping for tag matrix...\t\t",
+      format(Sys.time(), "%Y-%m-%d %X"), "\n")
+  tagMxBootCi <- sapply(seq_len(trackLen), function(i) {
+    bootCiToken <- boot.ci(tagMxBoot, type = "perc", index = i)
+    ## parse boot.ci results
+    return(parse_boot_ci_perc(bootCiToken))
+  }
+  )
+  row.names(tagMxBootCi) <- c("Lower", "Upper")
+  return(tagMxBootCi)
+```
+
+```{r}
+# all_promoters <- rtracklayer::import(paste0(base_path, "lncrna_mrna_promoters.gtf"))
+# lncrna_promoters <- rtracklayer::import(paste0(base_path, "lncrna_promoters.gtf"))
+# mrna_promoters <- rtracklayer::import(paste0(base_path, "mrna_promoters.gtf"))
+```
+
+
+
+```{r create-profiles, message=FALSE}
+if (!file.exists("results/tss_profiles.csv")) {
+  
+  tag_count_df <- data.frame("pos" = integer(0),
+                             "value" = numeric(0),
+                             "Lower" = numeric(0),
+                             "Upper" = numeric(0),
+                             "dbp" = character(0))
+  
+  for (i in 1:length(consensus_peaks)) {
+    
+    if (i %% 10 == 0) { print(i) }
+    tag_matrix <- get_tag_matrix(consensus_peaks[[i]], 
+                                 windows = all_promoters)
+    tag_count <- get_tag_count(tag_matrix, 
+                               xlim = c(-3000, 3000), 
+                               conf = 0.95, 
+                               ncpus = 6)
+    tag_count$dbp <- names(consensus_peaks)[i]
+    
+    tag_count_df <- bind_rows(tag_count_df, tag_count)
+  }
+  write_csv(tag_count_df, "results/tss_profiles.csv")
+} 
+```
+
+#### Clustering and plotting tss meta profile plots. 
+
+Specifically heat map of profile plots around tss +/- 3Kb
+
+```{r profile-clustering, fig.width=12, fig.height=25, message=FALSE}
+tag_count_df <- read.csv("results/tss_profiles.csv")
+
+tcm <- tag_count_df %>%
+  dplyr::select(pos, value, dbp) %>%
+  pivot_wider(names_from = pos, values_from = value) %>%
+  column_to_rownames("dbp") %>%
+  as.matrix()
+
+set.seed(908)
+tcmz <- t(scale(t(tcm)))
+tmp_hclust <- hclust(dist(tcmz))
+summary(tmp_hclust$height)
+clusters <- data.frame("dbp" = row.names(tcm),
+                       "cluster" = cutree(tmp_hclust, h = 65))
+table(clusters$cluster)
+tag_count_df <- merge(tag_count_df, clusters)
+
+# Filter to only clusters that contain at least two DBPs.
+non_singleton <- which(table(clusters$cluster) > 1)
+tag_count_df <- tag_count_df %>% filter(cluster %in% non_singleton)
+
+tcmdf <- tcmz %>% as.data.frame() %>%
+  rownames_to_column("dbp") %>%
+  pivot_longer(2:ncol(.), names_to = "pos", values_to = "value") %>%
+  merge(clusters)
+
+
+# Order by peak intensity at center
+peak_center <- tag_count_df %>% filter(pos %in% -10:10) %>%
+  group_by(dbp, cluster) %>% 
+  summarize(mean_peak_center = mean(value)) %>%
+  arrange(mean_peak_center)
+
+cluster_peak_center <- peak_center %>% group_by(cluster) %>%
+  summarize(mean_peak_center = mean(mean_peak_center)) %>%
+  arrange(-mean_peak_center)
+
+# Normalize each cluster to the max signal to aid in visibility
+norm_factor <- tag_count_df %>% group_by(cluster) %>%
+  summarize(cluster_max = max(value))
+norm_factor$norm_factor <-  max(norm_factor$cluster_max) / norm_factor$cluster_max
+tag_count_df <- merge(tag_count_df, norm_factor)
+
+tag_count_df$norm_val <- tag_count_df$value * tag_count_df$norm_factor
+
+tag_count_df$dbp <- factor(tag_count_df$dbp, levels = peak_center$dbp)
+tag_count_df$cluster <- factor(tag_count_df$cluster, 
+                               levels = cluster_peak_center$cluster)
+tag_count_df$pos <- as.numeric(tag_count_df$pos)
+
+#### FIGURE: Supplemental Figure 2C
+g <- ggplot(tag_count_df, aes(x = pos, y = dbp, fill = norm_val))
+g + geom_raster() + facet_grid(cluster~., scales = "free_y", space = "free") + 
+  scale_fill_gradientn(colors = colorRampPalette(c("#ffffff", "#a8404c"))(100)) + 
+  scale_x_continuous(expand = c(0,0)) + 
+  ggtitle("TSS Binding profiles cluster")
+ggsave("figures/tss_profile_heatmap.pdf", height = 25, width = 12)
+ggsave("figures/tss_profile_heatmap.png", height = 25, width = 12)
+
+write_csv(tag_count_df, "results/tss_profiles_clustered.csv")
+
+cluster_members <- tag_count_df %>% group_by(cluster) %>%
+  summarize(dbps = paste(unique(dbp), collapse = " "))
+knitr::kable(cluster_members)
+write_csv(cluster_members, "results/tss_profiles_cluster_members.csv")
+```
+
+Pulling out a few examples of DBP profile plots around promoter TSS. 
+A vast majority of DBP profiles resemble cluster 2 and very few, 
+but interesting examples that are the oposite (concave to start -vs- convex)
+
+```{r representative-profiles, message=FALSE}
+rep_profiles <- tag_count_df %>% group_by(cluster, pos) %>%
+  summarize(value = mean(value))
+
+#### FIGURE: Figure 2B
+g <- ggplot(rep_profiles, aes(x = pos, y = value))
+g + geom_line() + facet_wrap(~cluster, scales = "free_y") + 
+  theme(axis.text.y = element_blank(),
+      axis.title.y = element_blank(),
+      axis.ticks.y = element_blank()) +
+  scale_x_continuous(breaks = seq(-3000,3000,1500)) +
+  ggtitle("Average cluster profiles")
+ggsave("figures/average_cluster_profiles.pdf")
+ggsave("figures/average_cluster_profiles.png")
+```
+
+#### Individual DBP examples of the different profile clusters 
+(grey is the bootstrapped variance)
+
+```{r example-profiles, message=FALSE}
+#### FIGURE: Supplemental 2C
+# Let's choose a representative from each cluster to plot
+# Cluster 2 narrow
+tc2 <- tag_count_df %>% filter(dbp == "ATF2")
+g2 <- plot_profile(tc2, "ATF2")
+# Cluster 1 wide
+tc1  <- tag_count_df %>% filter(dbp == "GABPB1")
+g1 <- plot_profile(tc1, "GABPB1")
+# Cluster 6 dip
+tc6  <- tag_count_df %>% filter(dbp == "SMARCA5")
+g6 <- plot_profile(tc6, "SMARCA5")
+# Cluster 3 depleted at TSS
+tc3  <- tag_count_df %>% filter(dbp == "eGFP-ZNF507")
+g3 <- plot_profile(tc3, "eGFP-ZNF507")
+
+# Show plot
+gridExtra::grid.arrange(g2, g1, g6, g3, nrow = 2)
+
+# Save plot
+pdf("figures/example_cluster_profiles.pdf")
+gridExtra::grid.arrange(g2, g1, g6, g3, nrow = 2)
+dev.off()
+```
+
