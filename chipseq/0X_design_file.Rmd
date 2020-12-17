@@ -1,0 +1,264 @@
+---
+title: "MS_Design_Explorer"
+author: "JR"
+date: "10/15/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ENCODExplorer)
+library(tidyverse)
+library(janitor)
+library(httr)
+```
+
+Michaels Encode Explorer
+
+```{r}
+contstruct_query <- function(experiment_accession,
+                             base_url = "https://www.encodeproject.org/report.tsv?",
+                             file_format = "fastq",
+                             type = "File", 
+                             status = "released",
+                             fields = c("accession", "read_count", "md5sum",
+                                        "controlled_by", "paired_end",
+                                        "paired_with", "replicate", "target", "read_length")) {
+  query <- paste(list(paste0("type=", type), 
+        paste0("status=", status),
+        paste0("file_format=", file_format),
+        paste0("dataset=%2Fexperiments%2F", experiment_accession, "%2F"),
+        map_chr(fields, ~paste0("field=", .))) %>%
+          flatten(),
+       collapse = "&")
+  url <- paste0(base_url, query)
+  return(url)
+}
+get_fastq_info <- function(experiment_accession) {
+  request <- GET(contstruct_query(experiment_accession)) 
+  body <- read_tsv(content(request, "text"), skip = 1)
+  return(body)
+}
+
+contstruct_query("ENCSR516DDO")
+resp <- GET("https://www.encodeproject.org/report.tsv?type=File&status=released&file_format=fastq&dataset=%2Fexperiments%2FENCSR516DDO%2F&field=accession&field=read_count&field=md5sum&field=controlled_by&field=paired_end&field=paired_with&field=replicate&field=target&field=read_length")
+read_tsv(content(resp, "text"), skip = 1)
+options(stringsAsFactors = FALSE)
+# Read in the experiment report downloaded from Encode
+# we will only use the Accession column 
+# Here we'll retrieve the read_count and md5 sum 
+# as well as the file accession (with some other metadata)
+# for the fastq files associated with each experiment.
+fastq_info <- read.table("data/class_encode_report.tsv",
+                        skip = 1, sep = "\t", header = T) %>%
+  dplyr::select(Accession) %>%
+  rename(experiment_accession = Accession) %>%
+  distinct() %>%
+  mutate(fastq_info = map(experiment_accession, ~get_fastq_info(.))) %>%
+  unnest(fastq_info) %>%
+  rename(file_accession = Accession) %>%
+  clean_names()
+write_csv(fastq_info, "data/design_input.csv")
+
+md5_txt <- fastq_info %>%
+  mutate(fastq_file = paste0(file_accession, ".fastq.gz")) %>%
+  dplyr::select(md5sum, fastq_file)
+
+write.table(md5_txt, "data/fastq/md5.txt", sep = "  ", quote = FALSE, row.names = FALSE, col.names = FALSE)
+```
+
+Awesome now we have a text file of encode file names and md5sum.
+Let's run the md5sum test using -c to check a list and print the output to md5_status.txt
+
+```
+md5sum -c md5.txt 
+md5sum md5sum -c md5.txt > md5_status.txt
+```
+
+
+TODO : Decide on fastQ merge as next step -- explore the table in excel to get a feel?
+
+First we need to install "janitor"
+
+Here we are going to use our ENCODE.TSV report to make a design file for 
+Nextflow ChiP-seeker. You will need the report file that can be downloaded here:
+
+https://www.encodeproject.org/report/?type=Experiment&status=released&assay_slims=DNA+binding&biosample_ontology.term_name=HepG2&assay_title=TF+ChIP-seq&biosample_ontology.classification=cell+line&files.read_length=100&files.read_length=76&files.read_length=75&files.read_length=36&assay_title=Control+ChIP-seq&assay_title=Histone+ChIP-seq&files.run_type=single-ended
+
+Notice that the URL is very similar to the structure of the data file.
+
+For the input design file Nextflow needs a few things:
+
+group	replicate	fastq	antibody	control
+
+* group is the DBP and controls listed individually
+* replicate indicates which replicate of the given DBP 
+* Antibody same for all DBPs but input controls are blank
+* Control tells which "group" are the inputs.
+
+
+Now we start the hard part of coding such a simple sounding design file :)
+
+
+We are going to use the ENCODE API instead of the web interface. Some information
+cannot be retrieved such as MD5sum and other aspects in the .TSV
+
+You can see all the information you can gather using the API and what the code
+would look like here:
+
+https://app.swaggerhub.com/apis-docs/encodeproject/api/basic_search#/Experiment
+
+Notice the URL produced above has a lot of the information -- so we can use the 
+API to tell it exactly what we want in code rather than clicking buttons --
+
+
+First let's make a table with the 
+```{r}
+# write_csv(design, "design_full_file")
+## Grabbing some handy environment variables to .CSV :)
+contstruct_query <- function(experiment_accession,
+                             base_url = "https://www.encodeproject.org/report.tsv?",
+                             file_format = "fastq",
+                             type = "File", 
+                             status = "released",
+                             fields = c("accession", "read_count", "md5sum",
+                                        "controlled_by", "paired_end",
+                                        "paired_with", "replicate", "target")) {
+  query <- paste(list(paste0("type=", type), 
+        paste0("status=", status),
+        paste0("file_format=", file_format),
+        paste0("dataset=%2Fexperiments%2F", experiment_accession, "%2F"),
+        map_chr(fields, ~paste0("field=", .))) %>%
+          flatten(),
+       collapse = "&")
+  url <- paste0(base_url, query)
+  return(url)
+}
+get_fastq_info <- function(experiment_accession) {
+  request <- GET(contstruct_query(experiment_accession)) 
+  body <- read_tsv(content(request, "text"), skip = 1)
+  return(body)
+}
+# Read in the experiment report downloaded from Encode
+# we will only use the Accession column 
+# Here we'll retrieve the read_count and md5 sum 
+# as well as the file accession (with some other metadata)
+# for the fastq files associated with each experiment.
+
+unique(missing_control_file)
+
+# We can do another encode query to get the experiment control_type
+# if we query experiments instead of files.
+
+experiment_report <- read.table("data/Best_class_full_controls.tsv",
+                        skip = 1, sep = "\t", header = T)
+fastq_info <- data.frame(experiment_accession = c(experiment_report$Accession, c("ENCSR000EVT",
+                                                                                 "ENCSR945JOR",
+                                                                                 "ENCSR476TKW",
+                                                                                 "ENCSR770PLF"))) %>%
+  distinct() %>%
+  mutate(fastq_info = map(experiment_accession, ~get_fastq_info(.))) %>%
+  unnest(fastq_info) %>%
+  dplyr::rename(file_accession = Accession) %>%
+  clean_names()
+
+
+write_csv(fastq_info, "final_files_md5sum.csv")
+
+
+fastq_info <- read_csv("final_files_md5sum.csv")
+```
+
+
+
+Now that we have all the information we want in tables above we can tidy up
+file names with gsub. So the first part is just cleaning the naming we made above
+?gsub
+
+
+
+# TODO # I think this is the new way of making the batch design files. So together
+with chunk above maybe all we need.
+
+```{r}
+fastq_info$fastq_1 <- paste0("../fastq/", fastq_info$file_accession, ".fastq.gz")
+fastq_info$file_control <- gsub("/", "", gsub("/files/", "", fastq_info$controlled_by))
+fastq_info$fastq_2 <- ""
+fastq_info$antibody <- gsub("-human", "", gsub("/", "", gsub("/targets/", "", fastq_info$target)))
+fastq_info$group <- fastq_info$antibody
+
+
+contrls <- fastq_info %>% filter(is.na(file_control))
+contrls$group <- contrls$experiment_accession
+
+control2exp <- fastq_info %>% 
+  ungroup() %>% 
+  dplyr::select(file_control) %>%
+  distinct() %>%
+  filter(!is.na(file_control)) %>%
+  separate(file_control, into = c("one_control"), sep = ",", remove = FALSE)
+
+ctrl2exp <- contrls %>%
+ungroup() %>% 
+  dplyr::select(experiment_accession, file_accession) %>%
+  dplyr::rename(one_control = file_accession)
+
+control2exp <- merge(control2exp, ctrl2exp)
+
+control2exp <- control2exp %>%
+  dplyr::select(-one_control) %>%
+  dplyr::rename(control = experiment_accession)
+
+fastq_info <- merge(fastq_info, control2exp, all.x = T)
+
+fastq_info[is.na(fastq_info$controlled_by), "group"] <- fastq_info[is.na(fastq_info$controlled_by), "experiment_accession"]
+
+fastq_info <- fastq_info %>% 
+  group_by(group) %>%
+  mutate(replicate = 1:n())
+
+
+design <- fastq_info %>%
+  dplyr::select(group, replicate, fastq_1, fastq_2, antibody, control)
+
+experiments <- design %>% 
+  filter(!is.na(control)) %>%
+  dplyr::select(group) %>%
+  distinct() 
+experiments$exp_num <- 1:nrow(experiments)
+experiments$batch <- as.numeric(cut_number(experiments$exp_num, n = 6))
+experiments <- experiments %>% dplyr::select(group, batch) %>%
+  as.data.frame()
+
+design <- merge(design, experiments, all.x = T)
+
+batches <- design %>%
+  group_by(batch) %>%
+  group_split()
+
+controls <- batches[[7]]
+
+for (i in 1:6) {
+  batch <- batches[[i]]
+  ctrl_batch <- controls[controls$group %in% batch$control,]
+  batch <- bind_rows(ctrl_batch, batch)
+  # Change the NAs to ""
+  batch[is.na(batch$antibody),"antibody"] <- ""
+  batch[is.na(batch$control),"control"] <- ""
+  # Get rid of batch col
+  batch <- batch %>% dplyr::select(-batch)
+  dir.create(paste0("data/test_work/batch_",i))
+  write_csv(batch, paste0("data/test_work/batch_",i,"/design_",i,".csv"))
+}
+
+
+```
+
+
+
+
+
+
+
