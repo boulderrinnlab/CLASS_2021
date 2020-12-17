@@ -9,3 +9,268 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+One of the best parts of R is the plotting abilities. You are, by analogy designing your own figures with code. You can run many stastical analyses and plot the outputs in the code to make a figure.
+
+Here we will focus on GGPLOT(GGPLOT2). The GG says it all:
+
+"Grammar of Graphics" -- it truly is a very pure and flexible way of plotting data for figures!
+
+
+Although this is a package it is the best for vast majority of figure making.
+There are base R functions that can read excel files etc, but we hopefully will be so clean and tidy we won't be loading excel files into R :) 
+
+There are 8 possible layers of information -- each building on the data layer that you are importing. This looks really confusing but we will slowly build up from the basics (mapping, stats, geom)
+
+You can also think of ggplot2 as an API. There are alternatives such as Vega-lite that are also based in graphical grammar.
+
+
+Plotting layers of R:
+
+1) Data -- data being plotted from object indexes etc.
+
+2) MAPPING -- mapping data (aes)
+
+3) Statistics -- statical analyses on mapped data
+
+4) scales -- how big small you want things
+
+5) GEOMETRIES -- what type of plots you are making (geom)
+
+6) Facets -- making multiple representations of plots
+
+7) Coordinates -- specifing placement of image aspects
+
+8) THEME -- a set version of colors, background. Mostly so you don't have to add many of the layers above everytime!
+
+Ok let's walk through some simple examples to more difficult figures using these layers!
+
+Layer 1 : DATA (data types matter so good to label object accrodingly)
+
+```{r}
+# before we get started let's import that data we are going to     # plot. We will use the peak occurent matrix from our previous
+# general analysis of the data previously (10_our_data_ranges).
+
+promoter_peak_df <-
+```
+
+
+```{r}
+
+# here we are just looking at a x, y point plot (geom_point).
+# note there are not quotes on x, and y objects as they are being evaluated as "objects in ggplot"
+# note the +, we will see this everytime we are adding a new layer. # Yet within each layer it's standard comma 
+# seperated etc.
+# '+' adds layers together
+
+# Now let's see if we cna 
+
+ggplot(data = object),
+      mapping = aes (x = object$,
+                     y = object 2) +
+  geom_point()
+# we will see moving forward we don't have to type out data = and mapping = , this is because R can infer that 
+# in the appropriate layer. Above is absolute best practice, but we will go with a more succinct code in these layers
+
+
+## Lets compare the above with this:
+
+ggplot(data,) +
+  geom_point(aes(x = , y = )
+             
+# much more succinct but harder for non R user to read. We first have ggplot run on "data" then the + will
+# add a geometry layer, in this case geom_point is a dot plot of x, y values (the mapping layer)
+
+             
+# There is lots more we could modify here but let's change the shape of the points to show off R plotting.
+
+ggplot(data,) +
+  geom_point(aes(x = , y = ), shape = 'square')
+
+? geom_point 
+# scroll to the Aestheitcs section for all options
+# cool let's make the squares more transparent for example
+
+ggplot(data,) +
+  geom_point(aes(x = , y = ), shape = 'square', alpha = 0.3)
+
+# so much can be done in the Aesethics mapping layer!
+
+# We can also add some color features in the mapping layer of graphical grammar let's take a look
+
+ggplot(data) +
+  geom_point(aes(x = ,
+                 y = ,
+                 colours = data < 1000))
+
+# so we did a bit extra by adding a "function of less-than 1,000 peaks". 
+# Thus R will know to add two colors to data with less than 1,000 peaks 
+# and another color for those over 1,000 peaks.
+# Finally note ggplot gives us a free title and legend!
+
+# Compare to this where the color is set and not mapped outside the AES:
+ 
+ggplot(data) +
+  geom_point(aes(x = ,
+                 y = ,),
+                 colour = 'steelblue'))
+
+# This is not MAPPING colours, it is SETTING colours
+# It's subtle but why R is so powerful to MAP data !
+
+```
+
+
+# Histogram. This is great when you are inloadterested how often one variable occurs. So you would only use "x"
+# or one data value in this case.
+
+```{r}
+
+ggplot(data) +
+  geom_histogram(aes(x = data))
+
+# Pretty simple! But there could be a lot more -- so it's worth looking in manual !
+# genom_histogram and look for "Asethics" section in manual will be able to tadd more.
+# Let's chage the color of the bars in histogram by number of peaks.
+
+ggplot(data) +
+  geom_histogram(aes(x = data, fill = peaks > 3,000))
+
+# let's change how the bars are POSITIONED
+
+ggplot(data) +
+  geom_histogram(aes(x = data, fill = peaks > 3,000, positon = 'dodge', breaks = '100', alpha = "0.4" ))
+
+# This is just to show we can alot more features in the mapping layer to make the figures
+# more readable and clear as possible.
+
+
+
+
+# Let's try one more additon where fill is based on a different value in the table!
+# Let's compare the distribution of peak numbers that are above 1MB in total coverage
+# We can index into that in the df we are plotting
+
+ggplot(data) +
+  geom_histogram(aes(x = data, fill = peaks$width > 1e6))
+
+# DENISTY Plots are also very useful to see where the denisty of data arises.
+
+ggplot(data) +
+  geom_density(aes(x = peak_width))
+
+# Nice so sometimes we want a histogram and denisity plots for all values of some x
+
+# We can even add layers of plots. For example a 2 dimensional denisty plot of our x, y point plot above.
+# Let's check it out
+
+ggplot(data,) +
+  geom_point(aes(x = , y = )) +
+  geom_density_2d() +
+  geom_point()
+
+
+
+```
+
+You can do a lot in the geometry layer and add features with + and then new geom call. Let's look at 
+# this below
+
+
+```{r}
+# Now let's see how to add other features to the plots by adding an additional geom layer as we did above
+# Lets explore 'geom_abline' geometry to add a line 
+?geom_abline
+
+ggplot(data,) +
+  geom_point(aes(x = , y = )) +
+  geom_abline(slope = 1, intercept = 0)
+
+
+
+```
+
+Let's take a quick look at bar plots
+```{r}
+# Here we will look at more aspects of graphical grammar with bar plots
+# TODO  see if we can select certain DBPs names(dbp = *Z)
+ggplot(peaks) +
+  geom_bar(
+    aes(
+      x = DBP
+      y = after_stat(peak_width / 1e6)
+    )
+  )
+# Notice here we called after_stat function to let R know we are manipulating the data
+# that is going to be plotted on Y-axis. The peak width is so big we want to shrink it down to # intervals of 1 million.
+
+# We also add a fill command in the mapping layer.
+```
+
+Now we have gone through these layers:
+
+1) Data -- data being plotted from object indexes etc.
+
+2) MAPPING -- mapping data (aes)
+
+3) Statistics -- statical analyses on mapped data
+
+5) Geom
+
+# Now let's look at the scales layer
+
+4) scales -- how big small you want things
+# Scales is important for outputting specific factors as colors that are "scaled"
+# alos other outputs need to be scaled such as scale values to the "mean" etc.
+?scale
+
+```{r}
+# Let's use our num_peaks versus peak width to see this
+# Todo color by lncRNA and mRNA 
+ggplot(data,) +
+  geom_point(aes(x = , y = )) +
+  scale_colour_brewer(type = 'qual')
+# qual is a type scale_colour_brewer that has many color palattes
+# We can also set Pallete directly:
+
+ggplot(data,) +
+  geom_point(aes(x = , y = )) +
+  scale_colour_brewer(palette =  'set1')
+
+
+#Let's look at sclaing the axes
+
+ggplot(data,) +
+  geom_point(aes(x = num_peaks , y = peak_width )) +
+  scale_x_continous(breaks = c(1e3, 1e4, 1e6)) +
+  scale_y_continuous(trans = 'log10')
+# here we are saying where the points on X axis we want and to "TRANSFORM" (trans)
+# the Yaxis to log10 scale.
+
+```
+
+Now let's look at 6) FACETS
+This will allow us to make multiple plots in the same plot frame or facet
+One limitation is that it can only make the same plots from different data
+
+
+```{r}
+
+old_class_peak <- 
+make column all promoters together mrna_lncRNA etc
+
+ggplot(data,) +
+  geom_point(aes(x = num_peaks, y = peak_width )) +
+  facet_wrap( ~ lncRNA/mrNA)
+# facet the above to seperate  lncRNA and mRNA variable
+
+# Nice we cna see these plotted seperately now but in the same pane.
+
+# We can also use 'facet_grid' that can pivot grids (turn x and y axis)
+ggplot(data,) +
+  geom_point(aes(x = num_peaks, y = peak_width )) +
+  facet_grid( num_peaks ~ peak_width)
+
+
+
+
+```
