@@ -234,8 +234,40 @@ num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,m
 
 # This is a handy data frame of information we will plot from in 
 # 11_R_plotting_intro:
-write_csv2(num_peaks_df, "chipseq/results/num_peaks_df.csv")
+
+```
+
+
+Class Exercise ! Let's add some infomration about the DBPs that we will discuss in the next class (what are these DBPs). We will use the human transcription factor database.
+
+
+Now we are going to add some information ()
+```{r}
+# The human TFs
+# https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx
+library(janitor)
+human_tfs <- readxl::read_excel("data/mmc2.xlsx",
+                                sheet = 2, skip = 1)
+names(human_tfs)[4] <- "is_tf"
+
+# Checking to see how many overlaps there are.
+length(which(tolower(num_peaks_df$dbp) %in% tolower(human_tfs$Name)))
+
+# TODO: Manually match names -- doublecheck
+# Subset to just the columns we need.
+human_tfs <- human_tfs[tolower(human_tfs$Name) %in% tolower(num_peaks_df$dbp), 1:4]
+names(human_tfs) <- c("ensembl_id",
+                      "dbp",
+                      "dbd",
+                      "tf")
+
+num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
+# Let's check how many NAs -- we should have some missing values.
+length(which(is.na(num_peaks_df$ensembl_id)))
+write_csv(num_peaks_df, "chipseq/results/num_peaks_df.csv")
 # A new column for the nunmber of overlaps with a mRNA
+```
+
 
 ## Let's take a look at num_peak_df
 
@@ -256,6 +288,10 @@ ggplot(num_peaks_df,
   stat_regline_equation(label.x = 35000, label.y = 18000) +
   ylim(0,60100) +
   xlim(0,60100)
+```
+
+```{r}
+
 ```
 
 ```{r Let's see the overlaps with gene bodies}

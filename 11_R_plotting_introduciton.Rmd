@@ -60,7 +60,13 @@ Layer 1 : DATA (data types matter so good to label object accrodingly)
 # before we get started let's import that data we are going to     # plot. We will use the peak occurent matrix from our previous
 # general analysis of the data previously (10_our_data_ranges).
 
-num_peaks_df <- read_csv2('chipseq/results/num_peaks_df.csv')
+num_peaks_df <- read_csv('chipseq/results/num_peaks_df.csv')
+# There are 22 DBPs in here that don't have values
+# for the tf and dbp column -- let's take those
+# out since we'll be plotting those columns frequently
+num_peaks_df <- num_peaks_df %>% filter(!is.na(tf))
+
+table(num_peaks_df$tf)
 
 # Cool, take a look and we can start plotting these columns !
 ```
@@ -71,8 +77,8 @@ num_peaks_df <- read_csv2('chipseq/results/num_peaks_df.csv')
 ```{r}
 # let's make this simple plot first
 
-ggplot(num_peaks_df, aes(x = num_peaks_df$num_peaks,
-                     y = num_peaks_df$total_peak_length)) +
+ggplot(num_peaks_df, aes(x = num_peaks,
+                         y = total_peak_length)) +
   geom_point()
 
 # here we are just looking at a x, y point plot (geom_point).
@@ -81,65 +87,52 @@ ggplot(num_peaks_df, aes(x = num_peaks_df$num_peaks,
 # seperated etc.
 # '+' adds layers together
 
-## Lets compare the above with this:
+             
+# There is lots more we could modify here but let's change the    # shape of the points to show off R plotting. We need to do this  # outside the aes() layer. The aes is just for anything for       # that depends on any column of data. 
 
 ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, 
-                 y = num_peaks_df$total_peak_length))
-             
-# Here we simply deliniated the "data" layer and then used the 
-# geom_point to set the aes values. This is just to show you can 
-# move things around as long as you are following logic.
+  geom_point(aes(x = num_peaks, 
+                 y = total_peak_length),
+             shape = 'square',
+             color = 'purple') 
 
-             
-# There is lots more we could modify here but let's change the shape of the points to show off R plotting.
-
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, 
-                 y = num_peaks_df$total_peak_length, shape = 'square' ))
+# what other shapes are there and how would you find out ??????
 
 # Now the points are plotted as squares.
   
 
-? geom_point 
+?geom_point 
 # scroll to the Aestheitcs section for all options
 # cool let's make the squares more transparent for example
 
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, 
-                 y = num_peaks_df$total_peak_length, 
-                 shape = 'square',
-                 alpha = '0.3'))
-# we shouldn't really use alpha for discrete values
-# but we will see later that this can be useful to see
-# two plots on top of each other. 
+ggplot(num_peaks_df, aes(x = num_peaks, 
+                 y = total_peak_length,
+                 color = tf)) +
+  geom_point()
+
+# Now color came in aes() because it depends on data values.
 
 # so much can be done in the Aesethics mapping layer!
 
 # We can also add some color features in the mapping layer of graphical grammar let's take a look
-
+abundant_dbds <- table(num_peaks_df$dbd) > 100
+names(which(abundant_dbds))
+# we are checking which DBDs have more than 100 enteries or
+# we have at least 100 DBPs with a given DBD.
+num_peaks_df$dbd == "C2H2 ZF"
+# here is the computation we are going to do in the aes layer
+# we are going to see above how to take a list of characters
+# and turn it into a boolean vector (T/F). Let's go over above
+# and see how we can just add to the aes below.
 ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, 
-                 y = num_peaks_df$total_peak_length, 
-                 shape = 'square',
-                 alpha = '0.3',
-                 color = num_peaks_df$num_peaks < 1e3))
-
+  geom_point(aes(x = num_peaks, 
+                 y = total_peak_length,
+                 color = dbd == "C2H2 ZF"))
+table(num_peaks_df$dbd)
 # so we did a bit extra by adding a "function of less-than 1,000 peaks". 
 # Thus R will know to add two colors to data with less than 1,000 peaks 
 # and another color for those over 1,000 peaks.
 # Finally note ggplot gives us a free title and legend!
-
-#TODO add color -- currently doesn't work!
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, 
-                 y = num_peaks_df$total_peak_length, 
-                 shape = 'square',
-                 color = 'green',
-                 alpha = '0.3')) 
-            
-# This is not MAPPING colours, it is SETTING colours
-# It's subtle but why R is so powerful to MAP data !
 
 ```
 
@@ -149,64 +142,67 @@ ggplot(num_peaks_df) +
 
 ```{r}
 
-ggplot(num_peaks_df) +
-  geom_histogram(aes(x = num_peaks_df$num_peaks))
+ggplot(num_peaks_df, aes(x = num_peaks)) +
+  geom_histogram()
 
-# Interesting it told us we should use more bins we can set this
-# in the aes layer.
+# let's add more bins
 
-#TODO add more bins -- obvious way didn't work
+ggplot(num_peaks_df, aes(x = num_peaks)) +
+  geom_histogram(bins = 30)
 
-# Pretty simple! But there could be a lot more -- so it's worth looking in manual !
-# genom_histogram and look for "Asethics" section in manual will be able to tadd more.
 # Let's chage the color of the bars in histogram by number of peaks.
 
-ggplot(num_peaks_df) +
-  geom_histogram(aes(x = num_peaks_df$num_peaks, fill =    num_peaks_df$num_peaks > 1000))
+ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
+  geom_histogram(bins = 30)
 
-# cool so we can color the two different histograms by 
-# those DBPs with more than 1,000 or less than 1,000
-# However it's too dense as is. let's change how the bars are # POSITIONED
+# this is hard to see the two distributions.
 
-# Todo dodge isn't working
-ggplot(num_peaks_df) +
-  geom_histogram(aes(x = num_peaks_df$num_peaks, fill = num_peaks_df$num_peaks > 1000, positon = "dodge" ))
-  
-  #TODO couldn't get geom vline to work :)
+ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
+   geom_histogram(bins = 30, position = "dodge")
 
-# This is just to show we can alot more features in the mapping layer to make the figures
-# more readable and clear as possible.
+# so now we can see the individual data points seperated!
 
+# let's move on to check out density 
+# DENISTY Plots are also very useful to see where the denisty of  # data arises.
 
+# let's take a look at density plots comparing those that are and 
+# are not TFs
 
+ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
+   geom_density()
 
-# Let's try one more additon where fill is based on a different value in the table!
-# Let's compare the distribution of peak numbers that are above 1MB in total coverage
-# We can index into that in the df we are plotting
+# but again its hard to see let's fix that with shading or alpha
 
-ggplot(num_peaks_df) +
-  geom_histogram(aes(x = num_peaks_df$num_peaks, fill = num_peaks_df$total_peak_length > 1e6))
-#TODO need to add dodge or non overlap
+ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
+   geom_density(alpha = 0.1)
 
-# DENISTY Plots are also very useful to see where the denisty of data arises.
+# let's change color of the line now.
 
-ggplot(num_peaks_df) +
-  geom_density(aes(x = num_peaks_df$num_peaks))
+ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
+   geom_density(alpha = 0.3)
 
-# Nice so sometimes we want a histogram and denisity plots for all values of some x
+# so now line and fill are same color -- let's see:
+
+ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
+   geom_density(alpha = 0.0)
 
 # We can even add layers of plots. For example a 2 dimensional denisty plot of our x, y point plot above.
 # Let's check it out
 
+ggplot(num_peaks_df, aes(x = num_peaks, 
+                 y = total_peak_length)) +
+  geom_point()+
+  geom_density_2d() 
 
-#TODO can't figure out why it won't pipe forwrad to geom_denisty_2d
-# should be able to just + and geom_denisty_2d() and should fill?
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, 
-                 y = num_peaks_df$total_peak_length)) +
-  geom_density_2d(aes(x = num_peaks_df$num_peaks, 
-                 y = num_peaks_df$total_peak_length)) 
-  
+# what would happen if we change the order?
+
+ggplot(num_peaks_df, aes(x = num_peaks, 
+                 y = total_peak_length)) +
+   geom_density_2d()+
+    geom_point()
+
+# it's hard to see but in this case the contour is on top
+# of points and points are below -- subtle but important to       # remember
 
 ```
 
@@ -218,29 +214,38 @@ You can do a lot in the geometry layer and add features with + and then new geom
 # Now let's see how to add other features to the plots by adding an additional geom layer as we did above
 # Lets explore 'geom_abline' geometry to add a line 
 ?geom_abline
+# we usually give slope and or intercept
 
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, 
-                 y = num_peaks_df$total_peak_length)) +
+ggplot(num_peaks_df, aes(x = num_peaks, 
+                 y = total_peak_length)) +
+  geom_point()+
   geom_abline(slope = 1000, intercept = 0)
+
+# cool this fits -- what does it mean?
+# hint average peaks size is 1kb
 
 ```
 
 Let's take a quick look at bar plots
 ```{r}
 # Here we will look at more aspects of graphical grammar with bar plots
-# TODO  see if we can select certain DBPs names(dbp = *Z)
-ggplot(num_peaks_df) +
-  geom_bar(
-    aes(
-      x = num_peaks_df$dbp,
-      y = after_stat(num_peaks_df$total_peak_length  / 1e6)
-    )
-  )
-# Notice here we called after_stat function to let R know we are manipulating the data
-# that is going to be plotted on Y-axis. The peak width is so big we want to shrink it down to # intervals of 1 million.
 
-# We also add a fill command in the mapping layer.
+ggplot(num_peaks_df, aes(x = dbd)) + 
+  geom_bar()
+
+  
+# If you want the heights of the bars to represent values in the 
+# data, use 'stat = identity' and provide that identity in the
+# y = statement in aes.
+
+# If the we want to provide the Y-axis for a specific number
+# we need to apply stat = identitiy in the geom_bar()
+
+ggplot(num_peaks_df, aes(
+      x = dbp,
+      y = num_peaks)) +
+        geom_bar(stat = "identity")
+
 ```
 
 Now we have gone through these layers:
@@ -263,53 +268,43 @@ Now we have gone through these layers:
 ```{r}
 # Let's use our num_peaks versus peak width to see this
 # Todo color by lncRNA and mRNA 
-ggplot(num_peaks_df) +
-  geom_point(
-    aes(
-      x = num_peaks_df$dbp,
-      y = num_peaks_df$total_peak_length / 1e6))
-  scale_colour_brewer(type = 'qual')
+ggplot(num_peaks_df, aes(x =dbp, y =total_peak_length, color = tf)) +
+  geom_point()+
+  scale_color_brewer(type = 'qual')
 # qual is a type scale_colour_brewer that has many color palattes
 # We can also set Pallete directly:
 
-  #TODO can't find direct color palette 
+ggplot(num_peaks_df, aes(x =dbp, y =total_peak_length, color = tf)) +
+  geom_point()+
+  scale_color_brewer(palette =  2)
 
-  ggplot(num_peaks_df) +
-  geom_point(
-    aes(
-      x = num_peaks_df$dbp,
-      y = num_peaks_df$total_peak_length / 1e6))
-  scale_colour_brewer(palette =  'set1')
+# Try a few numbers.
+
   
 
-#Let's look at sclaing the axes
+#Let's look of using the scales layer by sclaing the axes
 
-ggplot(num_peaks_df) +
-  geom_point(
-    aes(
-      x = num_peaks_df$num_peaks,
-      y = num_peaks_df$total_peak_length / 1e6)) +
+ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
+  geom_point()+
+  scale_color_brewer(palette =  2) +
   scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
   scale_y_continuous(trans = 'log10')
 
-# notice 1e6 is not plotted since there are no total peak widths 
-# that cover that much space.
+# TODO explain
 
-# here we are saying where the points on X axis we want and to "TRANSFORM" (trans)
-# the Yaxis to log10 scale. 
 
-# The most common use of scale is to set the limits of a scale
+# what if we want to set the limits of the axes?
 
-#TODO not sure why this doesn't work!
-ggplot(num_peaks_df) +
-  geom_point(
-    aes(
-      x = num_peaks_df$num_peaks,
-      y = num_peaks_df$total_peak_length / 1e6))
-  scale_x_continuous(limits = c(0, 1e4)) +
-  scale_y_continuous(limits = c(0,100))
+ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
+  geom_point()+
+  scale_color_brewer(palette =  2) +
+  xlim(250, 2e3) +
+  ylim(1e5, 1e6)
 
-# This is really helpful when you want to zoom in on certain       # aspects of the data.
+# coool so we zoomed in 
+
+
+
 ```
 
 Now let's look at 6) FACETS
@@ -319,18 +314,45 @@ One limitation is that it can only make the same plots from different data
 
 ```{r}
 #TODO Debug
+table(num_peaks_df$dbd)[order(table(num_peaks_df$dbd))]
+dbds <- c("C2H2 ZF", "Homeodomain", "bZIP")
+ggplot(num_peaks_df %>% filter(dbd %in% dbds),
+       # this is cool we can run function on df before 
+       # pushing to aes()
+       aes(x = num_peaks, y = total_peak_length )) +
+  facet_grid(dbd ~ tf) + 
+  geom_point()
+# compare facet wrap
 
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, y = num_peaks_df$total_peak_length )) +
-  facet_wrap(num_peaks_df$num_peaks ~ num_peaks_df$peaks_overlapping_lncrna_promoters)
-# facet the above to seperate  lncRNA and mRNA variable
+ggplot(num_peaks_df %>% filter(dbd %in% dbds), 
+       aes(x = num_peaks, y = total_peak_length )) +
+  facet_wrap(dbd ~ tf) + 
+  geom_point()
 
-# Nice we cna see these plotted seperately now but in the same pane.
-# TODO another facet grid exercise
-# We can also use 'facet_grid' that can pivot grids (turn x and y axis)
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks_df$num_peaks, y = num_peaks_df$total_peak_length )) +
-    facet_grid( num_peaks_df$num_peaks ~ num_peaks_df$total_peak_length)
+# difference all combos of each factor.
+
+# now let's have them scale themselves using scales = free.
+# In facet grid one axis has to be shared, but in facet wrap we 
+# can autoscale both axes. We can also tell it the number of 
+# rows or columns we want. Let's see below.
+
+# first let's just look at facet_wrap
+ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length )) +
+  facet_wrap(tf ~ .) + 
+  geom_point()
+
+# here we change the ordering of the figures
+ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length )) +
+  facet_wrap(tf ~ ., nrow = 2) + 
+  geom_point()
+
+# here we are ordering and allowing each plot 
+ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length )) +
+  facet_wrap(tf ~ ., scales = "free", ncol = 1) + 
+  geom_point()
+
+# ncol and nrow
+
 ```
 
 7) Coordinates
@@ -340,20 +362,17 @@ How to represent X and Y coordinates in different coordinate systems.
 
 # TODO better coordinates example than polar :)?
 
-ggplot(num_peaks_df) +
-  geom_bar(aes(x = num_peaks_df$num_peaks)) +
+ggplot(num_peaks_df, aes(x = dbd)) +
+  geom_bar() +
   coord_polar()
 
 # We can play around in here too to tell what is the "theta" or circular dimension
 
 ggplot(num_peaks_df) +
-  geom_bar(aes(x = num_peaks_df$num_peaks)) +
+  geom_bar(aes(x = dbd)) +
   coord_polar(theta = 'y')
 
-ggplot(peaks) +
-  geome_bar(aes(x = numpeaks)) +
-  coord_polar(theta = 'y') +
-  expand_limits (y = 1)
+
 
 ```
 
@@ -367,80 +386,27 @@ document call _setup.R. Once loaded a "paper white" theme will be available.
 Let's look at example from 10_our_data_ranges
 
 ```{r}
-g <- ggplot(num_peaks_df, aes(x = num_peaks_df$num_peaks))
-
-
-g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
+ggplot(num_peaks_df, aes(x = num_peaks)) + 
+  geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
   theme_paperwhite() +
   xlab(expression("Number of peaks")) +
   ylab(expression("Density")) +
   ggtitle("Promoter binding events",
           subtitle = "mRNA and lncRNA genes") 
+
 # we can see here how titles can easily be made with ggtile which
 # is in the "theme" layer of things.
 
+# There are a number of built-in themes in addition to 
+# the one we've provided. You can see them by typing theme_ 
+# then autocomplete and check a few out! Here is cleavland :
+
+ggplot(num_peaks_df, aes(x = num_peaks)) +
+  geom_density() +
+  theme_cleveland()
+
+
 # Go take a look at _setup.R and see the features of paper white!
-```
-
-
-Now let's go back to the last figure exercise in 10_our_data_ranges. The big difference we are going
-to see is a lot of code and functions run in the figure making. At first you can do all of these functions independently and create an object to plot later. Or sometimes you just want to get to something while plotting the figures :)
-
-```{r}
-num_peaks_dfl <- num_peaks_df %>%
-  dplyr::select(-peaks_overlapping_promoters) %>%
-  
-  # the - sign here is saying take everything but the "peaks_overlapping_promoters"
-  # below we are going to use a couple function 'select' and pivot longer. 
-  # pivot longer can be a bit confusing but basically taking data with lots of 
-  # rows and few columns and changing the rownames to colnames.
-? pivot_longer
-
-# We see we need two parameters: 
-# names_to
-# valuest_to
-# we start with a third parameter cols from tidyverse to indicate the columns
-# we want to keep. basically we are only keeping the lncRNA and mRNA promoter columns
-
-
-#TODO why pivot longer instead of just plotting columns -- faster I am guessing?
-  pivot_longer(cols = peaks_overlapping_lncrna_promoters:peaks_overlapping_mrna_promoters,
-               names_to = "gene_type",
-  # we are naming the new names for colnames to "gene_type" that is lncRNA or mRNA
-               values_to = "peaks_overlapping_promoters") %>%
-  # each row  (1 promoter) is going to become a column that we need to grab values for
-  # here we are saying make the values name be 
-  mutate(gene_type = gsub("peaks_overlapping_", "", gene_type))
-ggplot(num_peaks_dfl, aes(x = num_peaks, y = peaks_overlapping_promoters, 
-                         col = gene_type)) +
-         geom_point() +
-# ok this should look familiar now we are going to make a point plot  
-
-         geom_abline(slope = 1, linetype="dashed") +
-# here we are adding a abline geometry (needs slope) with handy linetype for stylizing.
-  # previously we set intercept but that isn't required.
-  
-  geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
-# ?geom_smooth
-# Cool we are smoothing out the data. parameters are 'method' , 'se', 'formula'
-# method: we used lm for linear model (could be Loess or other models too)
-# se: this is giving the "standard error" around the smoothed line(you never want average with our sd/se)
-# formula: since we have an x, y value for every entry we can pass y ~ x. Always starts with 'y ~' but you # may need to evaluate x (but unlikely for our or your future purposes)
-  
-  stat_regline_equation() +
-# this little function is R plotting is great. Just adding that line will give us R^2 and slope etc.
-# We don't have to calculate these and then plot them -- R will just do it for us!
-  
-  scale_color_manual(values = c("#a8404c", "#424242"))+
-# We are manually setting the colors of "mRNA" and for "lncRNA", R will defualt to others.
-# Every color is associated with a number and you can google color numbers and find ones you like.
-  
-  xlab("Peaks per DBP") +
-# Now we are labeling the axes. x= Peaks per DBP and Y below
-  ylab("Peaks Overlapping Promoters") +
-  ggtitle("Number of DBP Peaks and Promoter Overlaps")
-
-# ggtitle will make the main title but there are other options in the manual. 
 ```
 
 Class exercise, go back to one of the other figures from 10_our_data_ranges. Try and change some feature or add a regression line etc. Slack us what you get :)
