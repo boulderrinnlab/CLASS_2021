@@ -15,7 +15,6 @@ library(tidyverse)
 source("util/plotting_functions.R")
 source("util/_setup.R")
 
-
 ```
 
 One of the best parts of R is the plotting abilities. You are, by analogy designing your own figures with code. You can run many stastical analyses and plot the outputs in the code to make a figure.
@@ -50,6 +49,8 @@ Plotting layers of R:
 7) Coordinates -- specifing placement of image aspects
 
 8) THEME -- a set version of colors, background. Mostly so you don't have to add many of the layers above everytime!
+
+The nice thing, to me, is that these layers don't have to come in order. But many of the later layers require data already to be mapped in aes().
 
 Ok let's walk through some simple examples to more difficult figures using these layers!
 
@@ -382,4 +383,65 @@ g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
 ```
 
 
+Now let's go back to the last figure exercise in 10_our_data_ranges. The big difference we are going
+to see is a lot of code and functions run in the figure making. At first you can do all of these functions independently and create an object to plot later. Or sometimes you just want to get to something while plotting the figures :)
+
+```{r}
+num_peaks_dfl <- num_peaks_df %>%
+  dplyr::select(-peaks_overlapping_promoters) %>%
+  
+  # the - sign here is saying take everything but the "peaks_overlapping_promoters"
+  # below we are going to use a couple function 'select' and pivot longer. 
+  # pivot longer can be a bit confusing but basically taking data with lots of 
+  # rows and few columns and changing the rownames to colnames.
+? pivot_longer
+
+# We see we need two parameters: 
+# names_to
+# valuest_to
+# we start with a third parameter cols from tidyverse to indicate the columns
+# we want to keep. basically we are only keeping the lncRNA and mRNA promoter columns
+
+
+#TODO why pivot longer instead of just plotting columns -- faster I am guessing?
+  pivot_longer(cols = peaks_overlapping_lncrna_promoters:peaks_overlapping_mrna_promoters,
+               names_to = "gene_type",
+  # we are naming the new names for colnames to "gene_type" that is lncRNA or mRNA
+               values_to = "peaks_overlapping_promoters") %>%
+  # each row  (1 promoter) is going to become a column that we need to grab values for
+  # here we are saying make the values name be 
+  mutate(gene_type = gsub("peaks_overlapping_", "", gene_type))
+ggplot(num_peaks_dfl, aes(x = num_peaks, y = peaks_overlapping_promoters, 
+                         col = gene_type)) +
+         geom_point() +
+# ok this should look familiar now we are going to make a point plot  
+
+         geom_abline(slope = 1, linetype="dashed") +
+# here we are adding a abline geometry (needs slope) with handy linetype for stylizing.
+  # previously we set intercept but that isn't required.
+  
+  geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+# ?geom_smooth
+# Cool we are smoothing out the data. parameters are 'method' , 'se', 'formula'
+# method: we used lm for linear model (could be Loess or other models too)
+# se: this is giving the "standard error" around the smoothed line(you never want average with our sd/se)
+# formula: since we have an x, y value for every entry we can pass y ~ x. Always starts with 'y ~' but you # may need to evaluate x (but unlikely for our or your future purposes)
+  
+  stat_regline_equation() +
+# this little function is R plotting is great. Just adding that line will give us R^2 and slope etc.
+# We don't have to calculate these and then plot them -- R will just do it for us!
+  
+  scale_color_manual(values = c("#a8404c", "#424242"))+
+# We are manually setting the colors of "mRNA" and for "lncRNA", R will defualt to others.
+# Every color is associated with a number and you can google color numbers and find ones you like.
+  
+  xlab("Peaks per DBP") +
+# Now we are labeling the axes. x= Peaks per DBP and Y below
+  ylab("Peaks Overlapping Promoters") +
+  ggtitle("Number of DBP Peaks and Promoter Overlaps")
+
+# ggtitle will make the main title but there are other options in the manual. 
+```
+
+Class exercise, go back to one of the other figures from 10_our_data_ranges. Try and change some feature or add a regression line etc. Slack us what you get :)
 
