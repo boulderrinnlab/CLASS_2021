@@ -57,22 +57,27 @@ Ok let's walk through some simple examples to more difficult figures using these
 Layer 1 : DATA (data types matter so good to label object accrodingly)
 
 ```{r}
-# before we get started let's import that data we are going to     # plot. We will use the peak occurent matrix from our previous
+# before we get started let's import that data we are going to     
+# plot. We will use the peak occurent data frame from our previous
 # general analysis of the data previously (10_our_data_ranges).
 
+
+# Here we want a "categorical variable" for plotting colors etc. So we 
+# are first going to filter all DBPs that are not marked as DNA binding
+# proteins or the 'tf' column is yes.
+
 num_peaks_df <- read_csv('chipseq/results/num_peaks_df.csv')
-# There are 22 DBPs in here that don't have values
-# for the tf and dbp column -- let's take those
-# out since we'll be plotting those columns frequently
 num_peaks_df <- num_peaks_df %>% filter(!is.na(tf))
 
 table(num_peaks_df$tf)
+# There are 22 of our DBPs in here that don't have values
+# for the tf and dbp column -- let's take those
+# out since we'll be plotting those columns frequently
 
-# Cool, take a look and we can start plotting these columns !
 ```
 
 
-
+# Cool, take a look and we can start plotting these columns !
 
 ```{r}
 # let's make this simple plot first
@@ -99,11 +104,10 @@ ggplot(num_peaks_df) +
 # what other shapes are there and how would you find out ??????
 
 # Now the points are plotted as squares.
-  
 
-?geom_point 
-# scroll to the Aestheitcs section for all options
-# cool let's make the squares more transparent for example
+# What if we wanted to color by TF or not TF column? Above, we "set" the 
+# color and shape AFTER the aes(). To color by data that needs to be 
+# evaluated we need to have that color INSIDE aes()
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length,
@@ -119,6 +123,8 @@ abundant_dbds <- table(num_peaks_df$dbd) > 100
 names(which(abundant_dbds))
 # we are checking which DBDs have more than 100 enteries or
 # we have at least 100 DBPs with a given DBD.
+# Ok we can see only the C2H2 Zinc Finger domain has more than 100 enteries.
+
 num_peaks_df$dbd == "C2H2 ZF"
 # here is the computation we are going to do in the aes layer
 # we are going to see above how to take a list of characters
@@ -128,10 +134,13 @@ ggplot(num_peaks_df) +
   geom_point(aes(x = num_peaks, 
                  y = total_peak_length,
                  color = dbd == "C2H2 ZF"))
+
+
+# We can see color outside aes() and we also see a function running!
+# It's subtle but the == means that dbd will turn from a list of 
+# characters to a vector boolean values (true or false). Let's look
 table(num_peaks_df$dbd)
-# so we did a bit extra by adding a "function of less-than 1,000 peaks". 
-# Thus R will know to add two colors to data with less than 1,000 peaks 
-# and another color for those over 1,000 peaks.
+
 # Finally note ggplot gives us a free title and legend!
 
 ```
@@ -151,18 +160,20 @@ ggplot(num_peaks_df, aes(x = num_peaks)) +
   geom_histogram(bins = 30)
 
 # Let's chage the color of the bars in histogram by number of peaks.
+# again we need to do this inside aes() since the data needs to read.
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
   geom_histogram(bins = 30)
 
 # this is hard to see the two distributions.
+# let's fix this by adding a 'position' parameter in the geom layer.
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
    geom_histogram(bins = 30, position = "dodge")
 
 # so now we can see the individual data points seperated!
 
-# let's move on to check out density 
+# DENSITY PLOTS # 
 # DENISTY Plots are also very useful to see where the denisty of  # data arises.
 
 # let's take a look at density plots comparing those that are and 
@@ -171,12 +182,13 @@ ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
    geom_density()
 
-# but again its hard to see let's fix that with shading or alpha
+# but again its hard to see let's fix that with shading or alpha in
+# geom layer
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
    geom_density(alpha = 0.1)
 
-# let's change color of the line now.
+# let's change color of the line now (inside aes())
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
    geom_density(alpha = 0.3)
@@ -186,7 +198,7 @@ ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
    geom_density(alpha = 0.0)
 
-# We can even add layers of plots. For example a 2 dimensional denisty plot of our x, y point plot above.
+# We can even add multiple geom layers. For example a 2 dimensional denisty plot of our x, y point plot above.
 # Let's check it out
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
@@ -228,7 +240,9 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 
 Let's take a quick look at bar plots
 ```{r}
-# Here we will look at more aspects of graphical grammar with bar plots
+# Here we will look at more aspects of graphical grammar with bar plots.
+# Will plot all the types of DBD's so it's not overwhelming with 30,000+
+# promoters etc.
 
 ggplot(num_peaks_df, aes(x = dbd)) + 
   geom_bar()
@@ -266,8 +280,8 @@ Now we have gone through these layers:
 ?scale
 
 ```{r}
-# Let's use our num_peaks versus peak width to see this
-# Todo color by lncRNA and mRNA 
+# Let's use our num_peaks versus peak width to explore the "scale" layer.
+
 ggplot(num_peaks_df, aes(x =dbp, y =total_peak_length, color = tf)) +
   geom_point()+
   scale_color_brewer(type = 'qual')
@@ -281,7 +295,7 @@ ggplot(num_peaks_df, aes(x =dbp, y =total_peak_length, color = tf)) +
 # Try a few numbers.
 
   
-
+# Ok now let's see how we can use the scales layer to change axes.
 #Let's look of using the scales layer by sclaing the axes
 
 ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
@@ -290,10 +304,13 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
   scale_y_continuous(trans = 'log10')
 
-# TODO explain
+#? scale_x_continious (same for y) is calling the scale layer specifically
+# for the axes in ggplot. We are giving it where to put values on X-axis     # (note if a value is not met in largest break that break isn't printed)
+# For the y-axis we are using transform (trans) to make it log 10 scaled
 
 
-# what if we want to set the limits of the axes?
+# what if we want to set the limits of the axes? The scales layer is
+# just the place.
 
 ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   geom_point()+
@@ -301,9 +318,9 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   xlim(250, 2e3) +
   ylim(1e5, 1e6)
 
-# coool so we zoomed in 
+# so we add to scale functions with xlim and ylim (?xlim, ?ylim)
 
-
+# coool so we zoomed in!
 
 ```
 
@@ -313,14 +330,27 @@ One limitation is that it can only make the same plots from different data
 
 
 ```{r}
-#TODO Debug
+# You have to be careful in the facet layer that you don't make too many
+# plots. Essential we make as many figures as there are enteries.
+# We will setd dbds to be the three categories of DBDs we want to facet.
+
+# ?facet_grid
+
 table(num_peaks_df$dbd)[order(table(num_peaks_df$dbd))]
+# First let's take a look at the top three represented DBDs?
+# Ok so now we will set dbds to these three DBDs.
 dbds <- c("C2H2 ZF", "Homeodomain", "bZIP")
+
+# Now the plotting begings and good example of running functions in aes()
 ggplot(num_peaks_df %>% filter(dbd %in% dbds),
        # this is cool we can run function on df before 
        # pushing to aes()
        aes(x = num_peaks, y = total_peak_length )) +
   facet_grid(dbd ~ tf) + 
+# here we call facet grid. The parameters are rows and columns seperated
+# by ~. So we said take the the DBD and facet to see if it is a tf too.
+# this will keep the x-axis the same and plot each DBD as yes or no if it
+# is a tf as well. Almost all these domains are TFs so sparse no plots.
   geom_point()
 # compare facet wrap
 
@@ -329,29 +359,44 @@ ggplot(num_peaks_df %>% filter(dbd %in% dbds),
   facet_wrap(dbd ~ tf) + 
   geom_point()
 
-# difference all combos of each factor.
+# difference all combos of each factor. Same as before but facet wrap
+# doesn't mind if all the values are in one category. So we see 
+# " bZIP Yes", but not an equivelant NO factor since all bZIP doamins
+# are TFs. Interestingly, one homeodomain has very few peaks and is not
+# a TF.
+
+
+# DEEPER INTO FACET #
+
+# first let's just look at facet_wrap
+ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length )) +
+  facet_wrap(tf ~ .) + 
+# this notation . means facet_wrap the rows of tf but not 
+# against another column as we did above. Just asking if a TF
+# then it facets to the values that can be tabulated for TF
+# which is just yes or no -- so we will get two plots. 
+  
+  geom_point()
+
+# here we change the ordering of the figures. We currently have 1 
+# row and two figures but we could easily make that two columns
+# so the figures are stacked on top of each other. This is done
+# in the facet layer inside facet_wrap as 'nrow' parameter. It
+# defaults to one row until space is filled, then makes a new row.
+ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length )) +
+  facet_wrap(tf ~ ., nrow = 2) + 
+  geom_point()
 
 # now let's have them scale themselves using scales = free.
 # In facet grid one axis has to be shared, but in facet wrap we 
 # can autoscale both axes. We can also tell it the number of 
 # rows or columns we want. Let's see below.
 
-# first let's just look at facet_wrap
-ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length )) +
-  facet_wrap(tf ~ .) + 
-  geom_point()
-
-# here we change the ordering of the figures
-ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length )) +
-  facet_wrap(tf ~ ., nrow = 2) + 
-  geom_point()
-
-# here we are ordering and allowing each plot 
 ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length )) +
   facet_wrap(tf ~ ., scales = "free", ncol = 1) + 
   geom_point()
-
-# ncol and nrow
+# note we are using ncol here istead of nrow you can use either one
+# this would be nrow = 2 just to show ncol parameter.
 
 ```
 
@@ -360,13 +405,19 @@ How to represent X and Y coordinates in different coordinate systems.
 
 ```{r}
 
-# TODO better coordinates example than polar :)?
+# R has a bunch of built in "cordinate" systems. Cartesian is the most common
+# and what we have been using. But you can also plot data in "polar" 
+# or other coordinate systems. We can just add it in the "Coordinates layer"
 
 ggplot(num_peaks_df, aes(x = dbd)) +
   geom_bar() +
   coord_polar()
 
-# We can play around in here too to tell what is the "theta" or circular dimension
+# the values eminate from the center and are a "bar_plot" from the center.
+# we can easily see as we did above C2H2 ZF most represented in our data.
+
+# We can play around in the coordinate space too. For example to tell what is # the "theta" or circular dimension. Essentially the bars will make arcs
+# from the center acroding to their theta value (doesn't really matter).
 
 ggplot(num_peaks_df) +
   geom_bar(aes(x = dbd)) +
@@ -383,7 +434,8 @@ backgrounds, grid lines etc. We tend to use paper white as a defualt theme.
 We made a defualt theme that we can source at the begining of the
 document call _setup.R. Once loaded a "paper white" theme will be available.
 
-Let's look at example from 10_our_data_ranges
+Let's look at example from 10_our_data_ranges where we called the theme.
+Note they don't have to be in the order we are learning them in :)
 
 ```{r}
 ggplot(num_peaks_df, aes(x = num_peaks)) + 
