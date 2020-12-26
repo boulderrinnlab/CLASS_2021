@@ -446,7 +446,9 @@ ggplot(num_peaks_df, aes(x = num_peaks)) +
   xlab(expression("Number of peaks")) +
   ylab(expression("Density")) +
   ggtitle("Promoter binding events",
-          subtitle = "mRNA and lncRNA genes") 
+          subtitle = "mRNA and lncRNA genes")
+
+
 
 # we can see here how titles can easily be made with ggtile which
 # is in the "theme" layer of things.
