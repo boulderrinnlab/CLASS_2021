@@ -69,6 +69,9 @@ Layer 1 : DATA (data types matter so good to label object accrodingly)
 num_peaks_df <- read_csv('chipseq/results/num_peaks_df.csv')
 num_peaks_df <- num_peaks_df %>% filter(!is.na(tf))
 
+# ?is.na
+# Note the ! almost always will mean NOT
+
 table(num_peaks_df$tf)
 # There are 22 of our DBPs in here that don't have values
 # for the tf and dbp column -- let's take those
@@ -95,11 +98,12 @@ ggplot(num_peaks_df, aes(x = num_peaks,
              
 # There is lots more we could modify here but let's change the    # shape of the points to show off R plotting. We need to do this  # outside the aes() layer. The aes is just for anything for       # that depends on any column of data. 
 
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks, 
-                 y = total_peak_length),
-             shape = 'square',
-             color = 'purple') 
+ggplot(num_peaks_df, aes(x = num_peaks, 
+                 y = total_peak_length)) +
+         
+           geom_point(shape = 'square',
+             color = 'purple')
+
 
 # what other shapes are there and how would you find out ??????
 
@@ -108,6 +112,8 @@ ggplot(num_peaks_df) +
 # What if we wanted to color by TF or not TF column? Above, we "set" the 
 # color and shape AFTER the aes(). To color by data that needs to be 
 # evaluated we need to have that color INSIDE aes()
+
+# DATA DEPENDENCE COLOR
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length,
@@ -119,27 +125,36 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 # so much can be done in the Aesethics mapping layer!
 
 # We can also add some color features in the mapping layer of graphical grammar let's take a look
+# First let's see all the enteries
+table(num_peaks_df$dbd)
+# Ok there are several but most have very few enteries. Let's find those with at least
+# 100 DBPs with a given DBD.
+
 abundant_dbds <- table(num_peaks_df$dbd) > 100
 names(which(abundant_dbds))
 # we are checking which DBDs have more than 100 enteries or
 # we have at least 100 DBPs with a given DBD.
 # Ok we can see only the C2H2 Zinc Finger domain has more than 100 enteries.
 
-num_peaks_df$dbd == "C2H2 ZF"
+
+# FUNCTION RUN in AES
+      # num_peaks_df$dbd == "C2H2 ZF"
 # here is the computation we are going to do in the aes layer
 # we are going to see above how to take a list of characters
 # and turn it into a boolean vector (T/F). Let's go over above
 # and see how we can just add to the aes below.
-ggplot(num_peaks_df) +
-  geom_point(aes(x = num_peaks, 
+
+
+ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length,
-                 color = dbd == "C2H2 ZF"))
+                 color = dbd == "C2H2 ZF")) +
+  geom_point()
 
 
 # We can see color outside aes() and we also see a function running!
 # It's subtle but the == means that dbd will turn from a list of 
 # characters to a vector boolean values (true or false). Let's look
-table(num_peaks_df$dbd)
+
 
 # Finally note ggplot gives us a free title and legend!
 
@@ -280,19 +295,6 @@ Now we have gone through these layers:
 ?scale
 
 ```{r}
-# Let's use our num_peaks versus peak width to explore the "scale" layer.
-
-ggplot(num_peaks_df, aes(x =dbp, y =total_peak_length, color = tf)) +
-  geom_point()+
-  scale_color_brewer(type = 'qual')
-# qual is a type scale_colour_brewer that has many color palattes
-# We can also set Pallete directly:
-
-ggplot(num_peaks_df, aes(x =dbp, y =total_peak_length, color = tf)) +
-  geom_point()+
-  scale_color_brewer(palette =  2)
-
-# Try a few numbers.
 
   
 # Ok now let's see how we can use the scales layer to change axes.
@@ -300,9 +302,9 @@ ggplot(num_peaks_df, aes(x =dbp, y =total_peak_length, color = tf)) +
 
 ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   geom_point()+
-  scale_color_brewer(palette =  2) +
   scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
-  scale_y_continuous(trans = 'log10')
+  scale_y_continuous(trans = 'log10') +
+  scale_color_brewer(palette =  6) 
 
 #? scale_x_continious (same for y) is calling the scale layer specifically
 # for the axes in ggplot. We are giving it where to put values on X-axis     # (note if a value is not met in largest break that break isn't printed)
@@ -314,9 +316,9 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
 
 ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   geom_point()+
-  scale_color_brewer(palette =  2) +
   xlim(250, 2e3) +
-  ylim(1e5, 1e6)
+  ylim(1e5, 1e6) +
+  scale_color_brewer(palette =  2) 
 
 # so we add to scale functions with xlim and ylim (?xlim, ?ylim)
 
@@ -328,7 +330,7 @@ Now let's look at 6) FACETS
 This will allow us to make multiple plots in the same plot frame or facet
 One limitation is that it can only make the same plots from different data
 
-
+FACET_GRID & FACET_WRAP
 ```{r}
 # You have to be careful in the facet layer that you don't make too many
 # plots. Essential we make as many figures as there are enteries.
