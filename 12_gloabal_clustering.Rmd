@@ -214,7 +214,7 @@ ggdendro::ggdendrogram(bin_hier, rotate = FALSE,  size = 3,
 # Let's save this as a figure -- we want to keep organized so we made a ChIPseq
 # folder and figures inside that folder. Let's put the figure there:
 
-ggsave("chipseq/figures/all_hclust_binary_dist.pdf", height = 60, width = 5.0)
+ggsave("chipseq/figures/all_hclust_binary_dist.pdf", height = 44, width = 5.0)
 
 # Nice, this will make it much easier to read :)
 # use file transfer to bring to desktop and take a look!
@@ -246,25 +246,30 @@ bin_hier_lncrna <- hclust(dist(lncrna_peak_occurence, method = "binary"))
 
 ggdendro::ggdendrogram(bin_hier_lncrna, rotate = TRUE,  size = 3)
 
-ggsave("chipseq/figures/lncrna_hclust_binary_dist.pdf", height = 60, width = 6)
+ggsave("chipseq/figures/lncrna_hclust_binary_dist.pdf", height = 44, width = 6)
+
+# Cool we can see the Pol II S2 and S5 diff right away again!
 
 
 # Now for mRNA
 
-mrna_peak_occurence <- promoter_peak_occurence[,mrna_promoters$gene_id]
+mrna_peak_occurence <- peak_occurence_matrix[,mrna_promoters$gene_id]
 
-bin_hier <- hclust(dist(lncrna_peak_occurence, method = "binary"))
+bin_hier_mrna <- hclust(dist(lncrna_peak_occurence, method = "binary"))
 
 ggdendro::ggdendrogram(bin_hier, rotate = TRUE,  size = 3)
 
-ggsave("figures/mrna_hclust_binary_dist.pdf", height = 26, width = 6)
+ggsave("chipseq/figures/mrna_hclust_binary_dist.pdf", height = 44, width = 6)
 
 
+# Do a file transfer and open up lncRNA and mRNA clusters side by side:
+# They are almost identical !! That is another good sign.
 
-
-
+# Nice I think we have a solid data set here ! Let's explore more in the next class.
 
 ```
 
+Class excercise: find regions of the clusters that make sense. For example my favorite is that SETDB1 is the methyltransferase that modifies histones to have H3K9me3. Note the two cluster next to each other -- another good sign.
 
+Find some more examples to present.
 
