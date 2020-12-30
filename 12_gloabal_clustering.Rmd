@@ -158,12 +158,15 @@ promoters <- rtracklayer::import("results/lncrna_mrna_promoters.gtf")
 
 peak_occurence_matrix <- read.table("results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
 
-#PROB SHOULD FILTER > 250 peaks?
+# Let's filter again to make sure we have at least 250 peaks:
+
+peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) >250, ]
 
 # ok now we have all the things we need to start clustering !
 # First we will use hclust
 
 # ?hclust
+# bin_hier
 # R is so savy with statistics that this is actually a base R function!
 # There are lots of methods to cluster by let's start with binary.
 
