@@ -158,6 +158,8 @@ promoters <- rtracklayer::import("results/lncrna_mrna_promoters.gtf")
 
 peak_occurence_matrix <- read.table("results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
 
+#PROB SHOULD FILTER > 250 peaks?
+
 # ok now we have all the things we need to start clustering !
 # First we will use hclust
 
