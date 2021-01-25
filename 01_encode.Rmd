@@ -228,8 +228,8 @@ power savings to never turn off?
 man screen
 ```
 control A is for attach
-control D is for detach
-contro R is to reattach (to session number below)
+D is for detach
+screen -r #session# is to reattach (to session number below)
 screen -list (tells you all the screen session you have runnign)
 
 Ok, we now know how to access the WWW and download anything that is available!
