@@ -328,7 +328,7 @@ many lines of matched md5sums were found -- check the number is not less than
 files downloaded.
 
 ```
-md5sum -c *.gz md5sums.txt | wc -l
+md5sum -c md5sums.txt | wc -l
 ```
 
 We will go over the pipe and lots of other basic bash commands in the next lecutre.
