@@ -30,7 +30,7 @@ then use that for batch download from ENCODE.
 First navigate to a directory in your computer of your choosing -- for example:
 
 ```
-cd /scratch/Users/<identikey>
+cd /scratch/rinnclass
 ```
 
 This will take you to your home directory
