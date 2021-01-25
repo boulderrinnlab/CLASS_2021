@@ -314,7 +314,7 @@ and pasting :) We are simply exploring the importance of these basic principles
 of data science. 
 
 ```
-md5sum -c *.gz md5sums.txt > md5sums_status.txt
+md5sum -c md5sums.txt > md5sums_status.txt
 # we will talk more about the > and printing files in next lecture
 cat md5sums_status.txt
 ```
