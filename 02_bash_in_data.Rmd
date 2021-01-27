@@ -26,7 +26,7 @@ cd - to change directories
 ls - list the files
 pwd - tells you the pathway you are currently at (very useful actually!)
 ```
-cd ~/
+cd /scratch/Shares/rinnclass/<identikey>
 ls
 pwd
 ```
@@ -66,12 +66,7 @@ Now let's take a look at the file with cat
 ```
 cat test.txt
 ```
-Cat will print all items in a file and sometimes they are very long. So there are other unix commands to get the head and tail of a file while specificying how many lines you want:
 
-```
-head -10 test.txt
-tail -10 test.txt
-```
 
 Let's make another file and combine two files to highlight other functinality of the cat command
 First let's remove (using rm command) the test.txt file and make a new one.
@@ -142,7 +137,7 @@ Let's make a sym-link to the class folder in your home directory
 
 ```
 cd ~/
-ln -s /Shares/rinn_class/data/CLASS_2021 CLASS
+ln -s /scratch/Shares/rinnclass CLASS 
 ls
 ```
 
@@ -182,22 +177,6 @@ Here the list output becomes the standard input to the word count owing to the p
 Or the pipe passed along the standard output of ls to standard input of wc. The 
 -l flag is for the line count. 
 
-# Excercise what is the difference in outcome of these pipe choices?
-
-```
-ls -lah | wc -l > file.txt | cat file.txt
-
-#versus#
-
-ls -lah > file.txt | wc -l | cat file.txt
-```
-
-
-Same three commands but in different order -- this is just a simple example of 
-how to think along with the standard input and output -- becomes much more relevant
-if used in more complex bash scripts. 
-
-
 
 #Let's move on the find and replace or the GREP command
 
@@ -213,10 +192,17 @@ the search key in a file. If there is a match then you can return just about any
 in the file. If you have ever done Vlookup in Xcel it maybe familiar in that sense. 
 But the reality it is so simple, elegnat and powerful we will use GREP a lot in class.
 
-Let's play with the encode .TSV file we downloaded.
+Let's download and play with the encode .TSV file.
 
 ```
-head data/encode_awk_lessons.tsv
+cat data/encode_awk_lessons.tsv
+```
+
+Cat will print all items in a file and sometimes they are very long. So there are other unix commands to get the head and tail of a file while specificying how many lines you want:
+
+```
+head -10 test.txt
+tail -10 test.txt
 ```
 
 Yikes ok, so you see all the "/" that means it is tab deliminated. We would see
@@ -228,7 +214,7 @@ many ways to spell but we can search for anything that starts with POL.
 
 
 ```
-grep -ia 'pol' data/encode_awk_lessons.tsv | wc -l
+grep -ia 'pol' encode_awk_lessons.tsv | wc -l
 ```
 I guess we see that there are 11 enteries for anything matching the text of pol.
 We used the 
@@ -236,8 +222,6 @@ We used the
 #-i flag which is very useful to match any type of the same letters.
 People spell gene names all kinds of different ways (with and with out capitals etc).
 So the -i will match Pol POl and POL as well as poL. Try running with out the -i (no matches!).
-
-#-a is simply saying we are looking for a text match.
 
 Note that we piped to wc -l, if you take that out what happens?
 
@@ -250,7 +234,7 @@ So let's print the grep standard output to a file using ' > '
 Let's take a look at these 11 matches.
 
 ```
-grep -ia 'pol' data/encode_awk_lessons.tsv > grep_out.txt
+grep -i 'pol' data/encode_awk_lessons.tsv > grep_out.txt
 ls
 cat grep_out.txt
 ```
@@ -265,10 +249,10 @@ grep.
 
 
 ```
-grep -aw 'POLR2A' data/encode_awk_lessons.tsv > grep_out.txt
+grep -w 'POLR2A' encode_awk_lessons.tsv > grep_out.txt
 cat grep_out.txt
 ```
-Here the -w requires an exact match and -x means the entire line has to match.
+Here the -w requires an exact match of the whole word.
 Now we see a file with just the POLR2A experiments -- as we wanted.
 
 Let's say we wanted to know how many unique DBPs we are about to study. We can
@@ -284,7 +268,7 @@ So we can use AWK in a similar way to grep to get started:
 
 ```
 man awk
-awk -F $'\t' '{if ($6 == "POLR2A") print $0;}' data/encode_awk_lessons.tsv | wc -l 
+awk -F $'\t' '{if ($6 == "POLR2A") print $0;}' encode_awk_lessons.tsv | wc -l 
 ```
 
 The syntax for awk is:
@@ -304,7 +288,7 @@ First let's make a file with just the names of DBPs.
 
 
 ```
-awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv
+awk 'BEGIN {FS="\t"}; {print $6}' encode_awk_lessons.tsv
 ```
 Here we see one of many ways to wrtie the same thing in AWK. The awk arguements
 are encapsulated in the ' ' statement(s) inside { }. It is good practice to tell
@@ -329,7 +313,7 @@ man sort
 Let's put it together:
 
 ```
-awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv | sort -u | wc -l
+awk 'BEGIN {FS="\t"}; {print $6}' encode_awk_lessons.tsv | sort -u | wc -l
 ```
 We piped out the awk arguments from standard in put to standard output of sort.
 We used the -u flag to sort and then collapse the sort to unique string names.
@@ -347,7 +331,7 @@ Let's use awk, grep and pipes to make a new file from the .tsv. Very similar to
 above, but now showing the power of awk in doing many things for you at once!
 
 ```
-awk 'BEGIN {FS="\t"}; {print $1,$2,$3}' data/encode_awk_lessons.tsv > test.txt
+awk 'BEGIN {FS="\t"}; {print $1,$2,$3}' encode_awk_lessons.tsv > test.txt
 ```
 What happened here? How could you test if it was the right file output?
 
@@ -367,7 +351,8 @@ The syntax in bash is:
 
 For X in $Y do 
 
-#For / in / do / done will always be used in a for loop
+#For (in) ; do ; done
+will always be used in a for loop
 
 
 Let's start with a really simple example that helps us understand how the computer
@@ -375,10 +360,14 @@ thinks about this:
 
 
 ```
-For x in 1 1 1 1
+for x in 1 1 1 1
 do 
 echo BCHM5631
 done
+
+or this can be combined with semicolan 
+
+for x in 1 1 1 1; do echo BCHM5631; done
 ```
 
 
