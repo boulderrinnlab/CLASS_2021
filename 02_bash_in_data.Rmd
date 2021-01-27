@@ -40,12 +40,12 @@ that are often very important. the -lah is called a flag that gives us more info
 
 ```
 man ls
-#q to escape
+# Press q to escape
 ```
 -l for long
 -a for all
 -h human readable
-basically I typically always use these flags
+Basically I typically always use these flags
 
 Now let's make a new file using touch
 
@@ -58,7 +58,7 @@ woah a new file shows up! What is in it? lets use Nano
 ```
 nano test.txt
 # type whatever
-# ctrl x, Y for yes -- then enter -- to exit nano
+# ctrl + x, Y for yes -- then enter -- to exit nano
 ```
 
 Now let's take a look at the file with cat
@@ -68,7 +68,7 @@ cat test.txt
 ```
 
 
-Let's make another file and combine two files to highlight other functinality of the cat command
+Let's make another file and combine two files to highlight other functionality of the cat command
 First let's remove (using rm command) the test.txt file and make a new one.
 
 ```
@@ -141,7 +141,7 @@ ln -s /scratch/Shares/rinnclass CLASS
 ls
 ```
 
-Now you see a sim-link called CLASS. You just cd CLASS and voila you are in class :)
+Now you see a simlink called CLASS. You just cd CLASS and voila you are in class :)
 
 Another handy short cut is to see how big a folder is. Often you are downloading to
 or working on a folder and need to see if it became bigger or smaller. This is best
@@ -180,6 +180,8 @@ Or the pipe passed along the standard output of ls to standard input of wc. The
 
 #Let's move on the find and replace or the GREP command
 
+## Let's download the ENCODE experiments .tsv and upload it using FileZilla
+
 ||||||||||||||||||||||||||||||||||||||||||||||||
 General Regularized Expression Print (GREP)
 ||||||||||||||||||||||||||||||||||||||||||||||||
@@ -201,8 +203,8 @@ cat data/encode_awk_lessons.tsv
 Cat will print all items in a file and sometimes they are very long. So there are other unix commands to get the head and tail of a file while specificying how many lines you want:
 
 ```
-head -10 test.txt
-tail -10 test.txt
+head -1 test.txt
+tail -1 test.txt
 ```
 
 Yikes ok, so you see all the "/" that means it is tab deliminated. We would see
@@ -211,6 +213,7 @@ commas if it was a .csv.
 So this is not very readable. Let's use GREP to get what we want. Let's say we are 
 interested in all the samples that start with POL for POL II or POLR2A, there are 
 many ways to spell but we can search for anything that starts with POL.
+
 
 
 ```
