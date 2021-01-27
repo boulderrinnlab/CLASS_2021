@@ -388,14 +388,16 @@ be "in". Notice the added "$x" this means it will print the value it's "in" curr
 Let's use the 'seq' command to set the variables to be "in"
 
 ```
-for x in $(seq 1 50)
+for x in $(seq 1 5)
 do 
 for y in A B C
 do
 echo "$x:$y"
 done
 done
+** try copy and pasting the above into terminal 
 
+or we can type out as such:
 #for x in $(seq 1 5); do for y in A B C; do echo "$x:$y"; done ; done
 ```
 
@@ -424,7 +426,7 @@ We would probably rather do a for loop while reading in a file and changing some
 Let's change the text in our encode practice file. 
 
 ```
-for line in $(cat /data/encode_awk_lessons.tsv)
+for line in $(cat encode_awk_lessons.tsv)
 do 
 echo "$line"
 done
@@ -439,7 +441,7 @@ This is identical to do this with "read" command too.
 while read line
 do
 echo "$line"
-done < data/encode_awk_lessons.tsv
+done < encode_awk_lessons.tsv
 ```
 
 Notice we have the same structure but we are putting the input file at end with
@@ -475,10 +477,9 @@ one line with sed and golden -- can also use in a for loop to replace many files
 
 
 ```
-for f in $(cat data/encode_awk_lessons.tsv)
+for f in $(cat encode_awk_lessons.tsv)
 do
-sed -i 's/USF2/USA/g' data/encode_awk_lessons.tsv
-do 
+sed -i 's/USF2/USA/g' encode_awk_lessons.tsv
 echo "$f"
 done
 
