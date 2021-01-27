@@ -468,7 +468,7 @@ the s/ is a substitute command
 Let's try changing POLR2A to POL2
 
 ```
-sed -i 's/$POLR2A/$POL2/g' data/encode_awk_lessons.tsv
+sed -i 's/POLR2A/POL2/g' data/encode_awk_lessons.tsv
 ```
 
 Did you see a change?
