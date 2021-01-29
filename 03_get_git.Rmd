@@ -8,7 +8,7 @@ HOPEFULLY THIS WORKS !!!
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+This is a practice edit :)
 Our first objective today will be to sync to the class github. We will
 go over a few needed things to establish git connections:
 
