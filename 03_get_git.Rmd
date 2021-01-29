@@ -77,7 +77,7 @@ click the copy button.
 Navigte back to your folder on fiji and type:
 
 ```
-git clone PASTE-URL
+git clone PASTE-SSH (not URL from github main page of repository CLASS 2021)
 ```
 
 Voila you are connected to our class 2021 git repository.
