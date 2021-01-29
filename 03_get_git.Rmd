@@ -4,7 +4,7 @@ author: "JR"
 date: "10/19/2020"
 output: html_document
 ---
-HOPEFULLY THIS WORKS !!!
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
