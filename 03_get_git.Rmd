@@ -12,40 +12,48 @@ knitr::opts_chunk$set(echo = TRUE)
 Our first objective today will be to sync to the class github. We will
 go over a few needed things to establish git connections:
 
-Sign up for github -- if you already have please make a new github repository. 
+Sign up for github -- if you already have please make a new github repository.
 
 
-## The very first thing we need to do is make the github website communicate 
+## The very first thing we need to do is make the github website communicate
 with Fiji. Once this relationship is established, you don't need to do this again :)
 
 Navigate to your home directory on fiji ~/IDENTIKEY
 
 ```
+cd ~
 ls -lah
 ```
+
 Note that there is a .ssh folder that you can place these unique keys to let
-servers communicate securely. We generate this with ssh-keygen command. 
+servers communicate securely. We can check to see if a key already exists.
+If it doesn't we will generate one with the with ssh-keygen command.
 
 ```
 cd .ssh
+ls -lah
+# If it exists already, you can check out the public key using cat
 cat id_rsa.pub
 ```
-This will reveal the public ssh key for fiji. However we want to make a new
-ssh key for each connection. We can easily do this by:
+
+
+This will reveal the public ssh key for fiji. If we don't have a key in this file already,
+let's create one:
 
 ```
 ssh-keygen -t rsa
 ```
-Then save this to your id_rsa.pub file using nano and paste in. Also copy to clipboard.
-Or you ssh-keygen will ask you to make a file name in which to put this generated ssh key.
+
+The default name id_rsa should work just fine.
+Then cat the contents of the public key file (id_rsa.pub) and copy to clipboard.
 
 Now let's got to your github website. You will need to sign into your github account first.
 
-On the top rigth there is a drop down 
-menu. Click on "settings". Now you will see on the left side there is a list of
-options. Click on "keys to deploy". There already be some keys in there or blank.
+On the top right there is a drop down
+menu. Click on "Settings". Now you will see on the left side there is a list of
+options. Click on "SSH and GPG Keys" There already be some keys in there or blank.
 Either way click "Add new key" on top right (green button). Paste in the new
-public SSH key we just generated. 
+public SSH key we just generated.
 
 You may also want to go to your local computer shell .ssh folder (same place).
 Generate a key and paste into github as done above. This way your local terminal
@@ -54,55 +62,115 @@ talk to github need this "handshake" SSH key.
 
 Cool we are all connected !
 
+Now that we're familiar with SSH keys, we can set-up
+an authorized key on fiji so that you don't need to use your
+password each time.
+
+We will be adding the public key to the `~/.ssh/authorized_keys` file.
+You'll create a key on your local computer. In windows you can use
+puttygen to create the key and on Mac or Linux you can use ssh-keygen
+the same way.
+
+The instructions for creating a key with putty are here and detailed.
+https://www.ssh.com/ssh/putty/windows/puttygen
+
+The location of the key file should be in cd ~/.ssh for Mac and
+in Windows it should be in C:/Users/<username>/.ssh
+
+Then as above for github, you'll copy the public key to your clipboard
+and paste it into `~/.ssh/authorized_keys`
+
+```
+nano ~/.ssh/authorized_keys
+# Then paste in the key and save file.
+```
+This will allow you to log-in to fiji without having to type your
+password in each time.
+
+
 -------------------------------------------------------------
 
 Now let's see how this all it works:
 
-Navigate back to ~/IDENTIKEY
+Navigate to /scratch/Shares/rinnclass/<your name>
 
-Let's have fiji get ready to talk to git !
+# Let's clone the class git repository from GitHub
 
-#initialize a git repository for the working directory 
-
-```
-git init
-ls -a
-```
-
-Now we see a generic .git folder. 
-Next we need to "clone" the git repository of interest
-Navigate to the git repository and you will see on the righ side
-"clone this wiki locally"
-click the copy button.
-Navigte back to your folder on fiji and type:
+On the CLASS_2021 GitHub site, click the Code dropdown, select SSH
+as your method on connecting and then click the clipboard icon which will
+copy the url to your clipboard. You can then paste it here.
 
 ```
-git clone PASTE-SSH (not URL from github main page of repository CLASS 2021)
+git clone <paste-ssh-link>
+```
+Voila you are connected to our CLASS_2021 git repository.
+
+Let's explore a bit the .git directory where the repository exists.
+In this directory, it keeps track of the fact that the remote repository
+is this one here on GitHub and you can synchronize your local repository
+with the remote anytime.
+
+While in class, I'll make a change to the git and then have you update
+your local repository with those changes
+using the git pull command.
+
+```
+git pull
 ```
 
-Voila you are connected to our class 2021 git repository.
+Note that multiple people could make changes to the same file which results in conflicting versions.
+Nicely, git will not allow any commits to be pushed to the remote without asking you to resolve the conflicts
+between the two versions of a file.
 
-Let's try it out:
+You can minimize the likelihood of having a file conflict if you `git pull` at the
+start of each session.
+
+Another way to avoid conflicting changes is to create a new branch and eventually you'll
+be able to merge that branch into the code in the main branch.
+Often, the practice is to make new branches corresponding to new features in the code of a project.
+In our case, that will correspond to new analyses. Also, this allows a mechanism for new
+code to be verified before it ends up in the master branch.
+
+
+## Create a new branch and make some changes.
+
+You can have as many branches as you want, so in order to avoid conflicts in this case
+we'll give you each a branch! Using `git checkout -b` allows you to switch branches,
+but it will also create a branch with that name if one doesn't exist.
 
 ```
-Nano test.Rmd
-#Type in something
-# exit nano
+git checkout -b <your-name>
+```
+
+Now use git status to see which branch you're on
+
+```
+git status
+```
+
+## Make some edits and make your first commit
+
+Let's create a new file and type whatever, then you can  `git add`
+
+```
+nano test.Rmd
+# Type in something
+# Save file
+git status
 git add test.Rmd
 git status
 ```
 
 Do you see a new item (test.Rmd) that git noticed was made and ready to sync?
 
-Let's sync so we are up to date. But we don't really want to ever do this on the
-master branch on github. We usually make a "branch" to work on and then "merge"
-branches later once the final code is compiled.
-
-So let's switch to the "students" branch
+Now we need to commit these changes that have been staged
 
 ```
-git checkout -b students
+git commit -m "Created a new test file."
 ```
+
+Typically you'll want to be very specific about what you write in the git commit.
+
 Now you should be on the students branch of the git site. Sometimes this can get
 buggy so you can also trying forcing a branch move:
 
@@ -110,7 +178,7 @@ buggy so you can also trying forcing a branch move:
 git push -u origin NEW-BRANCH-NAME
 ```
 
-Or you may receive an error something like: 
+Or you may receive an error something like:
 fatal: The current branch students has no upstream branch.
 To push the current branch and set the remote as upstream, use
 
@@ -185,5 +253,3 @@ nano .gitignore
 
 -----------------------------------------------
 Let's all get set up on fiji and github website using this info ....
-
-
