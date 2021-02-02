@@ -29,14 +29,8 @@ First we need to learn how to install packages. We will discuss the source funct
 at a later time, but have them set up in students directory where we will be 
 working together.
 
-Navigate to /Shares/rinn_class/data/CLASS_2021/students
-# clone git repository
-# make a directory called "data"
-# instal source functions by adding the util folder with these functions -- we will
-go over this in more detail later. We are only going to use a couple of these
-packages and functions. The main goal is to move into R-viz or R-studio and have 
-these packages ready to go for the future! It's not bad practice to plan ahead when
-you move into a new environment. Also a good way to learn install.packages :)
+Navigate to /scratch/Shares/rinnclass
+# you will see a directory called "data"
 
 ```{r}
 ?install.packages()
