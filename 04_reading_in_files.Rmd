@@ -55,6 +55,14 @@ Let's get started reading in a file "data/number_of_peaks_per_dbp.csv".
 All the files needed for this exeRcise can be downloaded here (note gencode
 annotation file is large). 
 
+SKIP if in class -- data folder is already in (scratch/Shares/rinnclass/data)
+or copy this directory to your folder
+
+cp -r data /scratch/Shares/rinnclass/<dir name>
+
+
+On youtube download these files into a directory in your working directory called "data"
+
 https://www.dropbox.com/sh/76etjxl10v2hcuc/AAAIk9a6aMhw8CvUtKlFnMn6a?dl=0
 
 Please make a directory called data and place the files
@@ -99,8 +107,11 @@ summary(file)
 ##Filter is a great way to quickly scan for specific gene properties
 #### Filter basic context is: filter(data, filter logic)
 #### Let's find the gene with most peaks using filter
+
 ?filter
 gene_x <- filter(file, file$num_peaks > 60000)
+```
+
 #### Here we find the gene with the most peaks is eGFP-CEBPB 
 #### The $ sign is an "indexing" symbol that means go to the column of "file" 
 #### Termed num_peaks (these also tab deliminate if it's going well)
