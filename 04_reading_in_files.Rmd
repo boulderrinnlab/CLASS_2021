@@ -72,7 +72,7 @@ there to keep file paths consistent.
 ```{r}
 # lets read in the bed using read_csv or read.csv (but it is slower)
  
-file <- read_csv("data/number_of_peaks_per_dbp.csv")
+file <- read_csv("../data/number_of_peaks_per_dbp.csv")
 
 # Now we have an object in the environment that is called file -- click to look!
 # or we can take a peak with head
@@ -117,34 +117,54 @@ gene_x <- filter(file, file$num_peaks > 60000)
 #### Termed num_peaks (these also tab deliminate if it's going well)
 
 #### Finding the gene with the fewest peaks
+```{R}
 gene_y <- filter(file, file$num_peaks < 264)
+```
+
 #### Here we find the gene with least peaks is ZNF639
 
 ### Let's find the number of peaks for a specific gene say POLR2A
+```{R}
 gene_pol2 <- filter(file, dbp == "POLR2A")
+
+```
+
 #### Voila we have just the info for your favorite gene.
 
 ### Now let's make a new column in the file table
+```{R}
 file$newcol <- "What?"
+
+```
 #### Now we have a newcol with the character "What?" in it.
 #### That isn't very useful and later we can see how to merge in new data so 
 #### it is linked with the gene name
 
 #### So let's remove that column
 
+```{R}
 file_removecol <- file[-4]
+
+```
+
 #### This indexed into the 4th column and the - sign removed that column
 #### We can use this simple approach to add and subtract columns we will see
 #### other ways as we advance.
 
 ### Now let's make a plot of the data. 
 #### First a histogram of number of peaks for each DBP
+
+```{R}
 hist(file$num_peaks, breaks = 100)
+```
 #### This shows the distribution of peaks for each DBP as we saw above.
 ##### the , breaks allows you to determine how fine you want the data (num bins)
 
 #### Now let's plot the number of peaks versus peak width.
+
+```{R}
 plot( x = file$num_peaks, y = file$total_peak_length)
+```
 #### We can see a linear relationship, as expected that a DBP that has more peaks
 #### will have more base pairs covered.
 ```
@@ -154,7 +174,11 @@ Now let's dig into the data file to subset it into the genes we are interested i
 
 ```{r}
 ### First let's make a list of genes we want. 
+
+```{R}
 genes <- c("POLR2A","POLR2B", "SUPT5H")
+
+```
 ### so our first arugment is to filter file, then we call grepl to match the terms
 ### grepl is called then the genes above are called adn collapesed by |
 ### This colapse is making the names in to a regexp (very cool and more later)
@@ -163,10 +187,15 @@ genes <- c("POLR2A","POLR2B", "SUPT5H")
 ### In other words: grepl is searching for the regex of genes as input into $dbp
 ### grep is making a list of terms to filter the file.
 ### First let's see if we searched by the character names of these genes
+
+```{R}
 gene_list <- filter(file, grepl(paste(genes), file$dbp))
+
+```
 ### Oh no we get an error saying we searched for more than one string. This is
 ### some nerdy grep stuff, but shows why we need to use regular expressions.
 gene_list <- filter(file, grepl(paste(genes, collapse = "|"), file$dbp))
+```
 ### Now this works because we used grep to change the gene names to regexp.
 
 ### Compare the above to this
