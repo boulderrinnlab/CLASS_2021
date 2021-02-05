@@ -26,7 +26,7 @@ cd - to change directories
 ls - list the files
 pwd - tells you the pathway you are currently at (very useful actually!)
 ```
-cd /scratch/Shares/rinnclass/<identikey>
+cd ~/
 ls
 pwd
 ```
@@ -40,12 +40,12 @@ that are often very important. the -lah is called a flag that gives us more info
 
 ```
 man ls
-# Press q to escape
+#q to escape
 ```
 -l for long
 -a for all
 -h human readable
-Basically I typically always use these flags
+basically I typically always use these flags
 
 Now let's make a new file using touch
 
@@ -58,7 +58,7 @@ woah a new file shows up! What is in it? lets use Nano
 ```
 nano test.txt
 # type whatever
-# ctrl + x, Y for yes -- then enter -- to exit nano
+# ctrl x, Y for yes -- then enter -- to exit nano
 ```
 
 Now let's take a look at the file with cat
@@ -66,9 +66,14 @@ Now let's take a look at the file with cat
 ```
 cat test.txt
 ```
+Cat will print all items in a file and sometimes they are very long. So there are other unix commands to get the head and tail of a file while specificying how many lines you want:
 
+```
+head -10 test.txt
+tail -10 test.txt
+```
 
-Let's make another file and combine two files to highlight other functionality of the cat command
+Let's make another file and combine two files to highlight other functinality of the cat command
 First let's remove (using rm command) the test.txt file and make a new one.
 
 ```
@@ -137,11 +142,11 @@ Let's make a sym-link to the class folder in your home directory
 
 ```
 cd ~/
-ln -s /scratch/Shares/rinnclass CLASS 
+ln -s /Shares/rinn_class/data/CLASS_2021 CLASS
 ls
 ```
 
-Now you see a simlink called CLASS. You just cd CLASS and voila you are in class :)
+Now you see a sim-link called CLASS. You just cd CLASS and voila you are in class :)
 
 Another handy short cut is to see how big a folder is. Often you are downloading to
 or working on a folder and need to see if it became bigger or smaller. This is best
@@ -177,10 +182,24 @@ Here the list output becomes the standard input to the word count owing to the p
 Or the pipe passed along the standard output of ls to standard input of wc. The 
 -l flag is for the line count. 
 
+# Excercise what is the difference in outcome of these pipe choices?
+
+```
+ls -lah | wc -l > file.txt | cat file.txt
+
+#versus#
+
+ls -lah > file.txt | wc -l | cat file.txt
+```
+
+
+Same three commands but in different order -- this is just a simple example of 
+how to think along with the standard input and output -- becomes much more relevant
+if used in more complex bash scripts. 
+
+
 
 #Let's move on the find and replace or the GREP command
-
-## Let's download the ENCODE experiments .tsv and upload it using FileZilla
 
 ||||||||||||||||||||||||||||||||||||||||||||||||
 General Regularized Expression Print (GREP)
@@ -194,17 +213,10 @@ the search key in a file. If there is a match then you can return just about any
 in the file. If you have ever done Vlookup in Xcel it maybe familiar in that sense. 
 But the reality it is so simple, elegnat and powerful we will use GREP a lot in class.
 
-Let's download and play with the encode .TSV file.
+Let's play with the encode .TSV file we downloaded.
 
 ```
-cat data/encode_awk_lessons.tsv
-```
-
-Cat will print all items in a file and sometimes they are very long. So there are other unix commands to get the head and tail of a file while specificying how many lines you want:
-
-```
-head -1 test.txt
-tail -1 test.txt
+head data/encode_awk_lessons.tsv
 ```
 
 Yikes ok, so you see all the "/" that means it is tab deliminated. We would see
@@ -215,9 +227,8 @@ interested in all the samples that start with POL for POL II or POLR2A, there ar
 many ways to spell but we can search for anything that starts with POL.
 
 
-
 ```
-grep -ia 'pol' encode_awk_lessons.tsv | wc -l
+grep -ia 'pol' data/encode_awk_lessons.tsv | wc -l
 ```
 I guess we see that there are 11 enteries for anything matching the text of pol.
 We used the 
@@ -225,6 +236,8 @@ We used the
 #-i flag which is very useful to match any type of the same letters.
 People spell gene names all kinds of different ways (with and with out capitals etc).
 So the -i will match Pol POl and POL as well as poL. Try running with out the -i (no matches!).
+
+#-a is simply saying we are looking for a text match.
 
 Note that we piped to wc -l, if you take that out what happens?
 
@@ -237,7 +250,7 @@ So let's print the grep standard output to a file using ' > '
 Let's take a look at these 11 matches.
 
 ```
-grep -i 'pol' data/encode_awk_lessons.tsv > grep_out.txt
+grep -ia 'pol' data/encode_awk_lessons.tsv > grep_out.txt
 ls
 cat grep_out.txt
 ```
@@ -252,10 +265,10 @@ grep.
 
 
 ```
-grep -w 'POLR2A' encode_awk_lessons.tsv > grep_out.txt
+grep -aw 'POLR2A' data/encode_awk_lessons.tsv > grep_out.txt
 cat grep_out.txt
 ```
-Here the -w requires an exact match of the whole word.
+Here the -w requires an exact match and -x means the entire line has to match.
 Now we see a file with just the POLR2A experiments -- as we wanted.
 
 Let's say we wanted to know how many unique DBPs we are about to study. We can
@@ -271,7 +284,7 @@ So we can use AWK in a similar way to grep to get started:
 
 ```
 man awk
-awk -F $'\t' '{if ($6 == "POLR2A") print $0;}' encode_awk_lessons.tsv | wc -l 
+awk -F $'\t' '{if ($6 == "POLR2A") print $0;}' data/encode_awk_lessons.tsv | wc -l 
 ```
 
 The syntax for awk is:
@@ -291,7 +304,7 @@ First let's make a file with just the names of DBPs.
 
 
 ```
-awk 'BEGIN {FS="\t"}; {print $6}' encode_awk_lessons.tsv
+awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv
 ```
 Here we see one of many ways to wrtie the same thing in AWK. The awk arguements
 are encapsulated in the ' ' statement(s) inside { }. It is good practice to tell
@@ -316,7 +329,7 @@ man sort
 Let's put it together:
 
 ```
-awk 'BEGIN {FS="\t"}; {print $6}' encode_awk_lessons.tsv | sort -u | wc -l
+awk 'BEGIN {FS="\t"}; {print $6}' data/encode_awk_lessons.tsv | sort -u | wc -l
 ```
 We piped out the awk arguments from standard in put to standard output of sort.
 We used the -u flag to sort and then collapse the sort to unique string names.
@@ -334,7 +347,7 @@ Let's use awk, grep and pipes to make a new file from the .tsv. Very similar to
 above, but now showing the power of awk in doing many things for you at once!
 
 ```
-awk 'BEGIN {FS="\t"}; {print $1,$2,$3}' encode_awk_lessons.tsv > test.txt
+awk 'BEGIN {FS="\t"}; {print $1,$2,$3}' data/encode_awk_lessons.tsv > test.txt
 ```
 What happened here? How could you test if it was the right file output?
 
@@ -354,8 +367,7 @@ The syntax in bash is:
 
 For X in $Y do 
 
-#For (in) ; do ; done
-will always be used in a for loop
+#For / in / do / done will always be used in a for loop
 
 
 Let's start with a really simple example that helps us understand how the computer
@@ -363,14 +375,10 @@ thinks about this:
 
 
 ```
-for x in 1 1 1 1
+For x in 1 1 1 1
 do 
 echo BCHM5631
 done
-
-or this can be combined with semicolan 
-
-for x in 1 1 1 1; do echo BCHM5631; done
 ```
 
 
@@ -391,16 +399,14 @@ be "in". Notice the added "$x" this means it will print the value it's "in" curr
 Let's use the 'seq' command to set the variables to be "in"
 
 ```
-for x in $(seq 1 5)
+for x in $(seq 1 50)
 do 
 for y in A B C
 do
 echo "$x:$y"
 done
 done
-** try copy and pasting the above into terminal 
 
-or we can type out as such:
 #for x in $(seq 1 5); do for y in A B C; do echo "$x:$y"; done ; done
 ```
 
@@ -429,7 +435,7 @@ We would probably rather do a for loop while reading in a file and changing some
 Let's change the text in our encode practice file. 
 
 ```
-for line in $(cat encode_awk_lessons.tsv)
+for line in $(cat /data/encode_awk_lessons.tsv)
 do 
 echo "$line"
 done
@@ -444,7 +450,7 @@ This is identical to do this with "read" command too.
 while read line
 do
 echo "$line"
-done < encode_awk_lessons.tsv
+done < data/encode_awk_lessons.tsv
 ```
 
 Notice we have the same structure but we are putting the input file at end with
@@ -468,7 +474,7 @@ the s/ is a substitute command
 Let's try changing POLR2A to POL2
 
 ```
-sed -i 's/POLR2A/POL2/g' data/encode_awk_lessons.tsv
+sed -i 's/$POLR2A/$POL2/g' data/encode_awk_lessons.tsv
 ```
 
 Did you see a change?
@@ -480,9 +486,10 @@ one line with sed and golden -- can also use in a for loop to replace many files
 
 
 ```
-for f in $(cat encode_awk_lessons.tsv)
+for f in $(cat data/encode_awk_lessons.tsv)
 do
-sed -i 's/USF2/USA/g' encode_awk_lessons.tsv
+sed -i 's/USF2/USA/g' data/encode_awk_lessons.tsv
+do 
 echo "$f"
 done
 
@@ -495,6 +502,93 @@ like find and replace.
 *********************
 EXCERCISE
 *********************
+
+Use a for loop to create a random set of three groups of 5 students in the class.
+What does the input file need to look like 
+
+
+Beginer version 
+
+```
+plist=(1 2 3 4 5)
+for i in ${plist[@]}; do
+    echo "$i"
+done > file.txt
+cat file.txt file.txt > file2.txt
+cat file2.txt file.txt > file3.txt
+paste -d ' ' file3.txt bchm.csv 
+#man paste
+```
+This is pretty simple, but still may have some scary parts. let's break it down:
+
+first we set a variable plist to the numbers 1-5 (for 5 members in the group)
+then we start the for loop for the first object i in plist (1,2,3,4 or 5). But as 
+we can see it's slightly more complicated we used ${ } to index into our plist.
+The computer is sorting 1-5 in a "hash" which is usally indexed with [@]. 
+
+Indexing is very fundemental to what we will do, but don't worry if it seems confusing
+right now -- we will do it so much it will become second nature :) 
+
+The first command ends with ; then we invoke the do command in bash. It's doing what 
+it says it's doing telling the computer to do what's next in line. Echo simply prints 
+what is in standard output currently (i) in the ${plist[@]}. 
+
+Finally we say done to end the loop. 
+
+This simply prints 1-5 into a file.txt. Then I merge the same two files to get 
+two sets of 1-5 and a third merge (cat). This is a terrible for loop :) 
+
+Here is a more advanced version from Michael
+
+```
+awk -F "," '{print $1}' bchm_5631_enrollment.csv | tail -n +2 > names.txt
+```
+# we saw this above, now with comma seperator to print column 1. then piped to
+# take only the last two enteries and print to names.txt
+
+```
+num_students=$(cat names.txt | wc -l)
+```
+#setting a variable like plist above called num_students
+
+```
+RANDOM=45208908
+```
+
+# This is setting a random seed so the randomness is even reproducible :)
+
+```
+echo -n "" > random_list.txt
+```
+# NOt sure
+
+```
+for i in `seq $num_students`
+do
+	echo $RANDOM >> random_list.txt
+done
+```
+
+# The for loop that is using echo to print the current random number so each
+# student gets a random number in sets of 5
+
+```
+paste -d',' random_list.txt names.txt > names_w_random.txt
+```
+
+# printing out the file
+
+```
+sort -t" " -n -k2 names_w_random.txt > names_sorted.txt
+```
+# sorting the output file by random number column
+
+```
+awk '{print} NR %3 == 0 { print "" }' names_sorted.txt
+```
+
+## NOT SURE
+
 
 
 _________________________ Bonus Bash Fun _________________________ 
@@ -534,7 +628,6 @@ next command. In otherwords standard out put is going to be "piped" into the mov
 command (mv). So we floated all the file paths ending in .jpg to the mv funciton and
 last we just tell the computer where to move the files (or copy (cp)). The back slash
 semi-colon ends the bash script. Not so bad -- just standard input and output movements.
-
 
 
 
