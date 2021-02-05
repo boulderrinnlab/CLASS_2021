@@ -1,0 +1,52 @@
+---
+title: "converting_tag_matrix"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = FALSE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+```
+
+
+```{r}
+#Load annotaitons
+gencode_gr <- rtracklayer::import("data/gencode.v32.annotation.gtf")
+g2s <- gencode_gr[gencode_gr$type == "gene"] %>%
+  as.data.frame() %>%
+  dplyr::select(gene_id, gene_name)
+
+HEPG2_promoter_df <- read.table("results/lncrna_mrna_promoter_peak_occurence_matrix-1.tsv",
+                              sep = " ", header = TRUE) %>%
+  pivot_longer(2:ncol(.), names_to = "gene_id", values_to = "bound") %>%
+  filter(bound == 1) %>%
+  merge(g2s) %>%
+  mutate(cell_type = "HEPG2")
+
+k562_promoter_df <- read.table("results/k562_lncrna_mrna_promoter_peak_occurence_matrix-1.tsv",
+                              sep = " ", header = TRUE) %>%
+  pivot_longer(2:ncol(.), names_to = "gene_id", values_to = "bound") %>%
+  filter(bound == 1) %>%
+  merge(g2s) %>%
+  mutate(cell_type = "K562")
+
+promoter_df <- bind_rows(HEPG2_promoter_df, k562_promoter_df) %>%
+  pivot_wider(names_from = cell_type, values_from = bound, values_fill = 0) %>%
+  write_csv("promoter_dbp_map.csv")
+
+firre_promoter <- promoter_df %>%
+  filter(gene_name == "FIRRE", K562 == 1, HEPG2 == 1)
+
+shf_promoter <- promoter_df %>%
+  filter(gene_name == "SHF", K562 == 1, HEPG2 == 1)
+
+shf_promoter$dbp[shf_promoter$dbp %in% firre_promoter$dbp]
+
+```
+
