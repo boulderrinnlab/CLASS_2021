@@ -1,5 +1,5 @@
 ---
-title: "Nextlfow"
+title: "Nextflow"
 author: "JR"
 date: "11/10/2020"
 output: html_document
@@ -78,6 +78,9 @@ echo $PATH | tr ":" "\n"
 # repalce and find text. 
 # echo is just goint to print out the $PATH variable and pipe to transform to
 #take the : and make it a new line (\n) --- ahhh so much nicer to read!
+
+# Now let's add it to our .profile file which will load each time you login to the terminal
+~/.profile
 
 ```
 
