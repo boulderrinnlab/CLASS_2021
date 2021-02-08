@@ -145,7 +145,7 @@ If you want a specific version you can use the flag to call that version.
 At the time of this document chipseq is at 1.2.1. 
 
 ```
-nextflow -r 1.2.1 pull nf-core/chipseq
+nextflow pull -r 1.2.1 nf-core/chipseq
 ```
 
 Whenever the pipeline is run, it actually does this step behind the scenes,
@@ -250,7 +250,7 @@ described with a # below.
 ### These lines are telling the slurm scheduler what resources we need. Here we're saying we
 ### want to be in the short queue (For jobs that take less than 24 hrs to run. Name of the job, who to email etc...
 
-SBATCH --nodes=1
+#SBATCH --nodes=1
 ### Fiji has multiple nodes and you will rarely want to run a job across more 
 ### than one node. 
 
@@ -260,13 +260,13 @@ SBATCH --nodes=1
 #### For some software, they can by run multicore and you may want more that one cpu.
 
 
-SBATCH --mem=6gb
+#SBATCH --mem=6gb
 
 #### Simply setting how much RAM memory you're requesting for your job. This is an important consideration
 #### depending on how much RAM your software uses to do the compute task.
   
 
-SBATCH --time=10:00:00
+#SBATCH --time=10:00:00
 
 ## The other noteable is the "WALL CLOCK" 
 ## THIS IS WHERE GOOD MANNERS come into play. You want to test this out on a few
@@ -278,8 +278,8 @@ SBATCH --time=10:00:00
 #### the progress of the run. 
 
 
-SBATCH --output=nextflow.out
-SBATCH --error=nextflow.err
+#SBATCH --output=nextflow.out
+#SBATCH --error=nextflow.err
 
 ```
 
@@ -312,7 +312,7 @@ nano run.sh
 #SBATCH --mail-user=john.rinn@colorado.edu
 
 pwd; hostname; date
-echo "Here we go again $SLURM_CPUS_ON_NODE core."
+echo "Lets do chipseq"
 
 module load singularity/3.1.1
 
@@ -322,7 +322,7 @@ nextflow run nf-core/chipseq -r 1.2.1 \
 --input design.csv \
 --fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
 --gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
---macs_gsize 2.7e9 \
+--macs_gsize 3.2e9 \
 --blacklist /scratch/Shares/rinnclass/data/hg38-blacklist.v2.bed \
 --email john.rinn@colorado.edu \
 -resume \
@@ -489,7 +489,7 @@ to put it back to comma seperated?
 
 ```
 group	replicate	fastq_1	fastq_2	antibody	control
-ASH2L	1	../fastq/ENCFF210PXS.fastq.gz		ASH2L	ENCSR055XHN
+ASH2L	1	../data/ENCFF210PXS.fastq.gz		ASH2L	ENCSR055XHN
 ASH2L	2	../fastq/ENCFF525AYL.fastq.gz		ASH2L	ENCSR055XHN
 ENCSR055XHN	1	../fastq/ENCFF162ADN.fastq.gz
 ```
@@ -498,7 +498,7 @@ ENCSR055XHN	1	../fastq/ENCFF162ADN.fastq.gz
 Hint:
 
 ```
-echo design.csv | tr '\t' ',' > desgin2.csv
+cat design.csv | tr '\t' ',' > desgin2.csv
 ```
 
 
