@@ -81,7 +81,11 @@ echo $PATH | tr ":" "\n"
 # echo is just going to print out the $PATH variable and pipe to transform to
 # take the : and make it a new line (\n) --- ahhh so much nicer to read!
 
+# Now let's add it to our .profile file which will load each time you login to the terminal
+~/.profile
+
 ```
+
 
 Luckily, we don't need to add each individual program to the PATH,
 rather we can now just add your new bin file to the PATH.
@@ -115,6 +119,7 @@ nextflow -version
 ```
 
 Sweet, that's it. We've successfully installed nextflow.
+
 
 Alright we have nextflow installed and we never have to worry about fiji finding
 the commands again!
@@ -241,10 +246,11 @@ described with a # below.
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=john.rinn@colorado.edu
 
+
 ### These lines are telling the slurm scheduler what resources we need. Here we're saying we
 ### want to be in the short queue (For jobs that take less than 24 hrs to run. Name of the job, who to email etc...
 
-#SBATCH --nodes=1
+SBATCH --nodes=1
 ### Fiji has multiple nodes and you will rarely want to run a job across more 
 ### than one node. 
 
@@ -253,12 +259,14 @@ described with a # below.
 #### leave this at 1 so the nextflow runs only on one cpu (single-threaded). 
 #### For some software, they can by run multicore and you may want more that one cpu.
 
-#SBATCH --mem=6gb
+
+SBATCH --mem=6gb
 
 #### Simply setting how much RAM memory you're requesting for your job. This is an important consideration
 #### depending on how much RAM your software uses to do the compute task.
   
-#SBATCH --time=08:00:00
+
+SBATCH --time=10:00:00
 
 ## The other noteable is the "WALL CLOCK" 
 ## THIS IS WHERE GOOD MANNERS come into play. You want to test this out on a few
@@ -270,8 +278,8 @@ described with a # below.
 #### the progress of the run. 
 
 
-#SBATCH --output=nextflow.out
-#SBATCH --error=nextflow.err
+SBATCH --output=nextflow.out
+SBATCH --error=nextflow.err
 
 ```
 
@@ -308,20 +316,23 @@ echo "Here we go again $SLURM_CPUS_ON_NODE core."
 
 module load singularity/3.1.1
 
-nextflow run nf-core/chipseq -r 1.1.0 \
+nextflow run nf-core/chipseq -r 1.2.1 \
 -profile singularity \
 --single_end \
 --input design.csv \
 --fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
 --gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
 --macs_gsize 2.7e9 \
---blacklist /Shares/rinn_class/data/hg38-blacklist.v2.bed \
+--blacklist /scratch/Shares/rinnclass/data/hg38-blacklist.v2.bed \
 --email john.rinn@colorado.edu \
 -resume \
 -c nextflow.config
 
 date
 
+
+
+### add the sbatch information to this above and make run.sh file in your directory
 ```
 
 Each line is a command ended by \
@@ -517,35 +528,12 @@ produced (bigWig and peak_files)
 Excercise: Make a design file for a diferent DNA binding protein in the encode
 dowload list. We can debug all the problems in class.
 
-###############
-# HOMEWORK / FUN
-
-****************
-Exercise: Making a script
-****************
-
-Now let's use an exercise to explore $PATH 
-
-!! Warning the order in the $PATH matters !! The computer will search for the
-first usage of the command -- so if there are two commands with the same names 
-be careful the first one will be used and may not be the intended program called.
 
 
-We will use the script to tell the time as script in a new folder we are going to 
-make -- that is NOT in our $PATH. Look throuhg the bash for tr, cut, but don't 
-worry about the bash we are just using this to make a program in a folder and add
-to our $PATH
-
-Here is more on $PATH and where the code below was derived.
-
-https://astrobiomike.github.io/unix/modifying_your_path
 
 
-This is the example in the resource for $PATH mentioned above. It is an example of 
-how to make a custom script, put it in path so you have a new command. It's quite basic, 
-but we get to revisit some bash too :)! Let's make a quick command to tell the time.
-Then put in our $PATH and be able to tell the time no matter which directory 
-you are in :)
+
+## Homework Fun ##
 
 To start Run each of these lines in a row. 
 ```{BASH}
@@ -622,8 +610,5 @@ sh what-time-is-it.sh
 Voila we can use the script anytime. Also this is a nice idea to have new scripts
 etc in this folder as they will automatically be in $PATH now. To run a .sh file
 you want to type "sh filename" in this case sh waht-time-is-it.
-
-
-
 
 
