@@ -1,0 +1,574 @@
+---
+title: "Nextlfow"
+author: "JR"
+date: "11/10/2020"
+output: html_document
+---
+
+Today we will install nextflow and install the Chip-seq pipeline. This way we can
+run hundreds of ChIP-seq files simultaneously through, alignments, qc, peak calling
+-- all the stuff you would ever want (even bigwig files for browsing raw data).
+
+Nextflow has amazing documentation and a good place to start is here:
+
+https://www.nextflow.io/docs/latest/getstarted.html
+
+You can go over what is included in the pipeline (everything you need :) here:
+
+https://nf-co.re/chipseq
+
+Scroll down to the bottom of the link above and see that you will already get
+a lot of results!
+ 
+
+****************
+Step 1 install:
+****************
+
+Next flow will install itself with this simple commmand below. However, you will
+want to think about where to install it. When you know where you want it (usually
+home directory or fairly high level up).
+
+I installed nextflow in home directory so output error messages etc are always
+located here:
+
+/Users/jori2700/.nextflow/assets/nf-core/chipseq/main.nf
+
+The main.nf will have all the code Nextflow's pipeline is running. If the pipeline
+has an error it will send you to the line of code in main.nf that failed.
+
+Alrighty, give it a go:
+
+```{BASH}
+
+wget -qO- https://get.nextflow.io | bash
+
+```
+
+Nice it's installed just like that! wget went and got a bash script (quietly -q)
+to output (-O) and then runs the bash script at the URL to install itself.
+
+Now let's see what all you got in the .nextflow dir.
+
+If you ever want to update nextflow just run the above. At the time of this doc
+it is at: v20.10.0
+
+********************************
+Step 2: add next flow to $PATH
+********************************
+
+The path is a default place the computer will look for commands. Imagine you
+had to tell Bash where list is?
+
+you would have to type something like this
+
+~/jori2700/.bash/ls to list files -- 
+
+Instead of ls
+
+So that path is an important aspect of unix/bash that you will never really hear
+about until it becomes a bug :) Just to be safe let's add nextflow to our $PATH
+
+```{BASH}
+
+$PATH
+echo $PATH | tr ":" "\n"
+# kinda hard to read with : seperated file
+# we can make it easier to read with TRANSFORM (tr) a powerful bash command to
+# repalce and find text. 
+# echo is just goint to print out the $PATH variable and pipe to transform to
+#take the : and make it a new line (\n) --- ahhh so much nicer to read!
+
+```
+
+Now let's use an exercise to explore $PATH 
+
+!! Warning the order in the $PATH matters !! The computer will search for the
+first usage of the command -- so if there are two commands with similar names 
+be careful the first one will be used and may not be the intended program called.
+
+
+We will use the script to tell the time as script in a new folder we are going to 
+make -- that is NOT in our $PATH. Look throuhg the bash for tr, cut, but don't 
+worry about the bash we are just using this to make a program in a folder and add
+to our $PATH
+
+Here is more on $PATH and where the code below was derived.
+
+https://astrobiomike.github.io/unix/modifying_your_path
+
+
+This is the example in the resource for $PATH mentioned above. It is an example of 
+how to make a custom script, put it in path so you have a new command. It's quite basic, 
+but we get to revisit some bash too :)! Let's make a quick command to tell the time.
+Then put in our $PATH and be able to tell the time no matter which directory 
+you are in :)
+
+To start Run each of these lines in a row. 
+```{BASH}
+
+mkdir time_script
+cd time_script
+
+cat >> what-time-is-it.sh << 'EOF'
+#!/bin/bash
+
+current_time=$(date | tr -s " " "\t" | cut -f 4 | cut -d ":" -f 1,2)
+#notice use of transmute (tr) and cut -- these are just grabbing the information
+#bash date command output looks like: Sun Nov 15 18:06:10 MST 2020. Hint cut -f 4
+# grabs the 4th item which is the time.
+
+# Exercise see how transmute and cut grab the information more succinctly.
+
+echo "The time is $current_time.
+I'm glad to see you're making good use of it :)"
+
+# this is just adding silly text to output with the time.
+
+
+# EOF is End of File we set on the first line.
+EOF
+
+chmod +x what-time-is-it.sh
+
+# chmod changes the permissions to a file, the +x gives it "executable" permission
+# to go from shell to Kernel.
+
+ls
+cat what-time-is-it.sh
+
+## Notice it wrote out the file what-time-is-it with the "cat >>" command.
+```
+
+Ok so we have a time telling script that only works in the current directory:
+
+This is where I made it:
+
+/Users/jori2700/CLASS/time_script
+
+So now we can add this to $PATH and run the script whenever just like ls, cat etc.
+
+First we are going to add the .sh script to our $PATH temporarily.
+
+```{BASH}
+
+pwd
+#copy and paste path to the directoy the .sh script is in
+
+
+export PATH="$PATH:/Users/Users/jori2700/CLASS/time_script"
+what_time_is_it.sh #(notice we don't need the ./ now that the path is set)
+
+```
+
+
+Now how to permenantly add to you $PATH
+
+```{BASH}
+
+echo 'export PATH="$PATH:/Users/jori2700/CLASS/time_script/"' >> ~/.bash_profile
+# nice let's take a look
+echo $PATH | tr ":" "\n"
+# we need to activate our new $PATH with
+source ~/.bash_profile
+
+cd anywhere
+sh what-time-is-it.sh
+```
+
+Voila we can use the script anytime. Also this is a nice idea to have new scripts
+etc in this folder as they will automatically be in $PATH now. To run a .sh file
+you want to type "sh filename" in this case sh waht-time-is-it.
+
+Let's add nextflow to our $PATH
+
+```{BASH}
+
+echo 'export PATH="$PATH:/Users/jori2700/.nextflow"' >> ~/.bash_profile
+
+source ~/.bash_profile
+#or start a new session.
+```
+
+Alright we have next flow installed and we never have to worry about fiji finding
+the commands again!
+
+
+****************
+Step 3: Install NF-Core Chip-seeker pipeline
+****************
+
+Now we want to install the chipseq pipeline from NF-core. The cool thing about 
+this set up is essentially you are going to clone the latest github for chipseq
+by default. Simply run:
+
+
+```
+nextflow pull nf-core/chipseq
+```
+
+Next flow takes care of managing all the packages that need to be installed and 
+the versions that were installed etc. So this container is 100% reproducible.
+
+If you want a specific version you can use the flag to call that version.
+At the time of this document chipseq is at 1.2.1. 
+
+```
+nextflow -r 1.2.1 pull nf-core/chipseq
+```
+
+Good news and bad news: the run.sh file will also ask for the version. So it will
+install it on flow in nextflow. Bad news is if you don't change the run.sh you
+may run older version even if newer one is installed -- double check!
+
+
+
+*********************
+Step 4: Config_FILE
+*********************
+
+Ok so we have next flow and the Chip seeker pipeline and our server. We need to 
+have them to talk to and instruct eachother on how best to proceed.
+
+To this end we need to make a nextflow.config file. Here next flow will look for the:
+
+executor : here we see it is slurm (as we will describe more below). It stands
+for Simple Linux Utility for Resource Management. Basically a simple job scheduler.
+
+queue : there is a long and short queue, they describe themselves that one queue
+is short or faster, and the other is longer. 
+
+memory : your telling fiji or your server, computer etc how much RAM or memory to
+use for the nextflow process. This is something to think about and consult with your IT team.
+You don't want to over load the server or your computer!
+
+maxforks : this tells nextflow how many processes can be run in parallel. Let's 
+say you had 40 fastq files to run through a pipeline you can speed up the process
+of running 40 tasks in parallel!
+
+Here is all this put together in a simple few lines that schedules how nextflow
+will communicate with your machine and how to move forward with it's core processes.
+
+40 processes simulanteously -- so if you have 10000 fastqs it will process 40 BWA
+alignments at a time. 
+
+```
+process {
+  executor='slurm'
+  queue='short'
+  memory='32 GB'
+  maxForks=40
+}
+```
+
+Above is a typical nextflow.config file that is needed to run nextflow.
+
+
+Note that the sbatch set up used less RAM etc. That is because the sbatch is 
+"controling the job flow" and doesn't need as much juice to do send and manage
+jobs. However, nextflow is calling on the server seperately for it's memory usage.
+This means nextflow will be running with more juice ...
+
+
+********************************
+Step 5: SLURM - run.sh
+********************************
+
+Next we need to talk to our server or computer directly to allocate computer or 
+server resources, where all the files nextflow needs and much more. So we need 
+to run a script on our server to invoke next flow, give it the configurations
+and start running. 
+
+The chunck below is an example of how we will invoke nextflow using BASH on our server.
+
+
+Essentiall the run.sh file is everythign we need to set up all the details of the run.  These are slurm instructions and nextflow learned it would be in slurm via the config file. We will use SBATCH to submit batch instructions to slurm. 
+
+In otherwords: When the job allocation is finally granted for the sbatch script,
+Slurm runs a single copy of the batch script on the first node in the set of allocated nodes.
+
+
+First let's look at the sbatch / slurm communication set up. Each aspect is 
+described with a # below.
+```{BASH}
+
+#!/bin/bash
+#SBATCH -p long
+#SBATCH --job-name=Hepg2_Pol_test
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=john.rinn@colorado.edu
+
+### This is setting up the very basics, that since this is for a lot of files we
+### want to be in the long queue. Name of the job, who to email etc...
+
+#SBATCH --nodes=1
+### Fiji has multiple nodes and you will rarely want to run a job across more 
+### than one node. 
+
+#SBATCH --ntasks=1
+
+#### This is how many tasks or commands are going to be run. We wil typically
+#### leave this at 1 so the run.sh command is one task in sequence rather than
+#### mutliple in parallel. Depending on the set up you may want more that one task.
+
+#### Take the example below. There are two commands called srun twice. But there is
+#### only one task set so this is an error. 
+
+#SBATCH --ntasks=1
+### Number of CPUs you want to use. But it is more complicated. If you had two
+### seperate slurm commands running it would error. 
+
+#SBATCH --mem=6gb
+
+#### Simply setting how much memory to use on Fiji. This is an important consideration
+#### depending on how big the files are etc.
+  
+#SBATCH --time=100:00:00
+
+## The other noteable is the "WALL CLOCK" 
+## THIS IS WHERE GOOD MANNERS come into play. You want to test this out on a few
+## files and then think about how it will scale. This run.sh file is for thousadnds
+## of FASTQ files, we will change teh wall clock.
+
+
+#### We also want to follow standard error and output. This will allow us to track
+#### the progress of the run. 
+
+
+#SBATCH --output=nextflow.out
+#SBATCH --error=nextflow.err
+
+```
+
+So above SBATCH organized all the instructions needed for slurm to scehdule the job.
+However, now we need set the file paths for next flow. We are using nextflow
+command language that is in the documentation. 
+
+
+---- Setting the nextflow parameter and file paths ----
+
+Now that we have SBATCH all set up we need to set the nextflow parameters for the
+job. 
+
+
+Here is the second half of the run.sh file needed below. The description of each
+follows after the chunk.
+
+
+```{BASH}
+
+pwd; hostname; date
+echo "Here we go again $SLURM_CPUS_ON_NODE core."
+
+module load singularity/3.1.1
+
+nextflow run nf-core/chipseq -r 1.1.0 \
+-profile singularity \
+--single_end \
+--input pol_run_design.csv \
+--fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
+--gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
+--macs_gsize 2.7e9 \
+--blacklist hg38-blacklist.v2.bed \
+--email john.rinn@colorado.edu \
+-resume \
+-c nextflow.config
+
+date
+
+```
+
+Each line is a command ended by \
+
+The first step is telling the pathway, hostname and date of where and when job was run.
+the echo command is sort of silly and just let's you know SBATCH was successful!
+
+module load singularity/3.1.1 is going to load singularity and tell bash that it
+is using singularity:
+
+Singularity: this creates a empty compute environment where packages can be installed,
+run and version tracked. Thus, we are making a "container" of the nextflow pipeline
+in singularity.
+
+Profile: this has a single flag is for an abbreviation of a command. Double flags
+are specifying directly to the command name. This tells the
+server to use the singularity container for instructions on running the pipeline
+that are set up by nextflow commands.
+
+--Single end: the defualt is paired end for nextflow, if the data is single end
+read then we need to tell nextflow that.
+
+-- input: is the design file so next flow knows which are controls, replicates etc
+more on this below.
+
+-- fasta: one of the initial steps in the nextflow pipelien is alining the reads to
+the genome of interest. So to make sure that is precise and reporducible you 
+provide the file path to the genome (in our case it is preplaced in file path).
+
+-- gtf: this is the file of annotations in the human genome. Here we will use 
+Genocode. Gencode's website provides a GTF of whatever release you prefer here:
+
+https://www.gencodegenes.org/human/
+
+-- macs_gsize: this is the effective genome size that is required by the MACS 
+peak calling algorithm in the nextflow pipeline. The genome is about 3 billion
+bases is what we are saying here. 
+
+-- blacklist: the reason we didn't 3B above is that many regions of the genome are not good
+to align to for various reasons (low complexity etc). This is telling nextflow what
+regions of your genome are bad and it will stay away from these coordinates.
+
+-- email so nextflow can email you status on your job (SLURM will too :)
+
+-- resume: is nextflow command that if there is a failure you don't have to start
+at the beginign fo the pipeline each time.
+
+-c abrreviation for config file.
+
+date: when the pipeline finishes it will print the bash date command (we used above)
+
+
+*******************************************
+Step 6:Running and Checking on slurm jobs
+*******************************************
+
+First thing we want to do is "run" a .sh file. Since we set this up in SBATCH we
+simply type:
+
+Don't run yet though
+```
+sbatch run.sh
+```
+This will have sbatch send the scripts in the run.sh file to slurm to run them. 
+
+
+--- what jobs are you running? You often want to see what job is running how long it is taking and other aspects. To that end we can use 'squeue' to see what is running
+
+```
+squeue -u identikey
+```
+
+the -u flag is for user.
+examine the information provided and google the column headers for more info.
+
+---- canceling jobs
+
+
+Let's say you accidently hit the run button and want to cancel immediately.
+
+'scancel' is the command
+
+```
+squeue -u identikey
+scancel jobid
+scancel -u identikey #cancels all running jobs
+```
+
+--- canceling multiple jobs:
+
+```
+squeue -u identikey | grep commonjobid# | awk '{print $1}' | xargs -n 1 scancel
+
+squeue -u jori2700  | grep 591 | awk '{print $1}' | xargs -n 1 scancel
+```
+
+Here we are using some bash to grab all the jobs running. They will typically have a common number (591 in example above -- would have aloso worked with just 5).
+
+Grep finds all your job id matches, then awk prints them, xargs is then going 
+to perform scancel on the output of awk, the -n is telling xargs how many arguments will follow. In this case just 1 -- scancel.
+
+Voila your jobs are gone :)
+
+
+**********************
+Step 7: Design file
+**********************
+
+Nextflow documentation has a clear set up for the Chipseq pipeline. 
+You must have the folowing columns (seperated by ',')
+
+```
+group,replicate,fastq_1,fastq_2,antibody,control
+```
+
+
+GROUP: the name of the gene targeted or sample information (e.g. POL2)
+
+REPLICATE: if you have replicates you number them 1,2 .... in each row. If you 
+have only one, you need to type in 1.
+
+fastq_1: file path to the fastq files you downloaded from ENCODE.
+fastq_2: if you have dual end reads the second read fastq file path.
+
+ANTIBODY: this is the target and same a group name for non-control samples.
+
+CONTROL: in our case this is input DNA from ChIP. ENCODE let us know what the 
+control accession is. 
+
+NOTE: the controls still need to be places as a 'group' entry. Howevever, their
+'control' column is empty.
+
+
+********************************
+Step 8: Test run of design file!
+********************************
+
+You will need these files -- and change the file paths in the design file below
+to where the fastq files are for you. You can download them with these links and wget:
+
+https://www.encodeproject.org/files/ENCFF210PXS/@@download/NCFF210PXS.fastq.gz
+https://www.encodeproject.org/files/ENCFF525AYL/@@download/ENCFF525AYL.fastq.gz
+https://www.encodeproject.org/files/ENCFF162ADN/@@download/ENCFF162ADNP.fastq.gz
+
+
+
+Here is a mini design file -- you will have to change the file path to the fastq
+files accordingly. 
+
+I am putting then design below as a tab serpated file. Can you use transmute 
+to put it back to comma seperated?
+
+```
+group	replicate	fastq_1	fastq_2	antibody	control
+ASH2L	1	../fastq/ENCFF210PXS.fastq.gz		ASH2L	ENCSR055XHN
+ASH2L	2	../fastq/ENCFF525AYL.fastq.gz		ASH2L	ENCSR055XHN
+ENCSR055XHN	1	../fastq/ENCFF162ADN.fastq.gz
+```
+
+
+Hint:
+
+```
+echo design.csv | tr '\t' ',' > desgin2.csv
+```
+
+
+group,replicate,fastq_1,fastq_2,antibody,control
+ASH2L,1,../fastq/ENCFF210PXS.fastq.gz,,ASH2L,ENCSR055XHN
+ASH2L,2,../fastq/ENCFF525AYL.fastq.gz,,ASH2L,ENCSR055XHN
+ENCSR055XHN,1,../fastq/ENCFF162ADN.fastq.gz,,,
+
+NOTE: remember to make sure the file path is correct to the fastq on your computer.
+here i am saying the fastq directory is one directory above then the path to the
+file name.
+
+Once you have all set:
+
+```
+sbatch run.sh
+tail -f nextflow.out
+```
+
+This will run the pipeline and tail -f allows you to follow the end of the nextflow
+output as it is going.
+
+Go check out all the results in the results folder created by nextflow! In the 
+next class we will go over all the output files and how to visualize the data
+produced (bigWig and peak_files)
+
+Excercise: Make a design file for a diferent DNA binding protein in the encode
+dowload list. We can debug all the problems in class.
+
+
+
+
