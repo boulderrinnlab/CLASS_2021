@@ -29,8 +29,8 @@ at a later time, but have them set up in students directory where we will be
 working together.
 
 ```{r}
-?install.packages
-install.packages("tidyverse")
+#?install.packages
+#install.packages("tidyverse")
 # if (!requireNamespace("BiocManager", quietly = TRUE))
 #     install.packages("BiocManager", version = '3.10')
 # 
@@ -220,9 +220,16 @@ ppdbp_subset <- dplyr::filter(peaks_per_dbp, dbp %in% genes)
 # Finally one last way that we can achieve the same thing is
 # by setting row names (we already have column names) and
 # indexing directly by using the name of the DBP.
+column_to_rownames(peaks_per_dbp, var = "dbp") # same as bellow
+
 peaks_per_dbp <- peaks_per_dbp %>%
-  column_to_rownames(var = "dbp")
+  column_to_rownames(var = "dbp") # renames index as gene name
+
+peaks_per_dbp["POLR2B",]
+peaks_per_dbp["POLR2B", "total_peak_length"]
+
 ppdbp_subset <- peaks_per_dbp[genes,]
+
 ```
 
 # In addition to editing columns by indexing with the dollar sign
@@ -235,21 +242,38 @@ head(peaks_per_dbp)
 ### NOTE: PIPE "%>%"
 # The pipe will put evaluate first what's on the left hand side of the pipe
 # and place it as the first argument of the function on the right hand side.
+
+# before we did:
+#peaks_per_dbp$id <-nrow(peaks_per_dbp)
+#new way now:
+
 peaks_per_dbp <- peaks_per_dbp %>%
   mutate(tpl_m = total_peak_length / 1000000)
+
+# or defining the mutate function with dplyr
+
+peaks_per_dbp <- peaks_per_dbp %>%
+  dplyr::mutate(tpl_m = total_peak_length / 1000000)
+
 ### Cool now we have a new column that is much easier to read for total length.
 
 ### Lets see if we can write over the previous column instead of removing it
 ### we can just set the new col to the old col name
 peaks_per_dbp <- peaks_per_dbp %>% 
-  mutate(total_peak_length = total_peak_length / 1000000) 
+  mutate(total_peak_length = total_peak_length / 1000000,
+         total_peak_length = log2(total_peak_length))
 head(peaks_per_dbp)
 ### Sweet we can mutate and just overide columns -- but we can also perform a FUN!
 ### NOTE IFELSE! A NESTED IFELSE at that!!
 ### Let's give it a go:
+
+hist(peaks_per_dbp$tpl_m)
+
+ifelse(peaks_per_dbp$tpl_m <50, "small", "large")
+
 peaks_per_dbp <- peaks_per_dbp %>% 
-  mutate(peak_genome_coverage = ifelse(total_peak_length < 1, "small",
-                          ifelse(total_peak_length < 30, "medium", "large")))
+  mutate(peak_genome_coverage = ifelse(tpl_m < 10, "small",
+                          ifelse(tpl_m < 60, "medium", "large")))
 
 
 ### Very nice we can see we have three categories of legnths now. This is common
