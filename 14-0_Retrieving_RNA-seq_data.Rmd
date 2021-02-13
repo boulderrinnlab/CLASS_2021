@@ -310,4 +310,5 @@ write_csv(samplesheet, "rnaseq/samplesheet.csv")
 ```
 
 Now we have the raw files downloaded and the samplesheet needed for downstream analyses (ex, differential expression). So the next step is to run nf-core/rnaseq on these samples.
+We'll do this in the 14-1 R Markdown.
 
