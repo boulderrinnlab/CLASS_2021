@@ -16,17 +16,17 @@ library(janitor)
 Goal: to get a rational samplesheet for use in downstream analysis (ie., differential expression) and to rename the files in the format needed by nf-core/rnaseq. You need the read numbers to be a part of the filename to run with nextflow.
 
 
-[Encode Query]("https://www.encodeproject.org/report/?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&assay_title=polyA+plus+RNA-seq&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all")
+[Encode Query]("https://www.encodeproject.org/report/?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all&advancedQuery=date_released:[2009-01-01%20TO%202021-12-31]")
 
 
 
 ```{bash}
 # You'll want to change directory to the rnaseq directory for this following bit.
 # Retrieve experiment info table
-wget -O samples.txt "https://www.encodeproject.org/report.tsv?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&assay_title=polyA+plus+RNA-seq&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all"
+wget -O samples.txt "https://www.encodeproject.org/report.tsv?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all&advancedQuery=date_released:[2009-01-01%20TO%202021-12-31]"
 
 # Retrieve fastq file urls
-wget -O files.txt "https://www.encodeproject.org/batch_download/?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&assay_title=polyA+plus+RNA-seq&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50"
+wget -O files.txt "https://www.encodeproject.org/batch_download/?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all&advancedQuery=date_released:[2009-01-01%20TO%202021-12-31]"
 
 # Now cd to the rnaseq/fastq directory 
 # If the fastq directory doesn't exist, let's create it.
@@ -309,6 +309,31 @@ samplesheet <- samplesheet %>%
 write_csv(samplesheet, "rnaseq/samplesheet.csv")
 ```
 
+We also need to make a design file for the nf-core/rnaseq
+
+```{r}
+# This will have the following columns:
+# group,replicate,fastq_1,fastq_2,strandedness
+# The group will specify the experimental condition 
+# We could use the experiment accesion or we could use the 
+# sample_name.
+# Let's create a group column using mutate -- and we'll clean up the names
+# There's spaces in the names currently and we need to get rid of those.
+design <- samplesheet %>%
+  mutate(group = gsub(" ", "_", sample_name) %>% tolower(),
+         strandedness = "unstranded") %>%
+  # We have the replicate number already, but it's just a part of the sample id
+  # We can use the separate function (opposite of unite) to retrieve it.
+  separate(sample_id, into = c("experiment_accession", "replicate"), sep = "_", remove = FALSE) %>%
+  mutate(replicate = gsub("rep", "", replicate)) %>%
+  # Now we gather just the columns we need
+  dplyr::select(group, replicate, fastq_1, fastq_2, strandedness)
+# Now we can write this out for input into nextflow
+write_csv(design, "rnaseq/design.csv")
+```
+
+
 Now we have the raw files downloaded and the samplesheet needed for downstream analyses (ex, differential expression). So the next step is to run nf-core/rnaseq on these samples.
 We'll do this in the 14-1 R Markdown.
+
 
