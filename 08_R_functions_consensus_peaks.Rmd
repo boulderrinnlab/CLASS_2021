@@ -104,9 +104,7 @@ Now let's look at the functions involved in creating consensus peaks.
 ```
 
 
-The only parameter for teh create_consensus_peaks is the file path to the peak files: 
-
-/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files
+The only parameter for the create_consensus_peaks is the file path to the peak files.
 
 So basically we are making a new R function (it's in util already under create_consensus_peaks).
 Below we will go through each step of the function that occcurs in between { }. 
@@ -151,7 +149,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "/scratch/Shares/rinnclas
 # here we are using x that is being read in by the function which is an individual file name.
 
   
-#pattern: the pattern to look for across the input vector. this is using regular
+# pattern: the pattern to look for across the input vector. this is using regular
 # expression (regex). You don't need to know this much regex, but if you are ever 
 # curious you can use the online regex calculator :)
 # 
@@ -189,20 +187,25 @@ create_consensus_peaks <- function(broadpeakfilepath = "/scratch/Shares/rinnclas
     # this way we only intersect the replicate files that have the same dbp name.
     # this is why we indexed into unique_tf[i]. Then the next unique DBP name will
     # run in the next iteration of the loop.
+    
     if (length(tf_files) > 1) {
+    
     # turns out some files don't have replicates :( so we are saying here that if
     # the current (i) entry for 'tf_files' is equal or less than 1 to stop running.
     # we can't intersect peaks if there is only one peak file :)
       
     peak_list <- c()
+    
     # making a new object peak list that will be populated by the loop below.
     # we leave it empty until the loop runs by simpling putting c()
     
     for (j in 1:length(tf_files)) {
+    
 ## This for loop is going to go through each peak file and store it in peak_list
       
       peak_list <- c(peak_list, read_peaks(tf_files[j]))
     }
+    
     # read_peaks is a function we already made in .util. It's pretty basic and 
     # commented out below
     
