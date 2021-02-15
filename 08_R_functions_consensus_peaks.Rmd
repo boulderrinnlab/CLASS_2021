@@ -112,7 +112,7 @@ So basically we are making a new R function (it's in util already under create_c
 Below we will go through each step of the function that occcurs in between { }. 
 
 ```{r}
-create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files") {
+create_consensus_peaks <- function(broadpeakfilepath = "/scratch/Shares/rinnclass/ .... <path to your broadpeaks") {
   
   fl <- list.files(broadpeakfilepath, 
                    full.names = TRUE)
