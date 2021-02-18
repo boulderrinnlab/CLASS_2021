@@ -321,7 +321,7 @@ We also need to make a design file for the nf-core/rnaseq
 # There's spaces in the names currently and we need to get rid of those.
 design <- samplesheet %>%
   mutate(group = gsub(" ", "_", sample_name) %>% tolower(),
-         strandedness = "unstranded") %>%
+         strandedness = "reverse") %>%
   # We have the replicate number already, but it's just a part of the sample id
   # We can use the separate function (opposite of unite) to retrieve it.
   separate(sample_id, into = c("experiment_accession", "replicate"), sep = "_", remove = FALSE) %>%
