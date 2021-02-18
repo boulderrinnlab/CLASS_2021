@@ -11,7 +11,17 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Let's do some RNAseq !
 
-Goal: Align reads and get the number of reads in each gene in the genome using nf-core/rnaseq
+Goal: Align reads and get the number of reads in each gene in the genome using nf-core/rnaseq 
+
+To use this new version of the nf-core/rnaseq pipeline (v3.0) we need to update to an edge release of nextflow.
+cd to your directory where you installed nextflow (~/bin/) and 
+
+wget https://github.com/nextflow-io/nextflow/releases/download/v21.02.0-edge/nextflow
+
+You may need to chmod +x nextflow 
+if it is not alread executable (check with ls -lah)
+
+This was retrieved from the nextflow github. The first time you run this new nextflow it will install itself.
 
 First let's take a look at the documentation:
 
@@ -33,6 +43,8 @@ Salmon is aware of different isoforms for each gene and will make a quantificati
 Take a deep breath -- basically we are going to get the abundance of RNA for each gene in the genome.
 
 Let's start with the config file -- very similar to nf-core/chipseq
+
+
 ```{bash}
 process {
   executor='slurm'
