@@ -302,10 +302,29 @@ samplesheet <- samples %>%
 # Now that we have it cleaned up, let's create one line for each replicate where the fastq read 1 and read 2 are in the same row.
 # For this we will use the pivot wider function
 # We need to tell the pivot_wider function which unique column combinations will specify each new row. 
+samplesheet <- samples
 samplesheet <- samplesheet %>%
   pivot_wider(id_cols = c("sample_id", "seq_type", "sample_name"),
               names_from = paired_end_identifier,
               values_from = c("fastq", "md5sum"))
+
+
+# Harmonize the sample names with the design file.
+samplesheet <- samplesheet %>%
+  mutate(condition = gsub(" ", "_", sample_name) %>% tolower()) %>%
+  separate(sample_id, into = c("experiment_accession", "replicate"), 
+           remove = FALSE, sep = "_") %>%
+  mutate(replicate = gsub("rep", "R", replicate)) %>%
+  unite(sample_name, condition, replicate, sep = "_", remove = FALSE)
+
+samplesheet$condition[samplesheet$condition == "hepg2"] <- "hepg2_total"
+samplesheet <- samplesheet %>%
+  mutate(cell_type = "hepg2",
+         condition = gsub("hepg2_", "", condition)) %>%
+  dplyr::select(sample_id, sample_name, replicate, condition,
+                cell_type, seq_type, fastq_1, fastq_2, md5sum_1,
+                md5sum_2)
+
 write_csv(samplesheet, "rnaseq/samplesheet.csv")
 ```
 

@@ -1,0 +1,49 @@
+---
+title: "14-2: RNA-seq differential expression"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = FALSE)
+library(tidyverse)
+library(tximport)
+library(DESeq2)
+```
+
+Read in the count data.
+
+```{r}
+genes <- rtracklayer::import("/scratch/Shares/rinn/genomes/Homo_sapiens/Gencode/v32/gencode.v32.annotation.gtf")
+
+tx2gene <- genes[genes$type == "transcript"]@elementMetadata %>% 
+  as.data.frame() %>%
+  dplyr::select(transcript_id, gene_id)
+
+samplesheet <- read_csv("../../../rinn/JR/CLASS_2021/rnaseq/samplesheet.csv")
+
+
+files <- file.path("../../../rinn/JR/CLASS_2021/rnaseq/results/star_salmon",
+                   samplesheet$sample_name, 
+                   "quant.sf")
+names(files) <- samplesheet$sample_name
+
+
+
+
+
+txi <- tximport(files, type = c("salmon"), tx2gene = tx2gene)
+?tximport
+
+
+tx2gene <- read_csv(file.path("../../../rinn/JR/CLASS_2021/rnaseq/results/star_salmon/", "tx2gene.csv"), col_names = FALSE)
+
+
+salmon_quant <- read_rds("../../../rinn/JR/CLASS_2021/rnaseq/results/star_salmon/salmon.merged.gene_counts.rds")
+load("/scratch/Shares/rinn/JR/CLASS_2021/rnaseq/results/star_salmon/deseq2_qc/deseq2.dds.RData")
+dds <- DESeqDataSet()
+dds <- DESeq(dds)
+```
+
