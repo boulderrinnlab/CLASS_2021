@@ -81,10 +81,18 @@ That wasn't so bad to format since we had so few files. Later we will write a sc
 to remove all the noncannonical chromosomes and add header with name of file.
 In the meantime here is something to think about for changing the files en masse:
 
+We need to get rid of the contigs first:
 
 ```
-awk -v OFS="\t" '$1=$1' your_peaks.broadPeaks > fixed_your_peaks.broadPeaks
+grep -e chr ASH2L_R1_peaks.broadPeak > ASH2L_R1_peaks_ucsc_chr.broadPeak
 ```
+
+Then we need to add a header for UCSC to know how to read in the file.
+
+```
+track type=broadPeak visibility=3 db=hg38 name="ASH2L_rep1" description="ASH2L"
+```
+
 
 Ok now are peak files are ready to load into UCSC. Have a go!
 
