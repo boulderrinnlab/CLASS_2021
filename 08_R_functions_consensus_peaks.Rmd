@@ -293,6 +293,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "/scratch/Shares/rinnclas
 # Okay, let's run this function now. 
 # Note that the filepath is set as a default parameter.
 
+peaks <- create_consensus_peaks()
 
 ```
 
