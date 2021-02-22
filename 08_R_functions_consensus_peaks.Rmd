@@ -295,6 +295,10 @@ create_consensus_peaks <- function(broadpeakfilepath = "/scratch/Shares/rinnclas
 
 peaks <- create_consensus_peaks()
 
+#Excercise: 
+
+peaks[1]
+
 ```
 
 
