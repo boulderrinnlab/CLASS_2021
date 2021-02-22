@@ -106,21 +106,28 @@ Now let's look at the functions involved in creating consensus peaks.
 
 The only parameter for teh create_consensus_peaks is the file path to the peak files: 
 
-/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files
+/scratch/Shares/rinnclass/data/peaks
 
 So basically we are making a new R function (it's in util already under create_consensus_peaks).
 Below we will go through each step of the function that occcurs in between { }. 
 
+
+You can check out Util folder 
+
 ```{r}
-create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files") {
+create_consensus_peaks <- function(broadpeakfilepath = "/scratch/Shares/rinnclass/data/peaks") {
   
   fl <- list.files(broadpeakfilepath, 
                    full.names = TRUE)
   
   
-  #fl <- fl[grep("broadPeak", fl)]
+  # fl <- fl[grep("broadPeak", fl)]
   #This is for safety if you want to grab the right file type from 'macs' output.
 
+  # Let's subset this data for testing
+  # In practice you'll want to run this on the full dataset.
+  fl <- fl[1:20]
+  
 # fl: this is just going to be a list of the peak file names
 # this used the R function "list.files" -- take a look:
 # ?list.files
@@ -283,16 +290,15 @@ create_consensus_peaks <- function(broadpeakfilepath = "/Shares/rinn_class/data/
 }
     
 
+# Okay, let's run this function now. 
+# Note that the filepath is set as a default parameter.
 
+peaks <- create_consensus_peaks()
 
+#Excercise: 
 
-# Write the consensus peaks to a file and take the name of the file
-# from the name of the list element -- which   should be the DBP name.
-for (i in 1:length(consensus_peaks)) {
-  rtracklayer::export(consensus_peaks[[i]], 
-                      paste0("results/consensus_peaks/", 
-                             names(consensus)[i],".bed"))
-}
+peaks[1]
+
 ```
 
 

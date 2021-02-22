@@ -1,0 +1,145 @@
+---
+title: "14-1_RNA-seq_nextflow"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Let's do some RNAseq !
+
+Goal: Align reads and get the number of reads in each gene in the genome using nf-core/rnaseq 
+
+To use this new version of the nf-core/rnaseq pipeline (v3.0) we need to update to an edge release of nextflow.
+cd to your directory where you installed nextflow (~/bin/) and 
+
+wget https://github.com/nextflow-io/nextflow/releases/download/v21.02.0-edge/nextflow
+
+You may need to chmod +x nextflow 
+if it is not alread executable (check with ls -lah)
+
+This was retrieved from the nextflow github. The first time you run this new nextflow it will install itself.
+
+First let's take a look at the documentation:
+
+https://nf-co.re/rnaseq/usage
+
+So what we need is
+
+design.csv
+nextflow.config file
+run.sh
+
+We will need to run nf-core/rnaseq to map the reads and make "counts" for each gene. These counts are essentially saying how many reads were there on a gene. However, not all genes are the same length. Thus, long genes will naturally get more reads by chance -- so we need to account for that. 
+
+We also need to account for how many reads there were in total. We will end with a Transcript Per Million Reads (TPM). You may have heard of Reads Per Kilobase per Million reads (RPKM) -- You can read all the debates about this, but we will use Salmon quantification.
+
+First we align to the genome with STAR
+Salmon is aware of different isoforms for each gene and will make a quantification for each isoform and then merge it into a final gene count. To account gene length SALMON calculates and effective transcript length (it's complicated but think of it as length normalization of all possible isoforms for that gene). Finally, SALMON simply divides this by the number of reads in millions. So we essentially (there are some esoteric differences) get a TPM or transcripts present per 1 million total reads.
+
+Take a deep breath -- basically we are going to get the abundance of RNA for each gene in the genome.
+
+Let's start with the config file -- very similar to nf-core/chipseq
+
+
+```{bash}
+process {
+  executor='slurm'
+  queue='short'
+  memory='16 GB'
+  maxForks=10
+}
+```
+
+Now the run.sh file that gives nf-core/rnaseq all the instructions for nextflow to task. 
+```{bash}
+#!/bin/bash
+#SBATCH -p long
+#SBATCH --job-name=HEPG2_rna_seq
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=john.rinn@colorado.edu
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=6gb
+#SBATCH --time=20:00:00
+#SBATCH --output=nextflow.out
+#SBATCH --error=nextflow.err
+
+
+## This is the same as nfcore/chipseq start
+pwd; hostname; date
+echo "Here we go You've requested $SLURM_CPUS_ON_NODE core."
+
+module load singularity/3.1.1
+
+## Here we are readching out to the nf-core/rnaseq github to get the needed software
+nextflow run nf-core/rnaseq -r 3.0 \
+-resume \
+-profile singularity \
+
+## Here we are providing the paired ends to be merged and replicates etc...
+
+--input design.csv
+
+## There are different quantification methods (e.g., RSEM) we are choosing SALMON
+--aligner star_salmon
+
+## We need a genome
+--fasta /scratch/Shares/rinn/genomes/Homo_sapiens/Gencode/v32/GRCh38.p13.genome.fa \
+## We need a genome annotation
+--gtf /scratch/Shares/rinn/genomes/Homo_sapiens/Gencode/v32/gencode.v32.annotation.gtf \
+
+## SALMON needs to know some details on how the GTF is formatted. REFSEQ if a default so
+## if we deviate from that we need to let SALMON know which annotation we are using.
+--gencode \
+
+## Standard stuff
+--email john.rinn@colorado.edu \
+-c nextflow.config
+
+date
+
+
+```
+
+Here is the run.sh in final form
+```{bash}
+#!/bin/bash
+#SBATCH -p long
+#SBATCH --job-name=HEPG2_rna_seq
+#SBATCH --mail-type=END,FAIL
+#SBATCH --mail-user=john.rinn@colorado.edu
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --mem=6gb
+#SBATCH --time=20:00:00
+#SBATCH --output=nextflow.out
+#SBATCH --error=nextflow.err
+
+pwd; hostname; date
+echo "Here we go You've requested $SLURM_CPUS_ON_NODE core."
+module load singularity/3.1.1
+nextflow run nf-core/rnaseq -r 3.0 \
+-resume \
+-profile singularity \
+--input design.csv
+--aligner star_salmon
+--fasta /scratch/Shares/rinn/genomes/Homo_sapiens/Gencode/v32/GRCh38.p13.genome.fa \
+--gtf /scratch/Shares/rinn/genomes/Homo_sapiens/Gencode/v32/gencode.v32.annotation.gtf \
+--gencode \
+--email john.rinn@colorado.edu \
+-c nextflow.config
+date
+
+```
+
+
+Now we need the design file, similar to nf-core/chipseq it has to be very specific :)
+
+group,replicate,fastq_1,fastq_2,strandedness
+
+Our data is not stranded, but this is an important consideration even if you don't have it.
+
