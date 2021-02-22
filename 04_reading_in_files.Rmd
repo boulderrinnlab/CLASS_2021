@@ -30,7 +30,7 @@ working together.
 
 ```{r}
 ?install.packages
-install.packages("tidyverse")
+#install.packages("tidyverse")
 # if (!requireNamespace("BiocManager", quietly = TRUE))
 #     install.packages("BiocManager", version = '3.10')
 # 
@@ -236,7 +236,7 @@ head(peaks_per_dbp)
 # The pipe will put evaluate first what's on the left hand side of the pipe
 # and place it as the first argument of the function on the right hand side.
 peaks_per_dbp <- peaks_per_dbp %>%
-  mutate(tpl_m = total_peak_length / 1000000)
+  dplyr::mutate(tpl_m = total_peak_length / 1000000)
 ### Cool now we have a new column that is much easier to read for total length.
 
 ### Lets see if we can write over the previous column instead of removing it
@@ -244,12 +244,14 @@ peaks_per_dbp <- peaks_per_dbp %>%
 peaks_per_dbp <- peaks_per_dbp %>% 
   mutate(total_peak_length = total_peak_length / 1000000) 
 head(peaks_per_dbp)
+hist(peaks_per_dbp$total_peak_length)
 ### Sweet we can mutate and just overide columns -- but we can also perform a FUN!
 ### NOTE IFELSE! A NESTED IFELSE at that!!
 ### Let's give it a go:
 peaks_per_dbp <- peaks_per_dbp %>% 
   mutate(peak_genome_coverage = ifelse(total_peak_length < 1, "small",
                           ifelse(total_peak_length < 30, "medium", "large")))
+peaks_per_dbp$peak_genome_coverage
 
 
 ### Very nice we can see we have three categories of legnths now. This is common
@@ -267,6 +269,8 @@ table(peaks_per_dbp$peak_genome_coverage)
 # in alphanumeric ordering.
 peaks_per_dbp <- peaks_per_dbp %>%
   mutate(peak_genome_coverage = factor(peak_genome_coverage, levels = c("small", "medium", "large")))
+
+peaks_per_dbp$peak_genome_coverage
 
 head(as.character(peaks_per_dbp$peak_genome_coverage))
 head(as.numeric(peaks_per_dbp$peak_genome_coverage))
