@@ -8,15 +8,7 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-library(GenomicRanges)
-library(rtracklayer)
-library(tidyverse)
-library(ggpubr)
-library(Gviz)
-source("util/_setup.R")
-source("util/intersect_functions.R")
-source("util/plotting_functions.R")
+
 ```
 
 ### Have you ever wanted to find overlaps between two lists of genes? Well
@@ -50,7 +42,7 @@ just having the advantage of indexing chromosome and strand to the start and sto
 ```{r}
 
 # rtracklayer::import is the way to import a GTF into a GRanges (see above)
-gencode_gr <- rtracklayer::import("data/gencode.v32.annotation.gtf")
+gencode_gr <- rtracklayer::import("/Users/maca9088/CLASS/data/gencode.v32.annotation.gtf")
 
 # ok wow this is a lot of inofrmaiton, mostly partiioned by the @ and $ symbol
 # Let's start with "indexing" this file with $values.
@@ -115,12 +107,8 @@ try indexing with [] in combination and or seperately to find specific values.
 #table(gencode_gr_length$type)
 #table(gencode_gr_length$gene_type)
 
-gencode_gr_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
-                           "gene_name" = gencode_gr@elementMetadata$gene_name,
-                           "gene_type" = gencode_gr@elementMetadata$gene_type,
-                           "type" = gencode_gr@elementMetadata$type,
-                           "start" = gencode_gr@ranges@start,
-                           "width" = gencode_gr@ranges@width)
+
+
                            
 
 ### Ok so now we have a new data frame with the information we want from gencode_gr
@@ -215,11 +203,18 @@ total_exon_length <- gencode_gr[gencode_gr$type == "exon"] %>%
   width() %>%
   sum()
 
-summary(total_exon_length)
+total_exon_length
+
+total_trans_length <- gencode_gr[gencode_gr$type == "transcript"] %>%
+  GenomicRanges::reduce() %>% 
+  width() %>%
+  sum()
+
+total_trans_length
 # We now have the total bases covered by exons in the human genome. We also know
 # the human genome is 3.9B base pairs so let's find the percentage by division:
 
-total_exon_length/3.2e9
+total_trans_length/3.2e9
 # Boom we can see the human genome is about 4% exons!
 
 
@@ -236,7 +231,8 @@ total_exon_length/3.2e9
 ```{r}
 ### Let's import POLR2A Chip-seq files from k562 ENCODE project.
 
-pol2_chip <- rtracklayer::import("data/POLR2A_consensus_peaks_filter.bed")
+pol2_chip <- rtracklayer::import("../../data/POLR2A_consensus_peaks_filter.bed")
+
 
 # We'll need to define the promoters 
 gencode_promoters <- promoters(gencode_gr[gencode_gr$type == "gene"], 
@@ -255,4 +251,9 @@ percent_promoter_overlap <- length(unique(promoter_overlaps@from))/length(pol2_c
 ```
 
 Now let's move to working with Gencode and genomic ranges on our data set!
+
+total_exon_length <- gencode_gr[gencode_gr$type == "exon"] %>%
+  GenomicRanges::reduce() %>% 
+  width() %>%
+  sum()
 
