@@ -52,6 +52,7 @@ just having the advantage of indexing chromosome and strand to the start and sto
 # rtracklayer::import is the way to import a GTF into a GRanges (see above)
 gencode_gr <- rtracklayer::import("data/gencode.v32.annotation.gtf")
 
+gencode_df <- gencode_gr %>% as.data.frame()
 # ok wow this is a lot of inofrmaiton, mostly partiioned by the @ and $ symbol
 # Let's start with "indexing" this file with $values.
 # There are lots of these in @elementMetadata (e.g., gene_id, gene_name)
@@ -138,6 +139,7 @@ gencode_gr_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
 
 mrna_df <- filter(gencode_gr_length, gene_type == "protein_coding", type == "gene")
 hist(log10(mrna_df$width), breaks = 60)
+
 # We filterned our gencode_gr_length variable by "gene_type" setting it to only
 #"protein_coding" specified by Gencode in $gene_type (take a look at other gene types)
 # We see that most of the widths are 0.5 - 1 MB large, what about lncRNA?
@@ -236,7 +238,7 @@ total_exon_length/3.2e9
 ```{r}
 ### Let's import POLR2A Chip-seq files from k562 ENCODE project.
 
-pol2_chip <- rtracklayer::import("data/POLR2A_consensus_peaks_filter.bed")
+pol2_chip <- rtracklayer::import("/scratch/Shares/rinnclass/data/POLR2A_consensus_peaks_filter.bed")
 
 # We'll need to define the promoters 
 gencode_promoters <- promoters(gencode_gr[gencode_gr$type == "gene"], 
@@ -252,6 +254,7 @@ length(pol2_chip)
 length(unique(promoter_overlaps@from))
        
 percent_promoter_overlap <- length(unique(promoter_overlaps@from))/length(pol2_chip)
+percent_promoter_overlap
 ```
 
 Now let's move to working with Gencode and genomic ranges on our data set!
