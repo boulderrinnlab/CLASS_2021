@@ -1,0 +1,269 @@
+---
+title: "iranges_granges"
+author: "JR"
+date: "6/24/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+library(ggpubr)
+library(Gviz)
+source("util/_setup.R")
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+```
+
+### Have you ever wanted to find overlaps between two lists of genes? Well
+Iranges and GRanges are just the thing!
+
+#### Iranges allows one to index "windows" with properties. Say you had a vector
+of all genes and wanted to track start and stop. Iranges can keep the start, 
+stop and width of values. So this list of ranges (start and stop) for each 
+gene-length is essentially a vector or each column a gene id. With this indexing
+we can now apply several attributes to these ranges. For example if an enhancer 
+or other feature resided in the gene we could also track the start, stop of that
+"interval". 
+
+#### Granges is even more specially aadapted for features in a given genome. All
+the start, stops for each feature is given similar to Iranges. However, we could
+have a big problem since we have 23 chromosomes in the geneome! So simple start
+and stop indexing isn't enough as there could be up to 23 redudant "intervals" 
+that are actually unique. So we need to consider choromosome and coordinates. 
+Worse we also should think about the strand. So GRanges works similar to Iranges
+just having the advantage of indexing chromosome and strand to the start and stop.
+
+
+### Let's go explore the human geneome annotations from GENCODE.
+#### We will do this by importing a GTF file of these annotaitons.
+#### A GTF file is similar in a way to a .bed file with start stop of features
+#### and other associated metadata that is described here:
+###https://uswest.ensembl.org/info/website/upload/gff.html
+
+
+## Ok enough background let's start exploring the features of the human genome!
+```{r}
+
+# rtracklayer::import is the way to import a GTF into a GRanges (see above)
+gencode_gr <- rtracklayer::import("../../data/gencode.v32.annotation.gtf")
+#to be able to look at the gr as a data frame:
+gencode_df <- gencode_gr %>% as.data.frame() #but you can't use gr comands like intersect in the data frame format
+
+#if you View(gencode_gr) then hover over the thing you're interested in and click the arrow icon to the right then it will show how to index that layer
+
+
+# ok wow this is a lot of inofrmaiton, mostly partiioned by the @ and $ symbol
+# Let's start with "indexing" this file with $values.
+# There are lots of these in @elementMetadata (e.g., gene_id, gene_name)
+### gene_id is a key category as it is a unique identifier for every gene, where
+### as gene_id is a character value but still unique. 
+
+```
+
+### Now let's look at the gene_id indexable part of this GRanges
+```{r}
+
+#### Let's start to explore the genome annotations:
+
+#### First seqnamaes gets us information on levels of categories of ranges.
+#### Let's find out more using R help menu -- simply add ?OBJECT
+?seqnames
+
+#### gencode_gr is being accessed by seqnames indexed by @seqnames in gencode_gr
+#### we can pass this information along to head with a "pipe" in R %>%
+#### Think of the arrow pointing the information forward. Later we will see %in%
+#### and %over% etc. These are handy pipes to push information forwrard and in the
+#### later case with specified logical operators.
+  
+seqnames(gencode_gr) %>% head()
+#### ok so we can see at a highlevel seqnames provides us with the "levels"
+#### which in this case is the chromosome.
+
+#### adding summary and table to see values inside the seqnames.
+table(seqnames(gencode_gr)) %>% summary()
+table(seqnames(gencode_gr)) %>% head()
+#### This is telling us how many features are associated with each chromosome.
+#### This includes number of exons, start, stop and other information. Notice
+#### @elemnentMetadata has the individual features above that INDEXABLE! by 
+####  @elemnentMetadata$X (where X is the genome feature of interest)
+### Ok so we got back the sum of Ranges (length of features on each chromosome)
+### Note we see the Mitochondrial ([25] index) has very few features as expected
+
+### Now let's dig in a little deeper
+table(gencode_gr@elementMetadata$gene_id) %>% head()
+## we first indexed to elementMetadata throuhg the @ (the environment gives this)
+## then we went into the gene id column of that metadata via @elementMetadata$geneid.
+
+# Let's see what we get with gene_name
+table(gencode_gr@elementMetadata$gene_name)
+# Ok a bit better with gene names in ENSEMBLE ID and the number of isoforms of 
+# that geneid.
+```
+### Excercise go look at different aspects of $index in @elementMetadata. Also
+try indexing with [] in combination and or seperately to find specific values.
+
+
+## Data frame organization and analysis. Often we don't want all the GENCODE data
+## so we can make out own. 
+
+```{r}
+## For this let's determine the length of genes in the genome and see if there is
+## a difference for long noncoding RNA genes and mRNA genes. 
+### let's organize the data frame first
+
+
+#table(gencode_gr_length$type)
+#table(gencode_gr_length$gene_type)
+
+gencode_gr_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
+                           "gene_name" = gencode_gr@elementMetadata$gene_name,
+                           "gene_type" = gencode_gr@elementMetadata$gene_type,
+                           "type" = gencode_gr@elementMetadata$type,
+                           "start" = gencode_gr@ranges@start,
+                           "width" = gencode_gr@ranges@width)
+                           
+
+### Ok so now we have a new data frame with the information we want from gencode_gr
+## Note we see that we can index the RANGES for each gene with @ranges "level"
+## in there we can get the start and width (thus infer the stop).
+
+
+
+### Let's look at the width for mRNA genes
+### We are introducing a new R base function "filter" it does as it seems.
+?filter
+# Notice filter is used in a few different libraries and maybe an issue if you
+# use the unintended version. We want : Globally add filters to an EnsDb databas
+# lets put it to use and make an mrna_df
+
+mrna_df <- filter(gencode_gr_length, gene_type == "protein_coding", type == "gene")
+hist(log10(mrna_df$width), breaks = 60)
+# We filterned our gencode_gr_length variable by "gene_type" setting it to only
+#"protein_coding" specified by Gencode in $gene_type (take a look at other gene types)
+# We see that most of the widths are 0.5 - 1 MB large, what about lncRNA?
+
+lncrna_df <- filter(gencode_gr_length, gene_type == "lncRNA", type == "gene")
+hist(log10(lncrna_df$width), breaks = 60)
+### Huh it looks like lncRNAs cover half the space of mRNAs!
+### notice there are 240K and 250K lncRNA and mRNA values.
+### certainly there are not that many genes in the genome. So what is happening
+### these widths are associated with different properties of each gene 
+### (e.g., TSS = 1 and gene body maybe 0.5 to 1 MB)
+### This is why "ranges are so cool" it can have many annotations associated
+### with a single gene type. 
+
+## Now let's go find the widths associated with gene-lenght. 
+
+
+### What can the metadata tell us about the human genome? Let's see
+table(gencode_gr@elementMetadata$type)
+
+## cool this tell us a lot about the genome with one line! How many genes are
+## in the human genome? How many genes have non-cannonical start codons?
+
+## Now let's go find the length of genes. Notice we pipe into a "empty data frame"
+## then FILTER @elementMetadata%type to only "gene". then we ask what is the max
+## width of all genes in the genome (lncRNA, mRNA etc)
+
+genes_of_interest <- gencode_gr %>%
+  as.data.frame() %>%
+  filter(type == "gene",
+         width == max(width))
+
+## Here is another way to do the same thing, but we index into gencode_gr directly
+## using [ ] then within these brackets we specify what we want to index:
+## gencode_gr$type and set it ( == ) to "gene"
+## then we use our new gencode genes that were essentially "filtered" into 
+## longest_gene_index, we grab gencode_genes (our filtered list by indexing)
+## pipe this to the "width function" in Iranges
+?width
+## the width function is piped to "which.max" base R function that finds max length
+?which.max
+## in the end longest_gene_index will have one value of the longest genes in genome
+  
+gencode_genes <- gencode_gr[gencode_gr$type == "gene"]
+longest_gene_index <- gencode_genes %>%
+  width() %>%
+  which.max()
+
+
+## Let's try some deeper indexing.
+## we have gencode genes filtered to genes, take a look at this in the environment
+## we still have all the metadata associated with genes. We can now use our 
+## longest_gene_index to call out the one gene that is the longest
+gencode_genes$gene_name[longest_gene_index]
+width(gencode_genes[longest_gene_index])
+
+## We immediately see that RBFOX1 is the longest gene in the human genome.
+## How would you find the smallest gene?
+
+
+# Now let's find the total amount of the genome covered by exons.
+# We start by defining total_exon_length of all exons in genome.
+# We use indexing to get what we want - inside gencode_gr, we want to access
+# the $type index and set it to ( == ) only exons as there is more info $type
+# how many other catagories are there in $type? what are they (hint:summary)
+# Next we use the base Iranges "reduce" object. 
+?reduce
+# we see this is used by Iranges and Granges and base R. In this case we may have
+# two versions of the same exon (say short and long version). We want to reduce
+# this to a single exon. In this case we will merge to the longest exon. ? How
+# would we reduce to the smallest exon represented?
+
+total_exon_length <- gencode_gr[gencode_gr$type == "exon"] %>%
+  GenomicRanges::reduce() %>% 
+  width() %>%
+  sum()
+
+summary(total_exon_length)
+# We now have the total bases covered by exons in the human genome. We also know
+# the human genome is 3.9B base pairs so let's find the percentage by division:
+
+total_exon_length/3.2e9
+# Boom we can see the human genome is about 4% exons!
+
+
+
+
+```
+
+
+
+### FIND OVERLAPS: who has ever wanted to find the overlaps of their data with
+### a feature of the human genome? Let's load in a chip-seq peak file and find
+### the overlaps at promoter regions.
+
+```{r}
+### Let's import POLR2A Chip-seq files from k562 ENCODE project.
+
+pol2_chip <- rtracklayer::import("../../data/POLR2A_consensus_peaks_filter.bed")
+
+# We'll need to define the promoters 
+gencode_promoters <- promoters(gencode_gr[gencode_gr$type == "gene"], 
+                               upstream = 3e3, 
+                               downstream = 3e3)
+# ?promoters
+# Thing to think about how does this function know which is upstream and downstream
+promoter_overlaps <- findOverlaps(pol2_chip, gencode_promoters)
+# Note @from @to
+
+
+length(pol2_chip)
+length(unique(promoter_overlaps@from))
+       
+percent_promoter_overlap <- length(unique(promoter_overlaps@from))/length(pol2_chip)
+```
+
+Now let's move to working with Gencode and genomic ranges on our data set!
+
+```{r}
+#what % of the largets gene (RBFOX1) is exonic?
+
+
+```
+
