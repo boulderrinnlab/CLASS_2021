@@ -16,6 +16,7 @@ source("util/plotting_functions.R")
 source("util/_setup.R")
 library(Gviz)
 library(ggpubr)
+library(ggplot2)
 ```
 
 ```{r}
@@ -27,7 +28,7 @@ library(ggpubr)
  
 # First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
 
-fl <- list.files("results/consensus_peaks", full.names=TRUE)
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names=TRUE)
 consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
 
 consensus_peaks[[42]]$name %>%
@@ -39,6 +40,7 @@ consensus_peaks[[42]]$name %>%
 names(consensus_peaks) <- sapply(consensus_peaks, function(x){
   unlist(strsplit(x$name, "_"))[[1]]
 })
+names(consensus_peaks)
 
 ## Now we have a named list of consensus peaks in the environment -- let's take a look
 
@@ -63,16 +65,17 @@ num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
 ## Ok we are going to filter all samples that don't have at least 250 peaks. We
 ## can see how many this is in the environment sort too ...
 
-num_peaks_threshold <- 250
+#num_peaks_threshold <- 500 
 # Setting a threshold number in an object to be called below
 
-
-filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+hist(num_peaks_df$num_peaks, breaks = 1000, xlim = c(0, 2000))
+filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > 500]
+#cuttoff at the 8th percentile to remove DBPs with very small number of peaks
 
 
 # fun exeRcise to find what percentil 250 peaks is in the distribution of all 483 ChIP-seq data sets
 # hint ?ecdf (google it too :)
-#threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
+threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
 
 # we are going to calculate what percentile of the data 250 peaks would account for.
 # it looks scary but can be distilled pretty easy. 
@@ -98,6 +101,8 @@ g <- ggplot(num_peaks_df, aes(x = num_peaks)) +
   geom_histogram(bins = 70)
 
 show(g)
+
+
 # ?ggplot
 # We see that we are going to plot from num_peaks_df. The first parameter is data     # then where the data maps (aes). Since we are only looking at number of peaks we just # need the x axis and a histogram -- with some fancy formatting we will get into later # for now we just want to focus on the AES layer.
 
@@ -128,6 +133,8 @@ for(i in 1:length(filtered_consensus_peaks)) {
   rtracklayer::export(filtered_consensus_peaks[[i]], paste0("results/filtered_peaks/", names(filtered_consensus_peaks)[i], 
 "_consensus_peaks_filter.bed"))
 }
+#this needs the folders to already be there
+#can count the number of output files in terminal using list (ls | wc -l)
 ```
 
 
@@ -245,26 +252,30 @@ Now we are going to add some information ()
 ```{r}
 # The human TFs
 # https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx
-library(janitor)
-human_tfs <- readxl::read_excel("data/mmc2.xlsx",
+library(janitor) #janitor strips away extra excel formatting to help convert to df
+human_tfs <- readxl::read_excel("/scratch/Shares/rinnclass/data/mmc2.xlsx",
                                 sheet = 2, skip = 1)
 names(human_tfs)[4] <- "is_tf"
 
 # Checking to see how many overlaps there are.
 length(which(tolower(num_peaks_df$dbp) %in% tolower(human_tfs$Name)))
+#425 of our 446 DBPs are in the TFs list we just pulled from another paper (link above)
 
 # TODO: Manually match names -- doublecheck
-# Subset to just the columns we need.
+# Subset to just the columns we need. Overrides the human_tfs df to only include the data we want
 human_tfs <- human_tfs[tolower(human_tfs$Name) %in% tolower(num_peaks_df$dbp), 1:4]
 names(human_tfs) <- c("ensembl_id",
                       "dbp",
                       "dbd",
                       "tf")
+#adds the column names ^
 
+#add if it's a TF on the other list to our running num_peaks_df that contains most of our wanted information that we keep adding on to 
+#(since human_tfs is shorter the ones that aren't in the TFs list will have null (NA) for DBPs that aren't in the TFs list)
 num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
 # Let's check how many NAs -- we should have some missing values.
 length(which(is.na(num_peaks_df$ensembl_id)))
-write_csv(num_peaks_df, "chipseq/results/num_peaks_df.csv")
+write_csv(num_peaks_df, "results/num_peaks_df.csv")
 # A new column for the nunmber of overlaps with a mRNA
 ```
 
@@ -285,7 +296,7 @@ ggplot(num_peaks_df,
   geom_abline(slope = 1, linetype="dashed") +
   geom_smooth(method = "lm", se=F, formula = 'y ~ x',
               color = "#a8404c") +
-  stat_regline_equation(label.x = 35000, label.y = 18000) +
+  #stat_regline_equation(label.x = 35000, label.y = 18000) +
   ylim(0,60100) +
   xlim(0,60100)
 ```
