@@ -27,7 +27,7 @@ library(ggpubr)
  
 # First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
 
-fl <- list.files("results/consensus_peaks", full.names=TRUE)
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names=TRUE)
 consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
 
 consensus_peaks[[42]]$name %>%
@@ -63,16 +63,17 @@ num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
 ## Ok we are going to filter all samples that don't have at least 250 peaks. We
 ## can see how many this is in the environment sort too ...
 
-num_peaks_threshold <- 250
+num_peaks_threshold <- 500
 # Setting a threshold number in an object to be called below
 
+hist(num_peaks_df$num_peaks, breaks = 1000, xlim = c(0,2000))
 
 filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
 
 
 # fun exeRcise to find what percentil 250 peaks is in the distribution of all 483 ChIP-seq data sets
 # hint ?ecdf (google it too :)
-#threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
+threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
 
 # we are going to calculate what percentile of the data 250 peaks would account for.
 # it looks scary but can be distilled pretty easy. 
@@ -98,6 +99,10 @@ g <- ggplot(num_peaks_df, aes(x = num_peaks)) +
   geom_histogram(bins = 70)
 
 show(g)
+
+
+num_peaks_df$dbp[372]
+
 # ?ggplot
 # We see that we are going to plot from num_peaks_df. The first parameter is data     # then where the data maps (aes). Since we are only looking at number of peaks we just # need the x axis and a histogram -- with some fancy formatting we will get into later # for now we just want to focus on the AES layer.
 
@@ -246,7 +251,7 @@ Now we are going to add some information ()
 # The human TFs
 # https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx
 library(janitor)
-human_tfs <- readxl::read_excel("data/mmc2.xlsx",
+human_tfs <- readxl::read_excel("../../data/mmc2.xlsx",
                                 sheet = 2, skip = 1)
 names(human_tfs)[4] <- "is_tf"
 
@@ -264,7 +269,7 @@ names(human_tfs) <- c("ensembl_id",
 num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
 # Let's check how many NAs -- we should have some missing values.
 length(which(is.na(num_peaks_df$ensembl_id)))
-write_csv(num_peaks_df, "chipseq/results/num_peaks_df.csv")
+write_csv(num_peaks_df, "results/num_peaks_df.csv")
 # A new column for the nunmber of overlaps with a mRNA
 ```
 
