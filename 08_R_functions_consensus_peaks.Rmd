@@ -284,6 +284,11 @@ create_consensus_peaks <- function(broadpeakfilepath = "/scratch/Shares/rinnclas
   return(consensus_peaks)
 }
 
+# Write the consensus peaks to a file and take the name of the file
+# from the name of the list element -- which   should be the DBP name.
+for (i in 1:length(consensus_peaks)) {
+  rtracklayer::export(consensus_peaks[[i]],paste0("/scratch/Shares/rinnclass/Nina/CLASS_2021/results/consensus_peaks/", names(consensus_peaks)[i],"_consensus_peaks.bed"))
+}
 
 # Okay, let's run this function now. 
 # Note that the filepath is set as a default parameter.
