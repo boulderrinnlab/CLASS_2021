@@ -1,6 +1,9 @@
 
 
-
+get_dbp_name <- function(x) {
+  file_name <- str_extract(x, "[\\w-]+\\.broadPeak")
+  return(str_extract(file_name, "^[^_]+(?=_)"))
+}
 
 #Functions we need
 
@@ -203,10 +206,11 @@ subset_rmsk <- function(rmsk_gr, rep_level = "family") {
 #'To add downstream sequence to feature subset
 
 get_promoter_regions <- function(gencode_gr, biotype, upstream = 3e3, downstream = 3e3) {
-  
+  #filter out only genes granges
   genes <- gencode_gr[gencode_gr$type == "gene"]
+  #get genes in biotype
   genes <- genes[genes$gene_type %in% biotype]
-  
+  #get promoters
   proms <- GenomicRanges::promoters(genes, upstream = upstream, downstream = downstream)
   
   return(proms)
