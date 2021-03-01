@@ -14,9 +14,9 @@ library(rtracklayer)
 library(tidyverse)
 library(ggpubr)
 library(Gviz)
-source("util/_setup.R")
-source("util/intersect_functions.R")
-source("util/plotting_functions.R")
+source("~/CLASS/util/_setup.R")
+source("~/CLASS/util/intersect_functions.R")
+source("~/CLASS/util/plotting_functions.R")
 ```
 
 ### Have you ever wanted to find overlaps between two lists of genes? Well
@@ -50,7 +50,7 @@ just having the advantage of indexing chromosome and strand to the start and sto
 ```{r}
 
 # rtracklayer::import is the way to import a GTF into a GRanges (see above)
-gencode_gr <- rtracklayer::import("data/gencode.v32.annotation.gtf")
+gencode_gr <- rtracklayer::import("~/CLASS/data/gencode.v32.annotation.gtf")
 
 # ok wow this is a lot of inofrmaiton, mostly partiioned by the @ and $ symbol
 # Let's start with "indexing" this file with $values.
@@ -135,8 +135,10 @@ gencode_gr_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
 # Notice filter is used in a few different libraries and maybe an issue if you
 # use the unintended version. We want : Globally add filters to an EnsDb databas
 # lets put it to use and make an mrna_df
+summary(gencode_gr_length)
 
 mrna_df <- filter(gencode_gr_length, gene_type == "protein_coding", type == "gene")
+summary(mrna_df)
 hist(log10(mrna_df$width), breaks = 60)
 # We filterned our gencode_gr_length variable by "gene_type" setting it to only
 #"protein_coding" specified by Gencode in $gene_type (take a look at other gene types)
@@ -169,7 +171,7 @@ genes_of_interest <- gencode_gr %>%
   as.data.frame() %>%
   filter(type == "gene",
          width == max(width))
-
+summary(genes_of_interest)
 ## Here is another way to do the same thing, but we index into gencode_gr directly
 ## using [ ] then within these brackets we specify what we want to index:
 ## gencode_gr$type and set it ( == ) to "gene"
@@ -212,14 +214,18 @@ width(gencode_genes[longest_gene_index])
 
 total_exon_length <- gencode_gr[gencode_gr$type == "exon"] %>%
   GenomicRanges::reduce() %>% 
-  width() %>%
-  sum()
+  sum(width())
 
-summary(total_exon_length)
+total_exon_length
 # We now have the total bases covered by exons in the human genome. We also know
 # the human genome is 3.9B base pairs so let's find the percentage by division:
+genes_of_interest
 
-total_exon_length/3.2e9
+total_longest <- filter(gencode_gr_length, gene_id == genes_of_interest$gene_id)
+exon_longest <- filter(total_longest, type == "exon")
+count(exon_longest)
+count(exon_longest) / count(total_longest)
+
 # Boom we can see the human genome is about 4% exons!
 
 
@@ -236,15 +242,21 @@ total_exon_length/3.2e9
 ```{r}
 ### Let's import POLR2A Chip-seq files from k562 ENCODE project.
 
-pol2_chip <- rtracklayer::import("data/POLR2A_consensus_peaks_filter.bed")
+pol2_chip <- rtracklayer::import("~/CLASS/data/POLR2A_consensus_peaks_filter.bed")
 
 # We'll need to define the promoters 
 gencode_promoters <- promoters(gencode_gr[gencode_gr$type == "gene"], 
                                upstream = 3e3, 
                                downstream = 3e3)
-# ?promoters
+gencode_promoters
+?promoters
 # Thing to think about how does this function know which is upstream and downstream
 promoter_overlaps <- findOverlaps(pol2_chip, gencode_promoters)
+
+promoter_overlaps
+ov_pol2 <- pol2_chip[unique(promoter_overlaps@from)]
+ov_promoter <- gencode_promoters[unique(promoter_overlaps@to)]
+head(ov_promoter)
 # Note @from @to
 
 

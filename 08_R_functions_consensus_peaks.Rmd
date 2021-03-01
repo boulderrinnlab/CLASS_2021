@@ -115,101 +115,42 @@ Below we will go through each step of the function that occcurs in between { }.
 You can check out Util folder 
 
 ```{r}
+extract_tf <- function(fl,x){
+  file_name <- str_extract(x, "[\\w-]+\\.broadPeak")
+  return(str_extract(file_name, "^[^_]+(?=_)"))
+}
+
 create_consensus_peaks <- function(broadpeakfilepath = "/scratch/Shares/rinnclass/data/peaks") {
   
   fl <- list.files(broadpeakfilepath, 
                    full.names = TRUE)
-  
-  
-  # fl <- fl[grep("broadPeak", fl)]
-  #This is for safety if you want to grab the right file type from 'macs' output.
-
-  # Let's subset this data for testing
-  # In practice you'll want to run this on the full dataset.
   fl <- fl[1:20]
-  
-# fl: this is just going to be a list of the peak file names
-# this used the R function "list.files" -- take a look:
-# ?list.files
-# So we have now read in all the file names in the paramater path.
-
-
-## Here we are reading in files first again and putting them in the object "create_consensus_peaks"
-## We are using grep to just grab broadPeak files. This is because the macs folder has many different
-## versions of peak files. It is just useful to be sure it grabs the right file type.
-## In our case the folder all_peak_files is only broadPeak files so a bit redundant....for safety.
-  
-  tf_name <- sapply(fl, function(x){
-
-## The first command sapply (? sapply) needs a parameter of what to work on (fl or list of file names)
-## then sapply wants to perform a funciton -- here we set the function to carry out the content in { }
-## Here these commands are being executed in the function(x) that is anonymous or
-## unnamed function. 
-    
+  tf_name <- sapply(fl, function(x){ #read and find tfs in /data/peaks directory
+ 
     file_name <- str_extract(x, "[\\w-]+\\.broadPeak")
-    str_extract(file_name, "^[^_]+(?=_)")
+    return(str_extract(file_name, "^[^_]+(?=_)"))
   })
   
-## Here we just named the file with str_extract and regex.
-# ?str_extract (need tidyverse library loaded)
-# The paramaters are:
-  
-# string: the input vector of coerciable data (e.g. character string) -- peak_files
-# here we are using x that is being read in by the function which is an individual file name.
-
-  
-#pattern: the pattern to look for across the input vector. this is using regular
-# expression (regex). You don't need to know this much regex, but if you are ever 
-# curious you can use the online regex calculator :)
-# 
-# https://regexr.com/
-# 
-# if you paste in the two regex commands below it will tell you what they are looking for.
-
-## Now our goal is to associate the replicate files with a unique DBP name. So 
-## 'unique_tf' will only provide one DBP name -- but will later be associated with
-## each replicate file associated with that DBP name.
-
+  #remove tf_name redunduncy
   unique_tf <- unique(tf_name)
-
-## ?unique
-## here we see the unique function provide information to index each DBP as a unique 
-## entry.
-
- 
-  consensus_peaks <- list()
   
-  # This for loop will iterate over all dna binding proteins.
+  #find consensus_peaks of each unique_tf
+  consensus_peaks <- list()
+
   for (i in 1:length(unique_tf)) {
-  # this is why we set up unique_tf above so the for loop will only run on one DBP
-  # at a time, and merges the peaks of the replicate files associated with each DBP.
-  # then the for loop will move onto the next unique_tf and merge those peak files.
-    
     dbp <- unique_tf[i]
-    
-    cat("Now I'm running", dbp, "\n")
-    # this is just a fun way of seeing the progress of the for loop -- also good
-    # for debugging when a file fails -- you know the last successful run.
-    
-    tf_files <- fl[grep(dbp, fl)]
-    # here we are creating dbp to use in grep to grab the dbp entry and find it in fl
-    # this way we only intersect the replicate files that have the same dbp name.
-    # this is why we indexed into unique_tf[i]. Then the next unique DBP name will
-    # run in the next iteration of the loop.
+    cat("Now I'm running", dbp, "\n") #print current dbp[i]
+    tf_files <- fl[grep(dbp, fl)] #subset only dbp[i] of fl
     if (length(tf_files) > 1) {
     # turns out some files don't have replicates :( so we are saying here that if
     # the current (i) entry for 'tf_files' is equal or less than 1 to stop running.
     # we can't intersect peaks if there is only one peak file :)
       
-    peak_list <- c()
-    # making a new object peak list that will be populated by the loop below.
-    # we leave it empty until the loop runs by simpling putting c()
+      peak_list <- c()
     
-    for (j in 1:length(tf_files)) {
-## This for loop is going to go through each peak file and store it in peak_list
-      
-      peak_list <- c(peak_list, read_peaks(tf_files[j]))
-    }
+      for (j in 1:length(tf_files)) {
+        peak_list <- c(peak_list, read_peaks(tf_files[j]))
+      }
     # read_peaks is a function we already made in .util. It's pretty basic and 
     # commented out below
     

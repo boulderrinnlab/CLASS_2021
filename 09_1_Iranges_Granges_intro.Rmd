@@ -16,7 +16,7 @@ library(Gviz)
 library(IRanges)
 source("util/_setup.R")
 source("util/intersect_functions.R")
-source("util/plotting_functions.R")
+source("~/CLASS/Justin/util/plotting_functions.R")
 ```
 
 Goal: to understand the basic usage of Iranges and Granges. These are core to almost
@@ -59,11 +59,8 @@ ir3 <- c(ir1, ir2)
 plotRanges(ir3)
 
 
-# The nice thing about IRanges as we can track values associated with each range
-# for example we may want to name these replicate 1 and replicate 2
-# let's give it a try
 
-names(ir1) <- paste("replicate_1", 1:3, sep = " ")
+names(ir1) <- paste("replicate_1", 1:3, sep = " ") #add replicate as names, metadata
 ir1
 # Nice we can see we didn't loose any infomation but we now have a new "level"
 # to index that is the name of the range or @NAMES in environment. Let's do the 
