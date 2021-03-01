@@ -1,6 +1,9 @@
 
 
-
+get_dbp_name <- function(x) {
+  file_name <- str_extract(x, "[\\w-]+\\.broadPeak")
+  return(str_extract(file_name, "^[^_]+(?=_)"))
+}
 
 #Functions we need
 
@@ -19,7 +22,7 @@
 #' @param consensus_file_path the path to consensus peak files
 
 
-import_peaks <- function(consensus_file_path = "data/test_work/all_peak_files") {
+import_peaks <- function(consensus_file_path = "scratch/Shares/rinnclass/data/peaks") {
   peak_files <- list.files(consensus_file_path, full.names = T)
   file_names <- str_extract(peak_files, "[\\w-]+\\.bed")
   tf_name <- str_extract(file_names, "^[^_]+(?=_)")

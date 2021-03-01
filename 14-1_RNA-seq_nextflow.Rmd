@@ -143,11 +143,3 @@ group,replicate,fastq_1,fastq_2,strandedness
 
 Our data is not stranded, but this is an important consideration even if you don't have it.
 
-```{r}
-
-```
-
-```{r}
-
-```
-
