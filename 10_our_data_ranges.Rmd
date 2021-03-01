@@ -167,7 +167,7 @@ g + geom_point() +
 ## is covered -- but hey that is a result !
 ```
 
-```{R finding overlaps with genomic features from GENCODE}
+```{r finding overlaps with genomic features from GENCODE}
 
 gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
 
@@ -279,7 +279,7 @@ write_csv(num_peaks_df, "results/num_peaks_df.csv")
 
 ## Let's take a look at num_peak_df
 
-
+```{r}
 # now let's plot x as num_peaks and y num overlapping promoters.
 
 ggplot(num_peaks_df,
@@ -298,9 +298,6 @@ ggplot(num_peaks_df,
   xlim(0,60100)
 ```
 
-```{r}
-
-```
 
 ```{r Let's see the overlaps with gene bodies}
 
