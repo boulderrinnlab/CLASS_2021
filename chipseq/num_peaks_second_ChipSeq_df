@@ -1,0 +1,5 @@
+dbp,num_peaks,total_peak_length,peaks_overlapping_promoters,peaks_overlapping_lncrna_promoters,peaks_overlapping_mrna_promoters
+ETS1,7626,3236244,4043,1218,2825
+POLR2A,9535,19463913,8185,2291,5894
+POLR2AphosphoS2,38215,45059358,13554,4662,8892
+TAF1,10463,4611442,13130,2906,10224
