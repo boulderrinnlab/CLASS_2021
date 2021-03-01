@@ -15,7 +15,7 @@ source("util/intersect_functions.R")
 source("util/plotting_functions.R")
 source("util/_setup.R")
 library(Gviz)
-library(ggpubr)
+library(ggplot2)
 ```
 
 ```{r}
@@ -27,7 +27,8 @@ library(ggpubr)
  
 # First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
 
-fl <- list.files("results/consensus_peaks", full.names=TRUE)
+fl <- list.files("../../data/consensus_peaks", full.names=TRUE)
+
 consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
 
 consensus_peaks[[42]]$name %>%
@@ -65,9 +66,9 @@ num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
 
 num_peaks_threshold <- 500
 # Setting a threshold number in an object to be called below
+dbps_with_sufficient_peaks <- num_peaks_df$dbp[num_peaks_df$num_peaks > num_peaks_threshold]
 
-
-filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+filtered_consensus_peaks <- consensus_peaks[dbps_with_sufficient_peaks]
 
 
 # fun exeRcise to find what percentil 250 peaks is in the distribution of all 483 ChIP-seq data sets
@@ -196,6 +197,8 @@ gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode
 lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
 rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.gtf")
 
+table(gencode_gr$gene_type)
+
 # rtraklayer::export is going to make a file we can use in the future so we don't 
 # have to run this each time. Note we set up the parameters for                     # "get_promoter_regions" function. So we can repeat this process by changing
 # the biotype parameter to different gene-types.
@@ -217,10 +220,11 @@ rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
 # "countOverlaps" function that will find overlaps with a feature. 
 # the final parameter decides to produce a matrix or dataframe of the overlap counts
 
-promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "counts")
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
 
+promoter_peak_counts[1:10,1:10]
 # We can see the parameters of count_peaks_per_feature
-
+(rowSums(promoter_peak_counts)/ncol(promoter_peak_counts))*100
 # This is cool information so let's keep building our 'num_peaks_df' by indexing.
 
 num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
