@@ -5,6 +5,7 @@ date: "3/1/2021"
 output: html_document
 ---
 
+Directions:
 pull 4 DBPs (2 replicates each) from rinnclass/data and copy into a folder to just run through those
 make consensus peaks
 create promoter regions - how many binding sites with lncRNA and mRNAs and all promoters
