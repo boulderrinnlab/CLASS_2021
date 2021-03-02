@@ -1,0 +1,84 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+library(Gviz)
+library(ggpubr)
+```
+
+```{r}
+
+##pull the files and generate consensus_peaks_group1
+fl <- list.files("../second_chipseq/results_data_replicates", full.names=TRUE)
+#merge the consensus peaks
+#consensus_peaks_group1 <- lapply(fl, rtracklayer::import)
+consensus_peaks_group1 <- create_consensus_peaks("/scratch/Shares/rinnclass/Chelsea/second_chipseq/results_data_replicates")
+
+#split apart the names
+names(consensus_peaks_group1) <- sapply(consensus_peaks_group1, function(x){
+  unlist(strsplit(x$name, "_"))[[1]]
+})
+
+
+#generate a data.frame of the length and names
+num_peaks_df <- data.frame("dbp" = names(consensus_peaks_group1),
+                           "num_peaks" = sapply(consensus_peaks_group1, length))
+
+
+#Get a glance at the plot of peaks
+g <- ggplot(num_peaks_df, aes(x = num_peaks)) + 
+  geom_histogram(bins = 70)
+
+show(g)
+
+
+```
+
+```{r}
+#exporting the merged consensus peaks
+for(i in 1:length(consensus_peaks_group1)) {
+  rtracklayer::export(consensus_peaks_group1[[i]], paste0("results/filtered_peaks_group1/", names(consensus_peaks_group1)[i], 
+"_consensus_peaks_filter.bed"))
+}
+
+##Number of peaks (sum of the width)
+num_peaks_df$total_peak_length <- sapply(consensus_peaks_group1, function(x) sum(width(x)))
+
+
+#Overlaps of genomic features from Encode
+gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
+
+
+# get promoter regions is working on genocde and extracting both lncRNA and mRNA    # promoters
+lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
+rtracklayer::export(lncrna_mrna_promoters, "results/promoter_regions/lncrna_mrna_promoters.gtf")
+
+# "get_promoter_regions" function. So we can repeat this process by changing
+# the biotype parameter to different gene-types.
+lncrna_promoters <- get_promoter_regions(gencode_gr, biotype = "lncRNA")
+rtracklayer::export(lncrna_promoters, "results/lncrna_promoters.gtf")
+
+# Same idea to make a mRNA list of promoters only
+mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
+
+```
+
+```{r}
+
+# Let's count the number of times a DBP peak overlapped a promoter by using the "count_peaks_per_feature" function
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, consensus_peaks_group1, type = "counts")
+
+#Add the column "peaks overlapping_promoters" on the num_peaks_df data.frame
+num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
+
+# A new column for the nunmber of overlaps with a lncRNA
+num_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[,lncrna_promoters$gene_id])
+
+# A new column for the number of overlaps with a mRNA
+num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
+
+```
