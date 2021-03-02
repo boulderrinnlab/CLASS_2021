@@ -222,7 +222,7 @@ rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
 # "countOverlaps" function that will find overlaps with a feature. 
 # the final parameter decides to produce a matrix or dataframe of the overlap counts
 
-promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "counts")
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, consensus_peaks_group1, type = "counts")
 
 # We can see the parameters of count_peaks_per_feature
 
