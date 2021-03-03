@@ -1,0 +1,100 @@
+---
+title: "210301_consensus_peak_overlay"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+library(Gviz)
+library(ggpubr)
+```
+
+## R Markdown
+
+```{r}
+fl <- list.files("/Users/niri2724/CLASS/Nina/broad_peaks", full.names=TRUE)
+broad_peaks <- lapply(fl, rtracklayer::import)
+
+consensus_peaks <- create_consensus_peaks(broadpeakfilepath = "/Users/niri2724/CLASS/Nina/broad_peaks")
+
+# to look T CONSENSUS_PEAKS 
+table(consensus_peaks[[2]]$name) %>%
+  head()
+
+# Now we are going to use an unamed or annonymous function to add the name of 
+# the DBP associated with it's Granges. Here the function simply uses 'strsplit'
+# function to split the current consensus peak in X and append the name column
+# with the index of the name of the DPB being 1.
+names(consensus_peaks) <- sapply(consensus_peaks, function(x){
+  unlist(strsplit(x$name, "_"))[[1]]
+})
+
+names(consensus_peaks)
+
+# We now want to turn our list of Granges into a data frame (data.frame) which
+#more like your typical excel spreadsheet. 
+
+# we will first use data.frame and name the columns of the data frame "dbp" & num_peaks for the number of peaks -- we will call this dataframe num_peaks_df.
+
+# To get the names we use name(consensus peaks) which is the DBP name in Granges list
+
+# To get the number of peaks (each peak has a unique name DBP_peak#) we use the 
+#length function to get the length of that vector of peak ranges for each DBP.
+
+num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
+                           "num_peaks" = sapply(consensus_peaks, length))
+
+#filtre
+num_peaks_threshold <- 500
+filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+
+# MAKE table of our filtered consensus peaks
+# we need to run a for loop over all the files in filtered_consensus_peaks (460)
+# for each interaction the function (the good stuff is betwee {} ) will use           # rtracklayer::export function for file 1 and make a bed file for each filtered       # consensus peak file.
+
+for(i in 1:length(filtered_consensus_peaks)) {
+  rtracklayer::export(filtered_consensus_peaks[[i]], paste0("results/filtered_peaks_5examples/", names(filtered_consensus_peaks)[i], 
+"_consensus_peaks_filter_5_examples.bed"))
+}
+
+
+# finding overlaps with genomic features from GENCODE
+
+gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
+
+table(gencode_gr$gene_type)
+
+lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
+rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.gtf")
+
+lncrna_promoters <- get_promoter_regions(gencode_gr, biotype = "lncRNA")
+rtracklayer::export(lncrna_promoters, "results/lncrna_promoters.gtf")
+# Same idea to make a lncRNA list of promoters only
+
+mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
+# Same idea to make a mRNA list of promoters only
+
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
+
+promoter_peak_counts[1:10,1:10]
+
+# We can see the parameters of count_peaks_per_feature
+rowSums(promoter_peak_counts)
+(rowSums(promoter_peak_counts)/ncol(promoter_peak_counts))*100
+
+num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
+# we can see we just made a new column 'peaks_overlapping_promters' 
+
+num_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[,lncrna_promoters$gene_id])
+# A new column for the nunmber of overlaps with a lncRNA
+
+num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
+
+
+```

@@ -71,6 +71,9 @@ hist(num_peaks_df$num_peaks, breaks = 1000)
 
 hist(num_peaks_df$num_peaks, breaks = 1000, xlim = c(0, 2000))
 
+#new line just added to keep it more save 
+#dbps_with_sufficient_peaks <- num_peaks_df$num_peaks_df$num_peaks > num_peaks_threshold]
+
 filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
 
 
@@ -202,6 +205,9 @@ gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode
 lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
 rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.gtf")
 
+table(gencode_gr$gene_type)
+
+
 # rtraklayer::export is going to make a file we can use in the future so we don't 
 # have to run this each time. Note we set up the parameters for                     # "get_promoter_regions" function. So we can repeat this process by changing
 # the biotype parameter to different gene-types.
@@ -223,9 +229,13 @@ rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
 # "countOverlaps" function that will find overlaps with a feature. 
 # the final parameter decides to produce a matrix or dataframe of the overlap counts
 
-promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "counts")
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
+
+promoter_peak_counts[1:10,1:10]
 
 # We can see the parameters of count_peaks_per_feature
+rowSums(promoter_peak_counts)
+(rowSums(promoter_peak_counts)/ncol(promoter_peak_counts))*100
 
 # This is cool information so let's keep building our 'num_peaks_df' by indexing.
 
