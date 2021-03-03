@@ -28,6 +28,11 @@ num_peaks_df <- data.frame("dbp" = names(consensus_peaks_group1),
                            "num_peaks" = sapply(consensus_peaks_group1, length))
 
 
+#could generate a cut off
+#num_peaks_threshold <- 500
+#filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+#REMINDER if you want to use the filter that you need to replace "consensus_peaks_group1" with filtered_consensus_peaks
+
 #Get a glance at the plot of peaks
 g <- ggplot(num_peaks_df, aes(x = num_peaks)) + 
   geom_histogram(bins = 70)
