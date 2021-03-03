@@ -1,6 +1,9 @@
 
 
-
+get_dbp_name <- function(x) {
+  file_name <- str_extract(x, "[\\w-]+\\.broadPeak")
+  return(str_extract(file_name, "^[^_]+(?=_)"))
+}
 
 #Functions we need
 
