@@ -27,19 +27,19 @@ library(ggpubr)
  
 # First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
 
-fl <- list.files("results/consensus_peaks", full.names=TRUE)
+fl <- list.files("../../data/consensus_peaks", full.names=TRUE)
+
 consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
 
 consensus_peaks[[42]]$name %>%
   head()
-# Now we are going to use an unamed or annonymous function to add the name of 
-# the DBP associated with it's Granges. Here the function simply uses 'strsplit'
-# function to split the current consensus peak in X and append the name column
-# with the index of the name of the DPB being 1.
+
+# only get the name of consensus, not replicate numbers
 names(consensus_peaks) <- sapply(consensus_peaks, function(x){
   unlist(strsplit(x$name, "_"))[[1]]
 })
 
+summary(consensus_peaks)
 ## Now we have a named list of consensus peaks in the environment -- let's take a look
 
 ```
@@ -58,34 +58,12 @@ length function to get the length of that vector of peak ranges for each DBP.
 num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
                            "num_peaks" = sapply(consensus_peaks, length))
 
-## Let's take a look at what we got.
+num_peaks_df
 
-## Ok we are going to filter all samples that don't have at least 250 peaks. We
-## can see how many this is in the environment sort too ...
-
-num_peaks_threshold <- 250
-# Setting a threshold number in an object to be called below
-
-
+#8th percentile
+num_peaks_threshold <- quantile(num_peaks_df$num_peaks, 0.08)
 filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
 
-
-# fun exeRcise to find what percentil 250 peaks is in the distribution of all 483 ChIP-seq data sets
-# hint ?ecdf (google it too :)
-#threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
-
-# we are going to calculate what percentile of the data 250 peaks would account for.
-# it looks scary but can be distilled pretty easy. 
-# round is rounding the number that comes out of the inner functions.
-# ecdf is empircal cumulative distribution function. This will work on the number of  # peaks for each DBP in our num_peaks_df. So it will generate a 483 ECDFs one for
-# the list of peaks for each DBP. Then it is filtering out all samples with less
-# than 250 peaks. 
-  
-# In the end we generate a list of filtered consensus peaks of DBPs > 250 peaks.
-
-
-## We can see that there are 23 elements that don't have at least 250 peaks.
-## Find out which genes went missing. Hint: change the threshold from > to <
 ```
 
 
@@ -161,7 +139,7 @@ g + geom_point() +
 ## is covered -- but hey that is a result !
 ```
 
-```{R finding overlaps with genomic features from GENCODE}
+```{r finding overlaps with genomic features from GENCODE}
 
 gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
 
@@ -271,7 +249,7 @@ write_csv(num_peaks_df, "chipseq/results/num_peaks_df.csv")
 
 ## Let's take a look at num_peak_df
 
-
+```{r}
 # now let's plot x as num_peaks and y num overlapping promoters.
 
 ggplot(num_peaks_df,
@@ -290,9 +268,6 @@ ggplot(num_peaks_df,
   xlim(0,60100)
 ```
 
-```{r}
-
-```
 
 ```{r Let's see the overlaps with gene bodies}
 
