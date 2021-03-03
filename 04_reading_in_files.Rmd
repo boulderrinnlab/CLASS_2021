@@ -39,8 +39,17 @@ these packages ready to go for the future! It's not bad practice to plan ahead w
 you move into a new environment. Also a good way to learn install.packages :)
 
 ```{r}
+<<<<<<< HEAD
 ?install.packages()
 install.packages(GenomicRanges)
+=======
+?install.packages
+#install.packages("tidyverse")
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+#     install.packages("BiocManager", version = '3.10')
+# 
+# BiocManager::install("GenomicRanges")
+>>>>>>> origin/in_class
 ```
 Now try installing the packages listed above. just paste in the name above into 
 the install packages R function.
@@ -226,21 +235,42 @@ back_to_long <- gather(wide_file, key = "dbp", value = "num_peaks")
 head(file)
 ### The total peak length is quite long, let's make it in Millions
 ### NOTE: PIPE "%>%"
+<<<<<<< HEAD
 new_file <- file %>% mutate(length_million = file$total_peak_length / 1000000) %>%
 head(new_file)
+=======
+# The pipe will put evaluate first what's on the left hand side of the pipe
+# and place it as the first argument of the function on the right hand side.
+peaks_per_dbp <- peaks_per_dbp %>%
+  dplyr::mutate(tpl_m = total_peak_length / 1000000)
+>>>>>>> origin/in_class
 ### Cool now we have a new column that is much easier to read for total length.
 
 ### Lets see if we can write over the previous column instead of removing it
 ### we can just set the new col to the old col name
+<<<<<<< HEAD
 new_file2 <- file %>% 
   mutate(total_peak_length = file$total_peak_length / 1000000) 
 head(new_file2)
+=======
+peaks_per_dbp <- peaks_per_dbp %>% 
+  mutate(total_peak_length = total_peak_length / 1000000) 
+head(peaks_per_dbp)
+hist(peaks_per_dbp$total_peak_length)
+>>>>>>> origin/in_class
 ### Sweet we can mutate and just overide columns -- but we can also perform a FUN!
 ### NOTE IFELSE
 ### Let's give it a go:
+<<<<<<< HEAD
 new_file3 <- new_file2 %>% 
   mutate(FUN_COL = ifelse(new_file2$total_peak_length < 1, "small",
                           ifelse(new_file2$total_peak_length < 30, "medium", "large")))
+=======
+peaks_per_dbp <- peaks_per_dbp %>% 
+  mutate(peak_genome_coverage = ifelse(total_peak_length < 1, "small",
+                          ifelse(total_peak_length < 30, "medium", "large")))
+peaks_per_dbp$peak_genome_coverage
+>>>>>>> origin/in_class
 
 hist(new_file3)
 # this is super inefficient but also efficient to get a lot of info. What can we 
@@ -251,12 +281,41 @@ head(new_file3)
 ### to want to take a continious variable such as gene expression levels and
 ### define them as "categorical" or high medium low. 
 ### Let's take a look
+<<<<<<< HEAD
 summary(new_file3$total_peak_length)
 ### Same as above just much easier numbers to read. ok what if we wanted to find
 ### the avearage legnth of peak_length by category? This is a good example how 
 ### R logic is grounded for statistics we will discuss later.
 
 
+=======
+table(peaks_per_dbp$peak_genome_coverage)
+
+# R represents categorical variables with factors (which represent each unique character
+# as a number under the hood). This makes it possible to run regressions and plot
+# character data. We'll get more practice with factors later. One thing to note now
+# is that categories that have a natural ordering to them like small, med, large
+# can be properly ordered with the levels parameter. They will be represented by 
+# 1, 2, and 3 respectively. Without the levels argument, the factor levels would be 
+# in alphanumeric ordering.
+peaks_per_dbp <- peaks_per_dbp %>%
+  mutate(peak_genome_coverage = factor(peak_genome_coverage, levels = c("small", "medium", "large")))
+
+peaks_per_dbp$peak_genome_coverage
+
+head(as.character(peaks_per_dbp$peak_genome_coverage))
+head(as.numeric(peaks_per_dbp$peak_genome_coverage))
+table(as.numeric(peaks_per_dbp$peak_genome_coverage))
+
+plot(peaks_per_dbp$peak_genome_coverage, peaks_per_dbp$num_peaks)
+
+# Notice that the plot function is pretty sophisticated. It figured out that 
+# we have a factor variable with a numeric y-axis and decided to make a box and whisker plot.
+
+# What if we wanted not just to plot this, but find out the average total_peak_length
+# by category? R is really made for these types of questions and we'll learn how 
+# to do this type of thing in upcoming classes.
+>>>>>>> origin/in_class
 ```
 
 END Lesson
