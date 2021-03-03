@@ -3,6 +3,8 @@ title: "Class10_exercise"
 author: "Katy Walsh"
 date: "3/1/2021"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 Directions:

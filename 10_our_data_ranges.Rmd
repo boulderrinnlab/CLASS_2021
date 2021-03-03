@@ -65,11 +65,8 @@ num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
 ## Ok we are going to filter all samples that don't have at least 250 peaks. We
 ## can see how many this is in the environment sort too ...
 
-<<<<<<< HEAD
-#num_peaks_threshold <- 500 
-=======
+
 num_peaks_threshold <- 500
->>>>>>> origin/in_class
 # Setting a threshold number in an object to be called below
 
 hist(num_peaks_df$num_peaks, breaks = 1000, xlim = c(0, 2000))
