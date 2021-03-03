@@ -81,4 +81,7 @@ num_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[
 # A new column for the number of overlaps with a mRNA
 num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
 
+
+write_csv(num_peaks_df, "results/num_peaks_df.csv")
+
 ```
