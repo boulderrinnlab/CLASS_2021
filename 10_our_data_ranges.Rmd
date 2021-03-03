@@ -283,6 +283,11 @@ names(human_tfs) <- c("ensembl_id",
                       "tf")
 
 num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
+
+table(num_peaks_df$tf)
+not_tfs <- num_peaks_df %<% filter(tf=="No")
+
+
 # Let's check how many NAs -- we should have some missing values.
 length(which(is.na(num_peaks_df$ensembl_id)))
 length(which(!is.na(num_peaks_df$ensembl_id)))
@@ -436,6 +441,9 @@ Lets find how many promoters don't have any DBPs bound
 ```{r determining if a promoter is never bound}
 
 unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp < 1)
+
+nrow(unbound_promoters)
+
 # here is just a simple index and filter of the index to have at least 1 dbp bound.
 write_csv(unbound_promoters, "results/unbound_lncrna_mrna_promoters.csv")
 
@@ -456,7 +464,7 @@ summary(num_ovl)
 table(num_ovl)
 
 # There are no DBPs that have no promoter overlaps. The minimum number of promoter
-# overlaps is 54
+
 ```
 
 
