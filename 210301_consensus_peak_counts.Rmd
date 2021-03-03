@@ -88,13 +88,18 @@ promoter_peak_counts[1:10,1:10]
 rowSums(promoter_peak_counts)
 (rowSums(promoter_peak_counts)/ncol(promoter_peak_counts))*100
 
-num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
+#  new df
+num_filtered_peaks_df <- data.frame("dbp" = names(filtered_consensus_peaks),
+                           "num_peaks" = sapply(filtered_consensus_peaks, length))
+
+
+num_filtered_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
 # we can see we just made a new column 'peaks_overlapping_promters' 
 
-num_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[,lncrna_promoters$gene_id])
+num_filtered_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[,lncrna_promoters$gene_id])
 # A new column for the nunmber of overlaps with a lncRNA
 
-num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
+num_filtered_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
 
 
 ```
