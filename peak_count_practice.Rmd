@@ -1,0 +1,88 @@
+---
+title: "peak_count_practice"
+author: "MC"
+date: "12/3/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+library(Gviz)
+library(ggpubr)
+```
+
+
+'''{r}
+# We have now have explored our function to make "consensus peaks". Now we want
+# to get them all into a named list of Granges (so we can track where the peaks are
+# and which chromosome they are on).
+
+# We can immediately start to analyze the results of our consensus peaks!
+ 
+# First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
+
+
+#pull files into gRange object
+fl_practice <- list.files("/scratch/Shares/rinnclass/Chelsea/second_chipseq/results_data_replicates", full.names=TRUE)
+
+consensus_peaks_p <- create_consensus_peaks('/scratch/Shares/rinnclass/Chelsea/second_chipseq/results_data_replicates')
+
+
+
+names(consensus_peaks_p) <- sapply(consensus_peaks_p, function(x){
+  unlist(strsplit(x$name, "_"))[[1]]
+})
+
+#find number of peaks per dpb and plot
+num_peaks_df_p <- data.frame("dbp" = names(consensus_peaks_p),
+                           "num_peaks" = sapply(consensus_peaks_p, length))
+g <- ggplot(num_peaks_df_p, aes(x = num_peaks)) + 
+  geom_histogram(bins = 70)
+  
+show(g)
+
+
+#export
+for(i in 1:length(consensus_peaks_p)) {
+  rtracklayer::export(consensus_peaks_p[[i]], paste0("./results/filtered_peaks_p/", names(consensus_peaks_p)[i], 
+"_consensus_peaks_filter.bed"))
+}
+
+
+#set length of total coverage peaks per dbp
+num_peaks_df_p$total_peak_length <- sapply(consensus_peaks_p, function(x) sum(width(x)))
+
+#load gencode annotation
+gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
+
+
+#set mrna and lcrna promotes
+lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
+rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.gtf")
+
+lncrna_promoters <- get_promoter_regions(gencode_gr, biotype = "lncRNA")
+rtracklayer::export(lncrna_promoters, "results/lncrna_promoters.gtf")
+# Same idea to make a lncRNA list of promoters only
+
+mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
+# Same idea to make a mRNA list of promoters only
+
+
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, consensus_peaks_p, type = "occurrence")
+
+
+num_peaks_df_p$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
+
+num_peaks_df_p$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[,lncrna_promoters$gene_id])
+
+num_peaks_df_p$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
+'''
+
