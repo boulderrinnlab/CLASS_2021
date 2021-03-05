@@ -72,6 +72,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "data/test_work/all_peak_
     
     # load all the peak files corresponding to this dna binding proteins.
     tf <- unique_tf[i]
+    print(tf)
     tf_index <- grep(tf, tf_name)
     tf_files <- fl[tf_index]
     
