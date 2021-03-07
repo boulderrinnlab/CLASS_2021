@@ -10,23 +10,21 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GenomicRanges)
 source("../../util/intersect_functions.R")
-source("../../util/plotting_functions.R")
-# source("util/_setup.R")
 ```
 
 ```{r}
 
 
-filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/results/chipseq/filtered_consensus", 
+filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/YOUR_FOLDER/X/results/chipseq/filtered_consensus", 
                                              pattern = "*.bed",
                                              full.names = TRUE)
 filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
-filtered_consensus_peaks_files
-names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/results/chipseq/filtered_consensus/|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
+
+names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/YOUR_FOLDER/X/results/chipseq/filtered_consensus/|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
 
 # Import annotations
-lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/results/lncrna_mrna_promoters.gtf")
-lncrna_mrna_genebody <- rtracklayer::import("/scratch/Shares/rinnclass/results/lncrna_mrna_genebody.gtf")
+lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/JYOUR_FOLDER/X/results/lncrna_mrna_promoters.gtf")
+lncrna_mrna_genebody <- rtracklayer::import("/scratch/Shares/rinnclass/YOUR_FOLDER/X/results/lncrna_mrna_genebody.gtf")
 
 lncrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "lncRNA"]
 mrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "protein_coding"]
@@ -83,8 +81,6 @@ human_tfs <- readxl::read_excel("/scratch/Shares/rinnclass/data/mmc2.xlsx",
 names(human_tfs)[4] <- "is_tf"
 
 length(which(tolower(num_peaks_df$dbp) %in% tolower(human_tfs$Name)))
-
-length(which(is.na(num_peaks_df$ensembl_id)))
 
 
 human_tfs <- human_tfs[tolower(human_tfs$Name) %in% tolower(num_peaks_df$dbp), 1:4]
