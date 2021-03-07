@@ -14,7 +14,7 @@ source("../../util/plotting_functions.R")
 # source("util/_setup.R")
 ```
 
-creating and exporting consensus peaks from individual 
+creating and exporting consensus peaks from individual peak files
 ```{r}
 consensus_peaks <- create_consensus_peaks("/scratch/Shares/rinnclass/data/peaks")
 
@@ -31,13 +31,14 @@ for(i in 1:length(consensus_peaks)) {
 ```
 
 
-Filtering the consensus peaks
+Filtering the consensus peaks to files with at least 250 peaks (per last years class cut-off)
 ```{r}
 
 num_peaks_threshold <- 250
 
 filtered_consensus_peaks <- consensus_peaks[sapply(consensus_peaks, length) > num_peaks_threshold]
 
+#Export consensus peaks
 for(i in 1:length(filtered_consensus_peaks)) {
   rtracklayer::export(filtered_consensus_peaks[[i]], 
                       paste0("/scratch/Shares/rinnclass/results/chipseq/filtered_consensus/", 
@@ -49,8 +50,9 @@ for(i in 1:length(filtered_consensus_peaks)) {
 ```
 
 
+Exporting Genomic features that we will use frequentyl so we can use rtracklayer::import and save a ton of time :)
 
-
+1) Promoter Regions
 ```{r}
 gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
 
@@ -67,6 +69,7 @@ rtracklayer::export(mrna_promoters, "/scratch/Shares/rinnclass/results/mrna_prom
 ```
 
 
+2) Gene Bodies
 
 ```{r}
 lncrna_mrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
