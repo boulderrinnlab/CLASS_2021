@@ -90,3 +90,23 @@ num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,m
 write_csv(num_peaks_df, "results/num_peaks_df.csv")
 
 ```
+
+PART 2
+
+```{r}
+# Let's plot the total peak coverage for each DBP.
+g <- ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length, label = dbp))
+# we see the aes now has X and Y values! X is the number of peaks we just plotted.
+# Y is going to be the total genomic space covered by the peaks for a given DBP.
+
+g + geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black", lty = 2,
+              formula = 'y ~ x') +
+  geom_text() +
+  ylab("BP covered") +
+  xlab("Number of peaks") +
+  ggtitle("Peak count vs. total bases covered")
+
+
+
+```
