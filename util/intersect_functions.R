@@ -46,10 +46,10 @@ import_peaks <- function(consensus_file_path = "data/test_work/all_peak_files") 
 # one granges object with merged peaks that are in all replicates
 #' 
 #' @param 
-#'  the path to consensus peak files
+#'  the path to peak files
 #' # We're going to iterate over all the files to make it work. 
 
-create_consensus_peaks <- function(broadpeakfilepath = "data/test_work/all_peak_files") {
+create_consensus_peaks <- function(broadpeakfilepath = "../../data/peaks") {
   
   
   fl <- list.files(broadpeakfilepath, 
@@ -61,11 +61,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "data/test_work/all_peak_
     unlist(strsplit(y, "_"))[[1]]
   })
   
-  tf_df <- data.frame(table(tf_name)) %>%
-    # filter those with no replicates
-    filter(Freq > 1)
-  unique_tf <- as.character(tf_df$tf_name)
-
+  unique_tf <- unique(tf_name)
   
   consensus_peaks <- list()
   # This for loop will iterate over all dna binding proteins.
