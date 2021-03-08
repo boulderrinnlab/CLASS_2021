@@ -1,6 +1,9 @@
 
 
-
+get_dbp_name <- function(x) {
+  file_name <- str_extract(x, "[\\w-]+\\.broadPeak")
+  return(str_extract(file_name, "^[^_]+(?=_)"))
+}
 
 #Functions we need
 
@@ -61,7 +64,12 @@ create_consensus_peaks <- function(broadpeakfilepath = "data/test_work/all_peak_
     unlist(strsplit(y, "_"))[[1]]
   })
   
-  unique_tf <- unique(tf_name)
+  # We don't want to run consensus peak creation
+  # on those files that don't have replicates
+  tf_df <- data.frame(table(tf_name)) %>%
+    # filter those with no replicates
+    filter(Freq > 1)
+  unique_tf <- as.character(tf_df$tf_name)
   
   consensus_peaks <- list()
   # This for loop will iterate over all dna binding proteins.
@@ -69,6 +77,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "data/test_work/all_peak_
     
     # load all the peak files corresponding to this dna binding proteins.
     tf <- unique_tf[i]
+    print(tf)
     tf_index <- grep(tf, tf_name)
     tf_files <- fl[tf_index]
     
