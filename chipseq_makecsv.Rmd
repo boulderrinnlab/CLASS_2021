@@ -1,0 +1,59 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+library(Gviz)
+library(ggpubr)
+```
+
+```{r}
+
+fl <- list.files("/scratch/Shares/rinnclass/Nina/broad_peaks", full.names=TRUE)
+
+peaks <- lapply(fl, rtracklayer::import)
+
+consensus_peaks <- create_consensus_peaks(broadpeakfilepath = "/scratch/Shares/rinnclass/Nina/broad_peaks")
+
+names(consensus_peaks) <- sapply(consensus_peaks, function(x){
+  unlist(strsplit(x$name, "_"))[[1]]
+})
+
+num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
+                           "num_peaks" = sapply(consensus_peaks, length))
+
+num_peaks_threshold <- 500
+
+
+filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+
+num_peaks_df <- num_peaks_df %>% filter(dbp %in% names(filtered_consensus_peaks))
+
+
+num_peaks_df$total_peak_length <- sapply(filtered_consensus_peaks, function(x) sum(width(x)))
+
+
+g <- ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length, label = dbp))
+
+
+gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
+
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "counts")
+
+promoter_peak_counts[1:4,1:4]
+
+rowSums(promoter_peak_counts)
+
+num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
+
+
+num_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[,lncrna_promoters$gene_id])
+
+
+num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
+
+write_csv(num_peaks_df, "chipseq/num_peaks_df_group2_VP.csv")
+
+```

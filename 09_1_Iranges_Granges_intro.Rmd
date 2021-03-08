@@ -39,6 +39,7 @@ Let's make a list of ranges and see what this looks like.
 ```{r}
 # Let's use an example of 2 ChiP-peak-files each with three peaks. We can use
 # this simple example to construct and intersect ranges -- a common procedure
+?IRanges
 
 ir1 <- IRanges(start = c(1,200, 1000), end = c(30, 299, 1200))
 ir1
@@ -56,6 +57,7 @@ plotRanges(ir2)
 
 # nice, so let's concatonate these and plot:
 ir3 <- c(ir1, ir2)
+ir3
 plotRanges(ir3)
 
 
@@ -70,8 +72,7 @@ ir1
 # same for ir2.
 
 names(ir2) <- paste("replicate_2", 1:3, sep = " ")
-
-
+ir2
 # ok we can see the first and third peak are overlapping but not the second.
 # lets find the overlaps between the peaks using "reduce" which will keep the 
 # overlapping regions as a range. "findOverlaps" is really powerful but we will
@@ -105,7 +106,7 @@ ov3
 # we see that the two overlapping ranges are from 17-30 and 1,100-1,200.
 
 # findOverlaps
-?finOverlaps
+?findOverlaps
 args(findOverlaps)
 
 
@@ -151,7 +152,7 @@ Ranges
 # what we need is chromosome, strand, and Ranges.
 # let's put it together:
 
-# ?GRanges
+?GRanges
 
 gr <- GRanges(seqnames = c("chrX"), strand = c("+", "-", "*"), ranges = IRanges(start = c(1,200, 1000), end = c(30, 299, 1200)))
 
@@ -182,7 +183,7 @@ seqlevels(gr)
 # now we can see that we have a level that contains both the X nad Y chromosome.
 gr
 # but we don't have any values for the Y chromosome :) let's add some.
-
+gr@seqnames
 # let's add genome:
 
 genome(gr) <- c("hg38")
