@@ -27,7 +27,8 @@ library(ggpubr)
  
 # First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
 
-fl <- list.files("results/consensus_peaks", full.names=TRUE)
+fl <- list.files("..//consensus_peaks", full.names=TRUE)
+
 consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
 
 consensus_peaks[[42]]$name %>%
@@ -63,7 +64,7 @@ num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
 ## Ok we are going to filter all samples that don't have at least 250 peaks. We
 ## can see how many this is in the environment sort too ...
 
-num_peaks_threshold <- 250
+num_peaks_threshold <- 500
 # Setting a threshold number in an object to be called below
 
 
@@ -217,10 +218,12 @@ rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
 # "countOverlaps" function that will find overlaps with a feature. 
 # the final parameter decides to produce a matrix or dataframe of the overlap counts
 
-promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "counts")
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
+
+promoter_peak_counts[1:10,1:10]
 
 # We can see the parameters of count_peaks_per_feature
-
+rowSums(promoter_peak_counts)
 # This is cool information so let's keep building our 'num_peaks_df' by indexing.
 
 num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)

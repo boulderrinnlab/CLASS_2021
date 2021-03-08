@@ -60,7 +60,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "data/test_work/all_peak_
   fl <- fl[grep("peaks.broadPeak", fl)]
   
   tf_name <- sapply(fl, function(x){
-    y <-  unlist(strsplit(x, "/"))[[11]]
+    y <-  str_extract(x, "([^\\/]+$)")
     unlist(strsplit(y, "_"))[[1]]
   })
   
