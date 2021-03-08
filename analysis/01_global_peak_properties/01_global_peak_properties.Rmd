@@ -9,22 +9,22 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GenomicRanges)
-source("../../util/intersect_functions.R")
+source("util/intersect_functions.R")
 ```
 
 ```{r}
 
-
-filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/YOUR_FOLDER/X/results/chipseq/filtered_consensus", 
+?gsub
+filtered_consensus_peaks_files <- list.files("analysis/00_consensus_peaks/results/filtered_consensus/", 
                                              pattern = "*.bed",
                                              full.names = TRUE)
 filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
 
-names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/YOUR_FOLDER/X/results/chipseq/filtered_consensus/|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
+names(filtered_consensus_peaks) <- gsub("analysis/00_consensus_peaks/results/filtered_consensus//|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
 
 # Import annotations
-lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/JYOUR_FOLDER/X/results/lncrna_mrna_promoters.gtf")
-lncrna_mrna_genebody <- rtracklayer::import("/scratch/Shares/rinnclass/YOUR_FOLDER/X/results/lncrna_mrna_genebody.gtf")
+lncrna_mrna_promoters <- rtracklayer::import("analysis/00_consensus_peaks/results/lncrna_mrna_promoters.gtf")
+lncrna_mrna_genebody <- rtracklayer::import("analysis/00_consensus_peaks/results/lncrna_mrna_genebody.gtf")
 
 lncrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "lncRNA"]
 mrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "protein_coding"]
@@ -93,7 +93,7 @@ num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
 
 # Let's check how many NAs -- we should have some missing values.
 
-write_csv(num_peaks_df, "results/num_peaks_df.csv")
+write_csv(num_peaks_df, "analysis/01_global_peak_properties/results/num_peaks_df.csv")
 ```
 
 
@@ -101,7 +101,7 @@ write_csv(num_peaks_df, "results/num_peaks_df.csv")
 promoter_peak_occurence <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, 
                                                type = "occurrence")
 # Output to promoter_peak_occurecne_matrix
-write.table(promoter_peak_occurence, "results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+write.table(promoter_peak_occurence, "analysis/01_global_peak_properties/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
 # Now we want to make into a data frame using the promoter annotations as rows and attributes as columns.
 # We will use lncrna_mrna_promoters to index "all promoters"
 # First make sure promoter_peak_occurence and lncrna_mrna_promoters are in the same order
@@ -125,7 +125,7 @@ peak_occurence_df <- data.frame("gene_id" = colnames(promoter_peak_occurence),
                                 "number_of_dbp" = colSums(promoter_peak_occurence))
 # This is the CSV file we will start building upon adding columns of properties as we analyze them
 # The output file name will change based on what is added later, but the "peak_occurence_df" will be used throughout.
-write_csv(peak_occurence_df, "results/peak_occurence_dataframe.csv")
+write_csv(peak_occurence_df, "analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv")
 ```
 
 Excercise
