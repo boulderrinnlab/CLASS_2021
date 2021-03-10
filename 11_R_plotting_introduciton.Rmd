@@ -66,7 +66,9 @@ Layer 1 : DATA (data types matter so good to label object accrodingly)
 # are first going to filter all DBPs that are not marked as DNA binding
 # proteins or the 'tf' column is yes.
 
-#num_peaks_df <- read_csv('analysis/01_global_peak_properties/results/num_peaks_df.csv')
+num_peaks_df <- read_csv('analysis/01_global_peak_properties/results/num_peaks_df.csv')
+
+peak_occurence_df <-
 
 #num_peaks_df_2020 <- read_csv('../../data/2020_peak_occurence_df.csv')
 
@@ -75,10 +77,6 @@ Layer 1 : DATA (data types matter so good to label object accrodingly)
 # ?is.na
 # Note the ! almost always will mean NOT
 
-table(num_peaks_df$tf)
-# There are 22 of our DBPs in here that don't have values
-# for the tf and dbp column -- let's take those
-# out since we'll be plotting those columns frequently
 
 ```
 
@@ -92,6 +90,8 @@ ggplot(num_peaks_df, aes(x = num_peaks,
                          y = total_peak_length)) +
   geom_point()
 
+
+?geom_point
 # here we are just looking at a x, y point plot (geom_point).
 # note there are not quotes on x, and y objects as they are being evaluated as "objects in ggplot"
 # note the +, we will see this everytime we are adding a new layer. # Yet within each layer it's standard comma 
@@ -116,7 +116,7 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 # color and shape AFTER the aes(). To color by data that needs to be 
 # evaluated we need to have that color INSIDE aes()
 
-# DATA DEPENDENCE COLOR
+# DATA DEPENDENCE COLOR / not in GEOM layer
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length,
