@@ -137,4 +137,5 @@ create a new directory in your analysis directory on your branch
 hint: make folders for each type of analysis (00 consensus peaks / 01 overlapps num_peaks_df)
 Load all the files needed to make the plots in 10_
 
+use read_csv() to read in saved csv files or right click in the file tab and import
 

@@ -175,19 +175,19 @@ ggplot(num_peaks_df, aes(x = num_peaks)) +
 # let's add more bins
 
 ggplot(num_peaks_df, aes(x = num_peaks)) +
-  geom_histogram(bins = 30)
+  geom_histogram(bins = 50)
 
 # Let's chage the color of the bars in histogram by number of peaks.
 # again we need to do this inside aes() since the data needs to read.
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
-  geom_histogram(bins = 30)
+  geom_histogram(bins = 50)
 
 # this is hard to see the two distributions.
 # let's fix this by adding a 'position' parameter in the geom layer.
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
-   geom_histogram(bins = 30, position = "dodge")
+   geom_histogram(bins = 50, position = "dodge")
 
 # so now we can see the individual data points seperated!
 
@@ -213,8 +213,8 @@ ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
 
 # so now line and fill are same color -- let's see:
 
-ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
-   geom_density(alpha = 0.0)
+ggplot(num_peaks_df, aes(x = num_peaks, color = tf)) +
+   geom_density()
 
 # We can even add multiple geom layers. For example a 2 dimensional denisty plot of our x, y point plot above.
 # Let's check it out
@@ -249,7 +249,8 @@ You can do a lot in the geometry layer and add features with + and then new geom
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length)) +
   geom_point()+
-  geom_abline(slope = 1000, intercept = 0)
+  #geom_abline(slope = 1000, intercept = 0)
+  geom_smooth(method="lm")
 
 # cool this fits -- what does it mean?
 # hint average peaks size is 1kb
@@ -303,11 +304,11 @@ Now we have gone through these layers:
 # Ok now let's see how we can use the scales layer to change axes.
 #Let's look of using the scales layer by sclaing the axes
 
-ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
+ggplot(num_peaks_df, aes(x = num_peaks, y =log10(total_peak_length), color = tf)) +
   geom_point()+
-  scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
-  scale_y_continuous(trans = 'log10') +
-  scale_color_brewer(palette =  6) 
+  scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) 
+  #scale_y_continuous(trans = 'log10') +
+  #scale_color_brewer(palette =  3) 
 
 #? scale_x_continious (same for y) is calling the scale layer specifically
 # for the axes in ggplot. We are giving it where to put values on X-axis     # (note if a value is not met in largest break that break isn't printed)
@@ -320,8 +321,8 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
 ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   geom_point()+
   xlim(250, 2e3) +
-  ylim(1e5, 1e6) +
-  scale_color_brewer(palette =  2) 
+  ylim(1e5, 1e6) 
+  #scale_color_brewer(palette =  2) 
 
 # so we add to scale functions with xlim and ylim (?xlim, ?ylim)
 
