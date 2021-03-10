@@ -267,11 +267,7 @@ Now we are going to add some information ()
 # https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx
 
 library(janitor)
-<<<<<<< HEAD
 human_tfs <- readxl::read_excel("/Users/niri2724/CLASS/data/mmc2.xlsx",
-=======
-human_tfs <- readxl::read_excel("../../data/mmc2.xlsx",
->>>>>>> origin/in_class
                                 sheet = 2, skip = 1)
 names(human_tfs)[4] <- "is_tf"
 
@@ -291,7 +287,7 @@ names(human_tfs) <- c("ensembl_id",
 num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
 
 table(num_peaks_df$tf)
-<<<<<<< HEAD
+
 not_tfs <- num_peaks_df %<% filter(tf=="No")
 
 
@@ -299,12 +295,7 @@ not_tfs <- num_peaks_df %<% filter(tf=="No")
 length(which(is.na(num_peaks_df$ensembl_id)))
 length(which(!is.na(num_peaks_df$ensembl_id)))
 write_csv(num_peaks_df, "results/num_peaks_df.csv")
-=======
-not_tfs <- num_peaks_df %>% filter(tf == "No")
-# Let's check how many NAs -- we should have some missing values.
 
-write_csv(num_peaks_df, "chipseq/results/num_peaks_df.csv")
->>>>>>> origin/in_class
 # A new column for the nunmber of overlaps with a mRNA
 ```
 
@@ -456,10 +447,7 @@ Lets find how many promoters don't have any DBPs bound
 unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp < 1)
 
 nrow(unbound_promoters)
-<<<<<<< HEAD
 
-=======
->>>>>>> origin/in_class
 # here is just a simple index and filter of the index to have at least 1 dbp bound.
 write_csv(unbound_promoters, "results/unbound_lncrna_mrna_promoters.csv")
 
