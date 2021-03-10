@@ -1,9 +1,6 @@
 
 
-get_dbp_name <- function(x) {
-  file_name <- str_extract(x, "[\\w-]+\\.broadPeak")
-  return(str_extract(file_name, "^[^_]+(?=_)"))
-}
+
 
 #Functions we need
 
@@ -22,7 +19,7 @@ get_dbp_name <- function(x) {
 #' @param consensus_file_path the path to consensus peak files
 
 
-import_peaks <- function(consensus_file_path = "scratch/Shares/rinnclass/data/peaks") {
+import_peaks <- function(consensus_file_path = "data/test_work/all_peak_files") {
   peak_files <- list.files(consensus_file_path, full.names = T)
   file_names <- str_extract(peak_files, "[\\w-]+\\.bed")
   tf_name <- str_extract(file_names, "^[^_]+(?=_)")
@@ -49,10 +46,10 @@ import_peaks <- function(consensus_file_path = "scratch/Shares/rinnclass/data/pe
 # one granges object with merged peaks that are in all replicates
 #' 
 #' @param 
-#'  the path to consensus peak files
+#'  the path to peak files
 #' # We're going to iterate over all the files to make it work. 
 
-create_consensus_peaks <- function(broadpeakfilepath = "/data/test_work/all_peak_files") {
+create_consensus_peaks <- function(broadpeakfilepath = "../../data/peaks") {
   
   
   fl <- list.files(broadpeakfilepath, 
@@ -63,9 +60,13 @@ create_consensus_peaks <- function(broadpeakfilepath = "/data/test_work/all_peak
     y <-  str_extract(x, "([^\\/]+$)")
     unlist(strsplit(y, "_"))[[1]]
   })
+  
   unique_tf <- unique(tf_name)
   
-
+  tf_df <- data.frame(table(tf_name)) %>%
+    # filter those with no replicates
+    filter(Freq > 1)
+  unique_tf <- as.character(tf_df$tf_name)
   
   consensus_peaks <- list()
   # This for loop will iterate over all dna binding proteins.
@@ -73,6 +74,7 @@ create_consensus_peaks <- function(broadpeakfilepath = "/data/test_work/all_peak
     
     # load all the peak files corresponding to this dna binding proteins.
     tf <- unique_tf[i]
+    print(tf)
     tf_index <- grep(tf, tf_name)
     tf_files <- fl[tf_index]
     

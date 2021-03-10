@@ -66,7 +66,10 @@ Layer 1 : DATA (data types matter so good to label object accrodingly)
 # are first going to filter all DBPs that are not marked as DNA binding
 # proteins or the 'tf' column is yes.
 
-num_peaks_df <- read_csv('chipseq/results/num_peaks_df.csv')
+num_peaks_df <- read_csv('analysis/01_global_peak_properties/results/num_peaks_df.csv')
+
+num_peaks_df_2020 <- read_csv('../../data/2020_peak_occurence_df.csv')
+
 num_peaks_df <- num_peaks_df %>% filter(!is.na(tf))
 
 # ?is.na
@@ -465,5 +468,4 @@ ggplot(num_peaks_df, aes(x = num_peaks)) +
 # Go take a look at _setup.R and see the features of paper white!
 ```
 
-Class exercise, go back to one of the other figures from 10_our_data_ranges. Try and change some feature or add a regression line etc. Slack us what you get :)
 
