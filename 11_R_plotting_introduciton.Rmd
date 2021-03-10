@@ -67,6 +67,7 @@ Layer 1 : DATA (data types matter so good to label object accrodingly)
 # proteins or the 'tf' column is yes.
 
 num_peaks_df <- read_csv('chipseq/results/num_peaks_df.csv')
+num_peaks_df <- read_csv('analysis/00_consensus_peaks/results/num_peaks_df.csv')
 num_peaks_df <- num_peaks_df %>% filter(!is.na(tf))
 
 # ?is.na
@@ -167,7 +168,7 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 ```{r}
 
 ggplot(num_peaks_df, aes(x = num_peaks)) +
-  geom_histogram()
+  geom_histogram() 
 
 # let's add more bins
 
