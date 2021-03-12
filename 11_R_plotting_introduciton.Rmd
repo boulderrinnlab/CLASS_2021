@@ -117,10 +117,11 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 # evaluated we need to have that color INSIDE aes()
 
 # DATA DEPENDENCE COLOR / not in GEOM layer
-
+?aes
 ggplot(num_peaks_df, aes(x = num_peaks, 
-                 y = total_peak_length,
-                 color = tf)) +
+                 y = total_peak_length
+                )) +
+  facet_wrap(tf ~ .) +
   geom_point()
 
 # Now color came in aes() because it depends on data values.
@@ -248,9 +249,13 @@ You can do a lot in the geometry layer and add features with + and then new geom
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length)) +
-  geom_point()+
-  #geom_abline(slope = 1000, intercept = 0)
-  geom_smooth(method="lm")
+
+  geom_point() +
+  geom_abline(slope = 1000, intercept = 0) +
+  geom_smooth(method = "gam")
+
+?geom_smooth
+
 
 # cool this fits -- what does it mean?
 # hint average peaks size is 1kb
@@ -304,11 +309,11 @@ Now we have gone through these layers:
 # Ok now let's see how we can use the scales layer to change axes.
 #Let's look of using the scales layer by sclaing the axes
 
-ggplot(num_peaks_df, aes(x = num_peaks, y =log10(total_peak_length), color = tf)) +
+ggplot(num_peaks_df, aes(x = log10(num_peaks), y =log10(total_peak_length), color = tf)) +
   geom_point()+
-  scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) 
-  #scale_y_continuous(trans = 'log10') +
-  #scale_color_brewer(palette =  3) 
+  scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
+  scale_color_brewer(palette = 3) 
+
 
 #? scale_x_continious (same for y) is calling the scale layer specifically
 # for the axes in ggplot. We are giving it where to put values on X-axis     # (note if a value is not met in largest break that break isn't printed)
@@ -318,11 +323,13 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =log10(total_peak_length), color = tf)
 # what if we want to set the limits of the axes? The scales layer is
 # just the place.
 
-ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
+ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length, color = tf)) +
   geom_point()+
   xlim(250, 2e3) +
-  ylim(1e5, 1e6) 
-  #scale_color_brewer(palette =  2) 
+
+  ylim(5, 6) +
+  scale_color_brewer(palette =  2) 
+
 
 # so we add to scale functions with xlim and ylim (?xlim, ?ylim)
 
@@ -429,7 +436,7 @@ ggplot(num_peaks_df) +
   geom_bar(aes(x = dbd)) +
   coord_polar(theta = 'y')
 
-
+?
 
 ```
 
