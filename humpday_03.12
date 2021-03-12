@@ -1,0 +1,46 @@
+---
+title: "Seperating out the mRNA and lncRNA"
+author: "CMT"
+date: "03/12/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+library(Gviz)
+library(ggpubr)
+library(ggplot2)
+```
+
+#Load in data for promoters
+lncrna_mrna_promoters <- rtracklayer::import ("/scratch/Shares/rinnclass/Chelsea/analysis/results/promoter_regions/lncrna_mrna_promoters.gtf")
+
+lncrna_promoters <- rtracklayer::import ("/scratch/Shares/rinnclass/Chelsea/analysis/results/promoter_regions/lncrna_promoters.gtf")
+
+mrna_promoters <- rtracklayer::import ("/scratch/Shares/rinnclass/Chelsea/analysis/results/promoter_regions/mrna_promoters.gtf")
+
+
+#load in data for gene_bodies
+lncrna_mrna_gene_bodies <- rtracklayer::import ("/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_bodies/lncrna_mrna_genebody.gtf")
+
+lncrna_promoters_gene_bodies <- rtracklayer::import ("/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_bodies/lncrna_genebody.gtf")
+
+mrna_promoters_gene_bodies <- rtracklayer::import ("/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_bodies/mrna_genebody.gtf")
+
+
+#peak_occurence for both mRNA and lncRNA
+peak_occurence <- read_csv("/scratch/Shares/rinnclass/Chelsea/analysis/results/peak_occurence_dataframe.csv")
+
+
+#Filter peak_occurence to separate mRNA and lnRNA
+peak_occurence_lnRNA <- filter(peak_occurence, gene_type == "lncRNA")
+
+
+test <- read_table("/scratch/Shares/rinnclass/Chelsea/analysis/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
