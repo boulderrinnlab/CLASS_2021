@@ -83,7 +83,7 @@ g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
 #plot both the lncRNA and protein_coding Promoter binding events
 g <- ggplot(peak_occurence, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
 
-g + geom_density(alpha = 0.0) +
+g + geom_density(alpha = 0.2, color = "#424242") +
 theme_paperwhite() +
   xlab(expression("Number of DBPs")) +
   ylab(expression("Density")) +
