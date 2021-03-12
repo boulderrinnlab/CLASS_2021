@@ -118,6 +118,7 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 
 # DATA DEPENDENCE COLOR / not in GEOM layer
 
+?aes
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length,
                  color = tf)) +
@@ -175,7 +176,7 @@ ggplot(num_peaks_df, aes(x = num_peaks)) +
 # let's add more bins
 
 ggplot(num_peaks_df, aes(x = num_peaks)) +
-  geom_histogram(bins = 30)
+  geom_histogram(bins = 80)
 
 # Let's chage the color of the bars in histogram by number of peaks.
 # again we need to do this inside aes() since the data needs to read.
@@ -249,7 +250,11 @@ You can do a lot in the geometry layer and add features with + and then new geom
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length)) +
   geom_point()+
-  geom_abline(slope = 1000, intercept = 0)
+  geom_abline(slope = 1000, intercept = 0) +
+  geom_smooth(method = "gam")
+
+?geom_smooth
+
 
 # cool this fits -- what does it mean?
 # hint average peaks size is 1kb
@@ -308,6 +313,13 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
   scale_y_continuous(trans = 'log10') +
   scale_color_brewer(palette =  6) 
+
+# or
+
+ggplot(num_peaks_df, aes(x = num_peaks, y =log10(total_peak_length), color = tf)) +
+  geom_point()+
+  scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
+  scale_color_brewer(palette =  6)
 
 #? scale_x_continious (same for y) is calling the scale layer specifically
 # for the axes in ggplot. We are giving it where to put values on X-axis     # (note if a value is not met in largest break that break isn't printed)
