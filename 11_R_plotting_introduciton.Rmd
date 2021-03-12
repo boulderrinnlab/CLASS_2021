@@ -204,7 +204,7 @@ ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
 # geom layer
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
-   geom_density(alpha = 0.1)
+   geom_density(alpha = 0.5)
 
 # let's change color of the line now (inside aes())
 
@@ -307,7 +307,7 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   geom_point()+
   scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
   scale_y_continuous(trans = 'log10') +
-  scale_color_brewer(palette =  6) 
+  scale_color_brewer(palette =  3) 
 
 #? scale_x_continious (same for y) is calling the scale layer specifically
 # for the axes in ggplot. We are giving it where to put values on X-axis     # (note if a value is not met in largest break that break isn't printed)
