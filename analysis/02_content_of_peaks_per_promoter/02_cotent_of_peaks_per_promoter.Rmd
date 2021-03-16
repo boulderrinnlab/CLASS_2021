@@ -12,58 +12,20 @@ library(GenomicRanges)
 library(Gviz)
 library(ggpubr)
 library(BiocManager)
-    install("BSgenome.Hsapiens.UCSC.hg38")
-BiocManager::install("biomartr")
-library(biomartr)
+
 library(regioneR)
 library(ggdendro)
-    
-source("/scratch/Shares/rinnclass/Justin/util/intersect_functions.R")
-source("/scratch/Shares/rinnclass/Justin/CLASS_2021/util/plotting_functions.R")
-source("/scratch/Shares/rinnclass/Justin/CLASS_2021/util/_setup.R")
+install.packages("pals")
+library(pals)    
+source("~/CLASS/Justin/util/intersect_functions.R")
+source("~/CLASS/Justin/CLASS_2021/util/plotting_functions.R")
+source("~/CLASS/Justin/CLASS_2021/util/_setup.R")
 ```
 
 ```{r}
-base_path <- "/scratch/Shares/rinnclass/Justin/CLASS_2021/analysis/00_consensus_peaks/results"
+base_path <- "~/CLASS/Justin/CLASS_2021/analysis/00_consensus_peaks/results"
 peak_list <- import_peaks(file.path(base_path,
                                     "filtered_consensus/"))
-# Import gencode
-lncrna_promoters <- rtracklayer::import(file.path(base_path,
-                                                  "promoters/lncrna_promoters.gtf"))
-mrna_promoters <- rtracklayer::import(file.path(base_path,
-                                                "promoters/mrna_promoters.gtf"))
-lncrna_mrna_promoters <- rtracklayer::import(file.path(base_path,
-                                                "promoters/lncrna_mrna_promoters.gtf"))
-lncrna_matrix <- count_peaks_per_feature(lncrna_promoters, 
-                                         peak_list, type = "occurrence")
-mrna_matrix <- count_peaks_per_feature(mrna_promoters, 
-                                       peak_list, type = "occurrence")
-
-```
-
-```{r}
-num_peaks_df <- data.frame("dbp" = rownames(lncrna_matrix),
-                           "total_number_of_peaks" = sapply(peak_list, length),
-                           "lncrna" = rowSums(lncrna_matrix),
-                           "mrna" = rowSums(mrna_matrix))
-
-summary(lncrna_matrix)
-```
-
-Find unbound and enough-bounding promoters
-```{r} 
-unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp < 1)
-
-```
-
-Find DBPs with no overlaps with promoter
-```{r}
-dbp_promoter_ovl <- get_overlapping_peaks(lncrna_mrna_promoters, filtered_consensus_peaks)
-
-head(dbp_promoter_ovl)
-num_ovl <- sapply(dbp_promoter_ovl, length)
-min(num_ovl)
-summary(num_ovl)
 
 ```
 
@@ -104,10 +66,11 @@ rownames(temp) <- peak_names
 colnames(temp) <- features_names
 temp[1,features_names[1]]
 
-source("/scratch/Shares/rinnclass/Justin/util/intersect_functions.R")
 peak_store <- get_overlapping_peaks(filtered_promoters, peak_list, 1)
+colnames(peak_store)
 peak_store[peak_names[1],features_names[10]]
-
+pcm <- peak_store %>%
+  dplyr::select()
 high_bound_df <- as.data.frame(as.table(peak_store))
 write_csv(high_bound_df, "/scratch/Shares/rinnclass/Justin/CLASS_2021/analysis/02_content_of_peaks_per_promoter/results/interesting_feature_peaks_dataframe.csv")
 
@@ -130,66 +93,53 @@ suppressWarnings(pt <- overlapPermTest(A = filtered_promoters,
 RowSum, ColumnSum of peak_store matrix
 ```{r}
 po_2020_df <- read.csv(file = '/scratch/Shares/rinnclass/data/2020_peak_occurence_df.csv')
-dbp_promoter_binding_table <- read.csv(file = '/scratch/Shares/rinnclass/data/dbp_promoter_binding_table.csv')
-```
+po_2021_df <- read.csv(file = '~/CLASS/Justin/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv')
+peak_occurence_df <- po_2021_df
 
-h_clustering
-```{r}
-bin_hier <- hclust(dist(high_bound_occur, method = "binary"))
-bin_hier$labels[bin_hier$order]
-ggdendro::ggdendrogram(bin_hier, rotate = FALSE,  size = 3, 
-                       theme_dendro = TRUE) +
-  coord_flip() +
-  # scale_y_continuous() +
-  # scale_x_continuous(position = "top") +
-  scale_x_continuous(breaks = seq_along(bin_hier$labels[bin_hier$order]),
-            labels = bin_hier$labels[bin_hier$order], position = "top",
-            expand = c(0,0)) +
-  theme(axis.text.x = element_text(angle = 90, hjust  = 1)) + 
-  theme(axis.text.y = element_text(angle = 0,hjust = 1)) +
-  scale_y_reverse(expand = c(0.01, 0)) +
-  theme(
-    plot.background = element_blank(),
-    panel.grid.major = element_blank(),
-    panel.grid.minor = element_blank(),
-    panel.border = element_blank()
-  )
-ggsave("figures/all_hclust_binary_dist.pdf", height = 22, width = 2.5)
-ggsave("figures/all_hclust_binary_dist.png", height = 22, width = 2.5)
+head(po_2020_df)
+dbp_promoter_binding_table <- read.csv(file = '/scratch/Shares/rinnclass/data/dbp_promoter_binding_table.csv')
+
+length(dbp_promoter_binding_table$dbp)
 ```
 
 Scatter plot of percentage of reservoirs in K562 and those in HEPG2
 ```{r}
-po2021_df <- peak_occurence_df
 #get the reservoirs in 2020 peak_occurence_df
 reservoir_2020 <- po_2020_df %>% filter(po_2020_df$reservoir == 1) 
 reservoir_name_list <- reservoir_2020$gene_name
 #get the reserviors in 2021 peak_occurence_df
-reservoir_2021 <- po2021_df %>% filter(po2021_df$gene_name %in% reservoir_name_list)
-total_sum_2021 <- sum(po2021_df$number_of_dbp)
-total_sum_2020 <- sum(po2020_df$number_of_dbp)
+reservoir_2021 <- po_2021_df %>% filter(po_2021_df$gene_name %in% reservoir_name_list)
+
 #normalize by the total number of DBP
-normalized_2021 <- peak_occurence_df %>%
+normalized_2020 <- reservoir_2020 %>%
   dplyr::select(gene_id, gene_type, number_of_dbp) %>%
-  dplyr::mutate(dbp_norm = number_of_dbp/sum()) %>%
-  dplyr::rename(norm_num_dpb_HEPG2 = dbp_norm)
+  dplyr::mutate(dbp_norm = number_of_dbp/length(dbp_promoter_binding_table$dbp)) %>%
+  dplyr::rename(norm_num_dbp_HEPG2 = dbp_norm)
 
 
-normalized_reservoir_2021 <- reservoir_2021 %>%
-  dplyr::select(gene_id, gene_type, number_of_dbp) %>%
-  dplyr::mutate(dbp_norm = number_of_dbp/sum()) %>%
-  dplyr::rename(norm_num_dpb_reservoir = dbp_norm)
-
-normalized_reservoir_2021 <- reservoir_2021 %>%
+normalized_2021 <-reservoir_2021 %>%
   dplyr::select(gene_id, gene_type, number_of_dbp) %>%
   dplyr::mutate(dbp_norm = number_of_dbp/length(peak_names)) %>%
-  dplyr::rename(norm_num_dpb_reservoir = dbp_norm)
-comparison_df <- merge(normalized_2021, num_reservoir_2021)
+  dplyr::rename(norm_num_dbp_K562 = dbp_norm)
 
-summary(dbp_promoter_binding_table)
-ggplot(comparison_df, aes(x = num_dbp_reservoir, 
-                 y = num_dpb_HEPG2)) +
-  geom_point()
+comparison_df <- merge(normalized_2020, normalized_2021, by="gene_id")
+comparison_df$ratio_of_HEPG2_K562 <- comparison_df$norm_num_dbp_HEPG2/comparison_df$norm_num_dbp_K562
+
+mean(comparison_df$norm_num_dbp_HEPG2)
+mean(comparison_df$norm_num_dbp_K562)
+ggplot(comparison_df, aes(x = norm_num_dbp_K562, 
+                 y = norm_num_dbp_HEPG2,
+                 color = ratio_of_HEPG2_K562)) +
+  geom_point()+
+  geom_abline(slope = 0.75, intercept = 0, color="red", 
+                 linetype="dashed") +
+  #facet_wrap(norm_num_dbp_K562~norm_num_dbp_HEPG2)
+  geom_smooth(method = "lm", span = 0.3)+
+  #scale_color_gradientn(colors = pals::ocean.amp(20)) +
+  ggtitle("Normalized num of dbp bound to each reservoir in HEPG2 vs in K562",
+          subtitle = "Colored by ratio")
+ggsave("~/CLASS/Justin/CLASS_2021/analysis/02_content_of_peaks_per_promoter/figures/Normalized_distribution_num_dbp_HEPG2_K562.png", height = 5, width = 8)
+?geom_abline
 ```
 
 
