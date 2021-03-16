@@ -131,8 +131,10 @@ ggplot(comparison_df, aes(x = norm_num_dbp_K562,
                  y = norm_num_dbp_HEPG2,
                  color = ratio_of_HEPG2_K562)) +
   geom_point()+
-  geom_abline(slope = 0.75, intercept = 0, color="red", 
-                 linetype="dashed") +
+  geom_vline(xintercept = 0.4)+
+  geom_hline(yintercept = 0.5)+
+  #geom_abline(slope = 0.75, intercept = 0, color="red", 
+                 #linetype="dashed") +
   #facet_wrap(norm_num_dbp_K562~norm_num_dbp_HEPG2)
   geom_smooth(method = "lm", span = 0.3)+
   #scale_color_gradientn(colors = pals::ocean.amp(20)) +
