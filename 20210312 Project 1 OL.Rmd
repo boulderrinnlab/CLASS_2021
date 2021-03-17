@@ -1,0 +1,80 @@
+---
+title: "Class project"
+author: "OL"
+date: "3/12/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+res_genes <- X2020_peak_occurence_df %>% filter(X2020_peak_occurence_df$reservoir == 1)
+res_gene_names <- res_genes$gene_name
+#goal: get a list of reservoir gene names from the old data.
+
+res_genes_2021 <- peak_occurence_df %>% filter(peak_occurence_df$gene_name %in% res_gene_names)
+res_gene_names_2021 <- res_genes_2021$gene_name
+#goal: filter out the same genes in the new data
+
+head(res_gene_names_2021)
+
+clean_res_genes_2021 <- res_genes_2021[-c(475),]
+which(grepl('ENSG00000258325.2', clean_res_genes_2021$gene_id))
+clean2_res_genes_2021 <- clean_res_genes_2021[-c(704),]
+
+comparison_df <- merge(res_genes, clean2_res_genes_2021)
+
+#need to remove ENSG00000254093.9 and ENSG00000258325.2
+#done
+
+total_dbp_2021 <- sum(clean2_res_genes_2021$number_of_dbp)
+total_dbp_2020 <- sum(res_genes$number_of_dbp)
+
+#normalizes the dbp count
+
+normalized_ratio_res21_res20 <- clean2_res_genes_2021$number_of_dbp/total_dbp_2021 %/% res_genes$number_of_dbp/total_dbp_2020
+
+#finds the ratio of expression of each gene, not normalized to total reads.
+
+clean2_res_genes_2021 <- cbind(clean2_res_genes_2021, normalized_ratio_res21_res20)
+
+clean2_res_genes_2021 <- subset(clean2_res_genes_2021, select = -c(9) )
+
+#adds the ratio to the 2021 df. Should show which genes are up and down regulated in liver cells.
+
+
+normalized_2021 <- clean2_res_genes_2021 %>%
+    dplyr::select(gene_id, gene_type, number_of_dbp) %>%
+    dplyr::rename(num_dbp_HEPG2 = number_of_dbp)
+  
+normalized_2020 <- X2020_peak_occurence_df %>%
+    dplyr::select(gene_id, gene_type, number_of_dbp) %>%
+    dplyr::rename(num_dbp_K562 = number_of_dbp)
+
+comparison_df <- merge(normalized_2020, normalized_2021)
+
+#Michael wrote this but I don't really get it. It didn't do anything interesting and the comparison df is wack.
+
+#Okay now it's time to plot this shit.
+ggplot(clean2_res_genes_2021, aes(x = gene_name, y = normalized_ratio_res21_res20)) +
+  geom_point()
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.

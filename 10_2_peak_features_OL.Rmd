@@ -93,7 +93,7 @@ num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
 
 # Let's check how many NAs -- we should have some missing values.
 
-write_csv(num_peaks_df, "results/num_peaks_df.csv")
+write_csv(num_peaks_df, "/scratch/Shares/rinnclass/Olivia/CLASS_2021/analysis/01_global_peak_properties/results/num_peaks_df.csv")
 ```
 
 
@@ -125,7 +125,7 @@ peak_occurence_df <- data.frame("gene_id" = colnames(promoter_peak_occurence),
                                 "number_of_dbp" = colSums(promoter_peak_occurence))
 # This is the CSV file we will start building upon adding columns of properties as we analyze them
 # The output file name will change based on what is added later, but the "peak_occurence_df" will be used throughout.
-write_csv(peak_occurence_df, "results/peak_occurence_dataframe.csv")
+write_csv(peak_occurence_df, "/scratch/Shares/rinnclass/Olivia/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv")
 ```
 
 Excercise
