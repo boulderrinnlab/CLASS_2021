@@ -63,15 +63,14 @@ g + geom_density(alpha = 0.2, color = "#424242") +
           subtitle = "mRNA and lncRNA genes")
 
 
-
+#count the peaks per lncrna and mrna genebody
 genebody_peak_occurence <- count_peaks_per_feature(lncrna_mrna_genebody, filtered_consensus_peaks, 
                                                    type = "occurrence")
 # Output to promoter_peak_occurecne_matrix
-write.table(genebody_peak_occurence, "./analysis/00_consensus_peaks/results/genebodies_peak_occurence_matrix.tsv")
+
+#write.table(genebody_peak_occurence, "./analysis/02_humps/results/genebodies_peak_occurence_matrix.tsv")
 # Now we want to make into a data frame using the promoter annotations as rows and attributes as columns.
-# We will use lncrna_mrna_promoters to index "all promoters"
-# First make sure promoter_peak_occurence and lncrna_mrna_promoters are in the same order
-    stopifnot(all(colnames(genebody_peak_occurence) == lncrna_mrna_promoters$gene_id))
+
 
 
 
@@ -91,7 +90,7 @@ peak_occurence_genebody_df <- data.frame("gene_id" = colnames(genebody_peak_occu
                                 "number_of_dbp" = colSums(genebody_peak_occurence))
 # This is the CSV file we will start building upon adding columns of properties as we analyze them
 # The output file name will change based on what is added later, but the "peak_occurence_df" will be used throughout.
-write_csv(peak_occurence_df, "results/peak_occurence_dataframe.csv")
+#write_csv(peak_occurence_df, "results/peak_occurence_dataframe.csv")
 
 #plotting mrna peak occurence
 g <- ggplot(peak_occurence_genebody_df, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
@@ -101,4 +100,47 @@ g + geom_density(alpha = 0.2, color = "#424242") +
   ylab(expression("Density")) +
   ggtitle("Genebody binding events",
           subtitle = "mRNA and lncRNA gene bodies")
+
+
+#filter promoter peaks into two groups: above 200 dbp and below
+peak_occurence_promoters_df <- peak_occurence_df
+
+#filter genes above 290 DBPs and less than 310 DBPs
+bump2_promoters <- filter(peak_occurence_df, peak_occurence_df$number_of_dbp > 200)
+
+bump2_promoters_genenames <- as.data.frame(bump2_promoters$gene_name)
+bump2_promoters_geneids <- as.data.frame(bump2_promoters$gene_id)
+
+mid_bump2_promoters <- filter(peak_occurence_df, peak_occurence_df$number_of_dbp > 290)
+mid_bump2_promoters <- filter(mid_bump2_promoters, mid_bump2_promoters$number_of_dbp < 310)
+
+mid_bump2_promoters_geneids <-as.data.frame(mid_bump2_promoters$gene_id)
+
+bump1_promoters <- filter(peak_occurence_df, peak_occurence_df$number_of_dbp < 100)
+bump1_promoters_genenames <- as.data.frame(bump1_promoters$gene_name)
+bump1_promoters_geneids <- as.data.frame(bump1_promoters$gene_id)
+
+
+#write the bump1 and bump2 gene names to csv file
+
+write_csv(bump1_promoters_genenames, "results/bump1_promoters_genenames.csv")
+write_csv(bump2_promoters_genenames, "results/bump2_promoters_genenames.csv")
+write_csv(bump1_promoters_geneids, "results/bump1_promoters_geneids.csv")
+write_csv(bump2_promoters_geneids, "results/bump2_promoters_geneids.csv")
+
+write_csv(mid_bump2_promoters_geneids, "results/mid_bump2_promoters_geneids.csv")
+
+#remove the version
+#sed 's/\(ENSG[0-9]*\)\.[0-9]*/\1/g' file_with_version > file_without_version 
+
+#percentage of mRNA in bump2 vs. bump1
+
+n_bump2_mrna_promoters = filter(bump2_promoters, bump2_promoters$gene_type == 'protein_coding')
+n_bump2_lncrna_promoters = filter(bump2_promoters, bump2_promoters$gene_type == 'lncRNA')
+
+n_bump2_mrna_promoters <- nrow(n_bump2_mrna_promoters)
+n_bump2_lncrna_promoters <- nrow(n_bump2_lncrna_promoters)
+
+percent_mrna_bump2 <- n_bump2_mrna_promoters/(n_bump2_mrna_promoters+n_bump2_lncrna_promoters)
+
 
