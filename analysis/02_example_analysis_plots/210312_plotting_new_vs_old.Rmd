@@ -20,7 +20,6 @@ library(ggplot2)
 ```{r}
 
 # scatterplot x: K562 % dbp and HepG
-#mutate to figure out %
 
 peak_occurence_df_2020 <- read.csv(file = '/scratch/Shares/rinnclass/data/2020_peak_occurence_df.csv')
 head(peak_occurence_df_2020)
@@ -29,7 +28,12 @@ peak_occurence_df_new <- read.csv(file = '/scratch/Shares/rinnclass/Nina/CLASS_2
 head(peak_occurence_df_new)
 
 
+```
 
+
+
+
+```{r}
 # new data
 g <- ggplot(peak_occurence_df_new, aes(x = number_of_dbp))
 
@@ -140,7 +144,7 @@ names(gene_w_reservoirs)
 comparison_df <- merge(num_dbp_2020, num_reservoir_new_data)
 
 
-comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/180) #180
+comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/161) #161
 comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/460) #460
 
 
@@ -171,3 +175,52 @@ ggplot(comparison_df, aes(x = num_dbp_HepG2,
   geom_point()
 
 
+
+
+# non - reservoirs
+reservoir_list_2020 <- peak_occurence_df_2020 %>% filter(peak_occurence_df_2020$reservoir == 0)
+gene_w_reservoirs <-reservoir_list_2020$gene_id
+
+reservoir_new_data <- peak_occurence_df_new %>% filter(peak_occurence_df_new$gene_id %in% gene_w_reservoirs)
+
+# plot 
+# 2021 data - in one image
+
+g <- ggplot(reservoir_new_data, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+
+g + geom_density(alpha = 0.3) +
+  xlab(expression("Number of DBPs - non-reservoirs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events of non-reservoirs",
+          subtitle = "mRNA and lncRNA genes - HepG2") 
+
+
+# make scatter plot 
+reservoir_new_data
+
+num_dbp_2020 <- peak_occurence_df_2020 %>%
+  dplyr::select(gene_id, gene_type, number_of_dbp) %>%
+  dplyr::rename(num_dbp_K562 = number_of_dbp)
+num_reservoir_new_data <- reservoir_new_data %>%
+  dplyr::select(gene_id, number_of_dbp) %>%
+  dplyr::rename(num_dbp_HepG2 = number_of_dbp)
+
+
+names(peak_occurence_df_2020)
+names(gene_w_reservoirs)
+comparison_df <- merge(num_dbp_2020, num_reservoir_new_data)
+
+
+comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/180) #180
+comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/460) #460
+
+
+
+
+ggplot(comparison_df, aes(x = dbp_HepG2_ratio,
+                         y = dbp_K562_ratio)) +
+  geom_point()
+
+ggplot(comparison_df, aes(x = num_dbp_HepG2,
+                         y = num_dbp_K562)) +
+  geom_point()
