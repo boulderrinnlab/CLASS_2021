@@ -90,3 +90,26 @@ theme_paperwhite() +
   ggtitle("Promoter binding events",
           subtitle = "mRNA and lncRNA genes")
 ```
+
+```{r}
+#03.17.21 Determine what dbp are present in the two peaks (seen on peak occurance plot)
+dbp_density_threshold_low <- 290
+# Setting a threshold number in an object to be called below
+#filtered_peak_occurence <- peak_occurence$number_of_dbp[peak_occurence$number_of_dbp > dbp_density_threshold]
+
+second_peak_occurence <- filter(peak_occurence, peak_occurence$number_of_dbp > dbp_density_threshold_low)
+
+dbp_density_threshold_high <- 310
+
+middle_second_peak_occurence <- filter(second_peak_occurence, second_peak_occurence$number_of_dbp < dbp_density_threshold_high)
+
+#Filter out the gene ID enriched with more than 200 bdp to paste into DAVID
+bump2_promoters_geneID <- as.data.frame(middle_second_peak_occurence$gene_id)
+
+write_csv(bump2_promoters_genenames, "/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_id_second_peak_dbp.csv")
+
+#Filter out the gene NAME 
+bump2_promoters_genenames <- as.data.frame(middle_second_peak_occurence$gene_name)
+
+write_csv(bump2_promoters_genenames, "/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_name_second_peak_dbp.csv")
+```
