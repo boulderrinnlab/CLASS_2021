@@ -7,14 +7,21 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+source('util/intersect_functions.R')
 ```
 
-## R Markdown
+FILES
+```{r}
+# scatterplot x: K562 % dbp and HepG
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+peak_occurence_df_2020 <- read.csv(file = '/scratch/Shares/rinnclass/data/2020_peak_occurence_df.csv')
+head(peak_occurence_df_2020)
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+peak_occurence_df_new <- read.csv(file = '/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv')
+head(peak_occurence_df_new)
+```
 
+FILTERING THE FILES BY RESERVOIR
 ```{r}
 res_genes <- X2020_peak_occurence_df %>% filter(X2020_peak_occurence_df$reservoir == 1)
 res_gene_names <- res_genes$gene_name
@@ -35,18 +42,17 @@ comparison_df <- merge(res_genes, clean2_res_genes_2021)
 #need to remove ENSG00000254093.9 and ENSG00000258325.2
 #done
 
-total_dbp_2021 <- sum(clean2_res_genes_2021$number_of_dbp)
-total_dbp_2020 <- sum(res_genes$number_of_dbp)
+total_dbp_2021 <- length(clean2_res_genes_2021$number_of_dbp)
+total_dbp_2020 <- length(res_genes$number_of_dbp)
 
 #normalizes the dbp count
 
-normalized_ratio_res21_res20 <- clean2_res_genes_2021$number_of_dbp/total_dbp_2021 %/% res_genes$number_of_dbp/total_dbp_2020
+normalized_ratio_res21_res20 <- clean2_res_genes_2021$number_of_dbp/161 %/% res_genes$number_of_dbp/460
 
 #finds the ratio of expression of each gene, not normalized to total reads.
-
+clean2_res_genes_2021 <- subset(clean2_res_genes_2021, select = -c(8))
 clean2_res_genes_2021 <- cbind(clean2_res_genes_2021, normalized_ratio_res21_res20)
 
-clean2_res_genes_2021 <- subset(clean2_res_genes_2021, select = -c(9) )
 
 #adds the ratio to the 2021 df. Should show which genes are up and down regulated in liver cells.
 
@@ -59,7 +65,20 @@ normalized_2020 <- X2020_peak_occurence_df %>%
     dplyr::select(gene_id, gene_type, number_of_dbp) %>%
     dplyr::rename(num_dbp_K562 = number_of_dbp)
 
-comparison_df <- merge(normalized_2020, normalized_2021)
+#Nina's
+
+num_dbp_2020 <- peak_occurence_df_2020 %>%
+  dplyr::select(gene_id, gene_type, number_of_dbp) %>%
+  dplyr::rename(num_dbp_K562 = number_of_dbp)
+num_reservoir_new_data <- res_genes_2021 %>%
+  dplyr::select(gene_id, number_of_dbp) %>%
+  dplyr::rename(num_dbp_HepG2 = number_of_dbp)
+
+
+comparison_df <- merge(num_dbp_2020, num_reservoir_new_data)
+
+comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/161) #161
+comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/460) #460
 
 #Michael wrote this but I don't really get it. It didn't do anything interesting and the comparison df is wack.
 
@@ -69,12 +88,133 @@ ggplot(clean2_res_genes_2021, aes(x = gene_name, y = normalized_ratio_res21_res2
 
 ```
 
-## Including Plots
+UNFILTERED PLOTS
+```{r}
+#Nina's plotting portions
 
-You can also embed plots, for example:
+# new data
+g <- ggplot(peak_occurence_df_new, aes(x = number_of_dbp))
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+#AES layer will know to make a histogram since there is only one set of values for x.
+g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes - HepG2") 
+
+
+# 2020 data
+g <- ggplot(peak_occurence_df_2020, aes(x = number_of_dbp))
+
+#AES layer will know to make a histogram since there is only one set of values for x.
+g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes - K562")
+
+# 2020 data - only mRNAs
+g <- ggplot(peak_occurence_df_2020 %>% filter(peak_occurence_df_2020$gene_type == 'protein_coding'), aes(x = number_of_dbp))
+
+#AES layer will know to make a histogram since there is only one set of values for x.
+g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA genes - K562") 
+
+
+# 2020 data - both mRNAs and ncRNAs 
+g <- ggplot(peak_occurence_df_2020, aes(x = number_of_dbp))+
+  facet_wrap(gene_type ~ .)
+
+g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes - K562") 
+
+
+
+# 2020 data - both mRNAs and ncRNAs 
+g <- ggplot(peak_occurence_df_2020, aes(x = number_of_dbp))+
+  facet_wrap(expression ~ .)
+
+g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes - K562") 
+
+
+
+# 2020 data - in one image
+ggplot(peak_occurence_df_2020, aes(x = number_of_dbp, fill = gene_type, color = gene_type)) +
+   geom_density(alpha = 0.3)
+
+
+# 2021 data - in one image --> main one
+ggplot(peak_occurence_df_new, aes(x = number_of_dbp, fill = gene_type, color = gene_type)) +
+   geom_density(alpha = 0.3)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+PLOTTING RESERVOIRS
+```{r}
+# 2021 data - density plot
+
+g <- ggplot(reservoir_new_data, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+
+g + geom_density(alpha = 0.3) +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events of reservoirs",
+          subtitle = "mRNA and lncRNA genes - HepG2") 
+
+
+# scatterplot 
+ggplot(comparison_df, aes(x = dbp_HepG2_ratio,
+                         y = dbp_K562_ratio)) +
+  geom_point()
+
+ggplot(comparison_df, aes(x = num_dbp_HepG2,
+                         y = num_dbp_K562)) +
+  geom_point()
+
+```
+
+PLOT NON-RESERVOIRS
+
+
+```{r}
+g <- ggplot(res_genes_2021, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+
+g + geom_density(alpha = 0.3) +
+  xlab(expression("Number of DBPs - non-reservoirs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events of non-reservoirs",
+          subtitle = "mRNA and lncRNA genes - HepG2") 
+
+
+# make scatter plot 
+
+ggplot(comparison_df, aes(x = dbp_HepG2_ratio,
+                         y = dbp_K562_ratio)) +
+  geom_point()
+
+ggplot(comparison_df, aes(x = num_dbp_HepG2,
+                         y = num_dbp_K562)) +
+  geom_point()
+```
+
+FINDING WHICH DBPs ARE BINDING A GIVEN PROMOTER
+```{r}
+#2021 Data
+
+high_binders_21 <- filter(peak_occurence_df, number_of_dbp >= 300)
+xhigh_binders_21 <- as.data.frame(t(high_binders_21))
+```
