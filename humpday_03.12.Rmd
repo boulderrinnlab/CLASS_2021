@@ -113,3 +113,40 @@ bump2_promoters_genenames <- as.data.frame(middle_second_peak_occurence$gene_nam
 
 write_csv(bump2_promoters_genenames, "/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_name_second_peak_dbp.csv")
 ```
+
+```{r}
+#lncrna_mrna_promoter_peak_occurence <- read.table(file="lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+
+lncrna_mrna_promoter_peak_occurence_matrix <- read_table('/scratch/Shares/rinnclass/Chelsea/analysis/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv')
+
+
+#df_matrix <- as.data.frame(lncrna_mrna_promoter_peak_occurence)
+
+#second_peak_promoters_matrix <- filter(df_matrix, colSums(df_matrix >200))
+
+#Filter out the Zinc Finger proteins and generate a density plot
+filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/Chelsea/analysis/results/chipseq/filtered_consensus", 
+                                             pattern = "*.bed",
+                                             full.names = TRUE)
+filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
+
+names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/Chelsea/analysis/results/chipseq/filtered_consensus/|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
+
+
+#generate num_peaks_df
+num_peaks_df <- data.frame("dbp" = names(filtered_consensus_peaks),
+                           "num_peaks" = sapply(filtered_consensus_peaks, length))
+
+
+#Filter
+znf_num_peaks_df <- filter(num_peaks_df, num_peaks_df$dbd == "C2H2 ZF")
+
+#Need to generate a peak_occurence matrix of the zinc finger proteins
+##znf_promoter_peak_occurence <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
+
+
+#filter the filtered_consensus_peaks using the znf_num_peaks_df
+znf_filtered_consensus_peaks <- filter(filtered_consensus_peaks, num_peaks_df$dbp)
+
+```
+
