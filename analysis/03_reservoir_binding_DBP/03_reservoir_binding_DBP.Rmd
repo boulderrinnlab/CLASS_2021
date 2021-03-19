@@ -178,6 +178,7 @@ g <- ggplot(num_peaks_df, aes(x = log10(num_peaks),
 g + geom_point(alpha = 0.3) +
   geom_text(data = dplyr::filter(num_peaks_df,log10(num_peaks) >= 5 | log10(num_reservoir) <= 1 ), alpha = 1)+
   geom_text(data = dplyr::filter(num_peaks_df,log10(num_peaks) >= 4.5 & log10(num_reservoir) <= 1.5 ), alpha = 1)+
+  geom_smooth(method = "lm", span = 0.3)+
   xlab(expression("Num of Total Peaks")) +
   ylab(expression("Num of Reservoir Peaks")) +
   ggtitle("Reservoir Peaks distribution of each DBP",
