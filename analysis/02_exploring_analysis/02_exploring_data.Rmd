@@ -131,18 +131,20 @@ matrix_rownames1 <- rownames(lncrna_mrna_promoter_peak_occurence_matrix[1])
 matrix_column1 <- lncrna_mrna_promoter_peak_occurence_matrix[1]
 matrix_column2 <- lncrna_mrna_promoter_peak_occurence_matrix[2]
 
+#attempt 1
 #want to pull out all columns that are found in the second peak gene id's list... not sure how
-#second_peak_promoters_matrix <- 
-#    filter(lncrna_mrna_promoter_peak_occurence_matrix,
-#            "ENSG00000143870.12" %in% #colnames(lncrna_mrna_promoter_peak_occurence_matrix))
+second_peak_promoters_matrix <- 
+    filter(lncrna_mrna_promoter_peak_occurence_matrix,
+            "ENSG00000143870.12" %in% colnames(lncrna_mrna_promoter_peak_occurence_matrix))
 #this isn't working... not sure why. tried to get it to work for one column before matching to second_peak_gene_ids
 
-
+##attempt 2
 df_matrix <- as.data.frame(lncrna_mrna_promoter_peak_occurence_matrix)
 
 second_peak_promoters_matrix <- filter(df_matrix, colSums(df_matrix > 200))
 #then get row names of filtered table
 
+#attempt 3
 #re-make the matrix to with just second peak promoters
 filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/Katy/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus/", pattern = "*.bed",
                             full.names = TRUE)
@@ -151,7 +153,9 @@ filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::
 
 names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/Katy/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus//|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
 
-promoter_peak_occurence <- count_peaks_per_feature(second_peak_gene_ids, filtered_consensus_peaks, type = "occurrence")
+#filter mRNA_lncrna_promoters to be just promoters with lots of DBPs bound (second_peak_gene_ids)
+
+promoter_peak_occurence <- count_peaks_per_feature(second_peak_gene_ids_Grange, filtered_consensus_peaks, type = "occurrence")
 #IDs needs to be Granges object
 
 
