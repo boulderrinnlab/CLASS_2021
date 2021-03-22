@@ -168,7 +168,7 @@ high_dense_genes <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp
 
 interesting_id <- high_dense_genes$gene_id
 
-interesting_genes <- num_peaks_df %>% filter(ensembl_id %in% interesting_id)
+interesting_genes <- human_tfs %>% filter(ensembl_id %in% interesting_id)
 
 
 ```

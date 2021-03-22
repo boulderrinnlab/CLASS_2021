@@ -143,6 +143,9 @@ colnames(reservoir_df) <- c('dbp','peak_id','freq')
 
 bound_reservoir_df <- reservoir_df %>% filter(reservoir_df$freq==1)
 dbp_reservoir_df <- bound_reservoir_df %>% count(dbp)
+reservoir_dbp_df <- bound_reservoir_df %>% count(peak_id)
+
+colnames(reservoir_dbp_df) <- c('peak_id','num_of_dbp')
 colnames(dbp_reservoir_df) <- c('dbp','num_of_peak')
 
 num_peaks_threshold <- 300
@@ -172,7 +175,6 @@ num_peaks_df$ratio_reservoir_by_total_peaks <- num_peaks_df$num_reservoir/num_pe
 
 g <- ggplot(num_peaks_df, aes(x = log10(num_peaks),
                               y = log10(num_reservoir),
-                              #color = ratio_reservoir_by_total_peaks,
                               label = dbp)
             )
 g + geom_point(alpha = 0.3) +
@@ -185,5 +187,15 @@ g + geom_point(alpha = 0.3) +
           subtitle = "HEPG2") 
 ggsave("~/CLASS/Justin/CLASS_2021/analysis/03_reservoir_binding_DBP/figures/Reservoir_distribution_of_each_DBP_in_HEPG2.png", height = 5, width = 8)
 
+```
+
+Filter
+```{r}
+filterd_num_peaks_df <- num_peaks_df %>% filter(num_peaks_df$num_peaks >= num_peaks_threshold)
+K562_DBP <- as.character(dbp_promoter_binding_table$dbp)
+rownames(dbp_promoter_binding_table) <- K562_DBP
+dbp_promoter_binding_table$dbp <- NULL
+dbp_promoter_binding_table[2]
+rowSums(dbp_promoter_binding_table) >= 300
 ```
 

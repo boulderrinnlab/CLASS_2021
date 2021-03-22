@@ -85,14 +85,8 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 
 
 ?geom_point
-# here we are just looking at a x, y point plot (geom_point).
-# note there are not quotes on x, and y objects as they are being evaluated as "objects in ggplot"
-# note the +, we will see this everytime we are adding a new layer. # Yet within each layer it's standard comma 
-# seperated etc.
-# '+' adds layers together
 
-             
-# There is lots more we could modify here but let's change the    # shape of the points to show off R plotting. We need to do this  # outside the aes() layer. The aes is just for anything for       # that depends on any column of data. 
+
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length)) +
@@ -101,36 +95,22 @@ ggplot(num_peaks_df, aes(x = num_peaks,
              color = 'purple')
 
 
-# what other shapes are there and how would you find out ??????
-
-# Now the points are plotted as squares.
-
-# What if we wanted to color by TF or not TF column? Above, we "set" the 
-# color and shape AFTER the aes(). To color by data that needs to be 
-# evaluated we need to have that color INSIDE aes()
-
-# DATA DEPENDENCE COLOR / not in GEOM layer
-
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length,
-                 color = tf)) +
+                 color = tf,
+                 alpha = 0.6)) +
   geom_point()
 
-# Now color came in aes() because it depends on data values.
 
-# so much can be done in the Aesethics mapping layer!
-
-# We can also add some color features in the mapping layer of graphical grammar let's take a look
-# First let's see all the enteries
 table(num_peaks_df$dbd)
 # Ok there are several but most have very few enteries. Let's find those with at least
 # 100 DBPs with a given DBD.
 
-abundant_dbds <- table(num_peaks_df$dbd) > 100
-names(which(abundant_dbds))
-# we are checking which DBDs have more than 100 enteries or
-# we have at least 100 DBPs with a given DBD.
-# Ok we can see only the C2H2 Zinc Finger domain has more than 100 enteries.
+abundant_dbds <- names(which(table(num_peaks_df$dbd) > 100))
+#abundant_dbds
+#most_abun_dbds <- names(which(abundant_dbds))
+
+#Evolution of "C2H2 ZF"
 
 
 # FUNCTION RUN in AES
@@ -143,7 +123,8 @@ names(which(abundant_dbds))
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length,
-                 color = dbd == "C2H2 ZF")) +
+                 color = dbd == abundant_dbds,
+                 alpha = 0.5)) +
   geom_point()
 
 
@@ -168,19 +149,19 @@ ggplot(num_peaks_df, aes(x = num_peaks)) +
 # let's add more bins
 
 ggplot(num_peaks_df, aes(x = num_peaks)) +
-  geom_histogram(bins = 30)
+  geom_histogram(bins = 60)
 
 # Let's chage the color of the bars in histogram by number of peaks.
 # again we need to do this inside aes() since the data needs to read.
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
-  geom_histogram(bins = 30)
+  geom_histogram(bins = 60)
 
 # this is hard to see the two distributions.
 # let's fix this by adding a 'position' parameter in the geom layer.
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
-   geom_histogram(bins = 30, position = "dodge")
+   geom_histogram(bins = 60, position = "dodge")
 
 # so now we can see the individual data points seperated!
 
@@ -197,12 +178,12 @@ ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
 # geom layer
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf)) +
-   geom_density(alpha = 0.1)
+   geom_density(alpha = 0.5)
 
 # let's change color of the line now (inside aes())
 
 ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
-   geom_density(alpha = 0.3)
+   geom_density(alpha = 0.5)
 
 # so now line and fill are same color -- let's see:
 
@@ -214,7 +195,7 @@ ggplot(num_peaks_df, aes(x = num_peaks, fill = tf, color = tf)) +
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length)) +
-  geom_point()+
+  geom_point(alpha = 0.5)+
   geom_density_2d() 
 
 # what would happen if we change the order?
@@ -222,7 +203,7 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length)) +
    geom_density_2d()+
-    geom_point()
+    geom_point(alpha = 0.5)
 
 # it's hard to see but in this case the contour is on top
 # of points and points are below -- subtle but important to       # remember
@@ -241,7 +222,8 @@ You can do a lot in the geometry layer and add features with + and then new geom
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length)) +
-  geom_point()+
+  geom_point(alpha=0.5)+
+  geom_smooth(method = "lm")+
   geom_abline(slope = 1000, intercept = 0)
 
 # cool this fits -- what does it mean?
@@ -256,6 +238,7 @@ Let's take a quick look at bar plots
 # promoters etc.
 
 ggplot(num_peaks_df, aes(x = dbd)) + 
+
   geom_bar()
 
   
@@ -271,6 +254,7 @@ ggplot(num_peaks_df, aes(
       y = num_peaks)) +
         geom_bar(stat = "identity")
 
+?geom_bar(stat = "identity")
 ```
 
 Now we have gone through these layers:
@@ -298,9 +282,9 @@ Now we have gone through these layers:
 
 ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
   geom_point()+
-  scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
-  scale_y_continuous(trans = 'log10') +
-  scale_color_brewer(palette =  6) 
+  #scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
+  scale_y_continuous(trans = 'log10') 
+  #scale_color_brewer(palette =  6) 
 
 #? scale_x_continious (same for y) is calling the scale layer specifically
 # for the axes in ggplot. We are giving it where to put values on X-axis     # (note if a value is not met in largest break that break isn't printed)
@@ -310,10 +294,10 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
 # what if we want to set the limits of the axes? The scales layer is
 # just the place.
 
-ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
+ggplot(num_peaks_df, aes(x = log10(num_peaks), y = log10(total_peak_length), color = tf)) +
   geom_point()+
-  xlim(250, 2e3) +
-  ylim(1e5, 1e6) +
+  #xlim(250, 2e3) +
+  #ylim(1e5, 1e6) +
   scale_color_brewer(palette =  2) 
 
 # so we add to scale functions with xlim and ylim (?xlim, ?ylim)
@@ -334,10 +318,13 @@ FACET_GRID & FACET_WRAP
 
 # ?facet_grid
 
-table(num_peaks_df$dbd)[order(table(num_peaks_df$dbd))]
+temp <- table(num_peaks_df$dbd)[order(table(num_peaks_df$dbd), decreasing = T)]
+
 # First let's take a look at the top three represented DBDs?
 # Ok so now we will set dbds to these three DBDs.
-dbds <- c("C2H2 ZF", "Homeodomain", "bZIP")
+dbds <- temp[1:4]
+dbds <- names(dbds)
+dbds <- dbds[-2]
 
 # Now the plotting begings and good example of running functions in aes()
 ggplot(num_peaks_df %>% filter(dbd %in% dbds),
