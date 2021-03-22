@@ -1,0 +1,52 @@
+---
+title: "02_clustering.Rmd"
+author: "Katy Walsh"
+date: "3/22/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggdendro)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+
+```
+
+
+
+```{r}
+## clustering ##
+
+# load in the promoters annotations and peak_occurence_matrix for lncRNA and mRNA promoters
+promoters <- rtracklayer::import("results/lncrna_mrna_promoters.gtf")
+peak_occurence_matrix <- read.table("analysis/01_global_peak_properties/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+
+# Let's filter again to make sure we have at least 250 peaks
+# This is a different filtering because we're now filtering on at least 250 peaks on promoter regions rather than 250 peaks across the genome.
+peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) > 250, ]
+
+#dist(peak_occurence_matrix[1:2,], method = "euclidean")
+  #or
+#dist(peak_occurence_matrix[1:4,], method = "binary")
+  #but we'll use binary
+
+peak_occurence_dist <- dist(peak_occurence_matrix, method = "binary")
+
+bin_hier <- hclust(peak_occurence_dist, method = "complete")
+
+plot(bin_hier)
+
+# To make this bigger, we can plot it as a pdf
+pdf("figures/dbp_hclust_dendro.pdf", height = 12, width = 70)
+plot(bin_hier)
+dev.off()
+
+bin_hier$labels[bin_hier$order]
+```
+

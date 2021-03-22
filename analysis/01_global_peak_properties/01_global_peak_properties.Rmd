@@ -14,9 +14,8 @@ library(GenomicRanges)
 source("/scratch/Shares/rinnclass/Katy/CLASS_2021/util/intersect_functions.R")
 ```
 
+
 ```{r}
-
-
 filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/Katy/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus/", 
                                              pattern = "*.bed",
                                              full.names = TRUE)
