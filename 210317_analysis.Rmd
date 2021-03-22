@@ -110,7 +110,7 @@ ggplot(peak_occurence_df_new, aes(x = number_of_dbp, fill = gene_type, color = g
 ```
 
 
-
+```{r}
 # filter for reservoirs
 
 reservoir_list_2020 <- peak_occurence_df_2020 %>% filter(peak_occurence_df_2020$reservoir == 1)
@@ -146,8 +146,8 @@ names(gene_w_reservoirs)
 comparison_df <- merge(num_dbp_2020, num_reservoir_new_data)
 
 
-comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/161) #161
-comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/460) #460
+comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/460) #161
+comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/161) #460
 
 
 
@@ -213,8 +213,8 @@ names(gene_w_reservoirs)
 comparison_df <- merge(num_dbp_2020, num_reservoir_new_data)
 
 
-comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/180) #180
-comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/460) #460
+comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/460) #180
+comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/180) #460
 
 
 
@@ -228,3 +228,53 @@ ggplot(comparison_df, aes(x = num_dbp_HepG2,
   geom_point()
 
 ```
+
+```{r}
+human_tfs <- readxl::read_excel("/scratch/Shares/rinnclass/data/mmc2.xlsx",
+                                sheet = 2, skip = 1)
+names(human_tfs)[4] <- "is_tf"
+
+length(which(tolower(num_peaks_df$dbp) %in% tolower(human_tfs$Name)))
+
+
+human_tfs <- human_tfs[tolower(human_tfs$Name) %in% tolower(num_peaks_df$dbp), 1:4]
+names(human_tfs) <- c("ensembl_id",
+                      "dbp",
+                      "dbd",
+                      "tf")
+
+```
+
+```{r}
+
+num_dbps_threshold <- 299
+
+highly_bound_genes <- peak_occurence_df_new[sapply(peak_occurence_df_new, number_of_dbp) > num_dbps_threshold]
+
+
+
+highly_bound_genes <- peak_occurence_df_new %>% filter(peak_occurence_df_new$number_of_dbp > 299)
+
+highly_bound_genes <- highly_bound_genes$gene_id
+
+highly_bound_genes <- as.data.frame(t(highly_bound_genes))
+
+
+```
+
+subsetting occurrence matrix by reservoirs or high binders make a cutoff, do column or row sums
+
+for ewachdbp, how many high binding promoters it bound
+
+find promoters with high binding, 
+
+
+
+
+
+
+
+
+
+
+
