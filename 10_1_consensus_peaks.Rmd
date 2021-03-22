@@ -62,6 +62,7 @@ These you will want to save directly to your results folder since they will be u
 gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
 
 lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
+<<<<<<< HEAD
 rtracklayer::export(lncrna_mrna_promoters, "/scratch/Shares/rinnclass/Chelsea/analysis/results/promoter_regions/lncrna_mrna_promoters.gtf")
 
 
@@ -71,6 +72,17 @@ rtracklayer::export(lncrna_promoters, "/scratch/Shares/rinnclass/Chelsea/analysi
 
 mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
 rtracklayer::export(mrna_promoters, "/scratch/Shares/rinnclass/Chelsea/analysis/results/promoter_regions/mrna_promoters.gtf")
+=======
+rtracklayer::export(lncrna_mrna_promoters, "/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/--- 00 consensus peaks -- /lncrna_mrna_promoters.gtf")
+
+
+lncrna_promoters <- get_promoter_regions(gencode_gr, biotype = "lncRNA")
+rtracklayer::export(lncrna_promoters, "/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/--- 00 consensus peaks -- /lncrna_promoters.gtf")
+
+
+mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+rtracklayer::export(mrna_promoters, "/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/--- 00 consensus peaks -- /mrna_promoters.gtf")
+>>>>>>> origin/in_class
 ```
 
 
@@ -79,20 +91,30 @@ rtracklayer::export(mrna_promoters, "/scratch/Shares/rinnclass/Chelsea/analysis/
 ```{r}
 lncrna_mrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
                                      gencode_gr$gene_type %in% c("lncRNA", "protein_coding")]
+<<<<<<< HEAD
 rtracklayer::export(lncrna_mrna_genebody, "/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_bodies/lncrna_mrna_genebody.gtf")
+=======
+rtracklayer::export(lncrna_mrna_genebody, "/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/--- 00 consensus peaks -- /lncrna_mrna_genebody.gtf")
+>>>>>>> origin/in_class
 
 
 lncrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
                                 gencode_gr$gene_type %in% c("lncRNA")]
+<<<<<<< HEAD
 rtracklayer::export(lncrna_genebody, "/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_bodies/lncrna_genebody.gtf")
+=======
+rtracklayer::export(lncrna_genebody, "/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/--- 00 consensus peaks -- /lncrna_genebody.gtf")
+>>>>>>> origin/in_class
 
 
 mrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
                               gencode_gr$gene_type %in% c("protein_coding")]
+<<<<<<< HEAD
 rtracklayer::export(mrna_genebody, "/scratch/Shares/rinnclass/Chelsea/analysis/results/gene_bodies/mrna_genebody.gtf")
+=======
+rtracklayer::export(mrna_genebody, "/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/--- 00 consensus peaks -- /mrna_genebody.gtf")
+>>>>>>> origin/in_class
 
 ```
-
-
 
 
