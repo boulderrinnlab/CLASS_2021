@@ -138,8 +138,10 @@ num_peaks_df <- data.frame("dbp" = names(filtered_consensus_peaks),
                            "num_peaks" = sapply(filtered_consensus_peaks, length))
 
 
-#Filter
+#Filter out zinc fingers from the num_peaks_df data.frame
 znf_num_peaks_df <- filter(num_peaks_df, num_peaks_df$dbd == "C2H2 ZF")
+
+
 
 #Need to generate a peak_occurence matrix of the zinc finger proteins
 ##znf_promoter_peak_occurence <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
@@ -147,6 +149,7 @@ znf_num_peaks_df <- filter(num_peaks_df, num_peaks_df$dbd == "C2H2 ZF")
 
 #filter the filtered_consensus_peaks using the znf_num_peaks_df
 znf_filtered_consensus_peaks <- filter(filtered_consensus_peaks, num_peaks_df$dbp)
+
 
 ```
 

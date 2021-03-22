@@ -322,24 +322,29 @@ Let's make a heatmap of the promoters -- since it will take a long long time to 
 
 ```{r}
 # We'll start with the promoter peak occurrence and filter down to just those that have high numbers of dbps
-high_binders <- promoter_peak_occurence[,colSums(promoter_peak_occurence) > 350]
+high_binders <- peak_occurence_matrix[,colSums(peak_occurence_matrix) > 350]
 # Could filter out the rows that have zeros, but we don't have any
 min(rowSums(high_binders))
 
 # If you don't have pheatmap, install it.
+install.packages("pheatmap")
 library(pheatmap)
 ?pheatmap
 # We don't need to be able to read the promoter names and it takes a long time to plot those.
 pheatmap(high_binders, show_colnames = FALSE, clustering_distance_rows = "binary", clustering_distance_cols = "binary")
 
 # If we want to just plot the zinc fingers for example, we can reference the num_peaks_df 
-num_peaks_df <- read_csv("../../data/num_peaks_df.csv")
+num_peaks_df <- read_csv("results/num_peaks_df.csv")
 
-zinc_finger_dbd <- num_peaks_df %>% filter(dbd == "C2H2 ZF")
+zinc_finger_dbd <- num_peaks_df %>% filter(dbd == "C2H2 ZF",
+                                           dbp %in% rownames(high_binders))
 
 # Index this matrix using the names
 zf_matrix <- high_binders[zinc_finger_dbd$dbp,] 
 pheatmap(zf_matrix, show_colnames = FALSE, clustering_distance_rows = "binary", clustering_distance_cols = "binary")
+
+rownames(high_binders) %in% zinc_finger_dbd$dbp
+
 
 
 # We can also check out the dendrogram for just this matrix.
