@@ -41,6 +41,8 @@ ggplot(super_promoter_features, aes(x = percent_super_prom_ov, color = zincfinge
   geom_density()
 ggplot(super_promoter_features, aes(x = percent_of_total_peaks_at_super_prom, y = percent_super_prom_ov)) + 
   geom_point()
+
+write.csv(super_promoter_features, "results/super_promoter_features.csv")
   
 ```
 
