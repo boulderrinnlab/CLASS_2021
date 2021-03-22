@@ -15,7 +15,7 @@ source("util/intersect_functions.R")
 source("util/plotting_functions.R")
 source("util/_setup.R")
 library(Gviz)
-#library(ggpubr)
+library(ggpubr)
 library(ggplot2)
 ```
 
@@ -97,6 +97,8 @@ ggplot(lncrna_peak_occurance, aes(x=number_of_dbp)) +
   ggtitle("Promoter binding events",
           subtitle = "lncRNA promoters")
 
+
+
 ```
 
 Next: are there any DBP's that don't show up in the second hump? (promoters with lots of DBPs bound)
@@ -120,60 +122,24 @@ write_csv(first_peak_gene_ids, "analysis/02_exploring_analysis/first_peak_gene_i
 #there's 13,000 gene promoters in the second peak and 18,000 in the first so gene ontology analysis likely won't work well since there's so many genes in each
 #dplyer::select() would also work instead of as.data.frame()
 
-#could look at if the promoters in our second humps correspond with promoters with lots of DBPs in last class's paper
+#could look at if the promoters in our second humps also have 
+
 
 
 ##now looking at which DBP's ar in each peak and if there are DBPs that aren't in the second peak
-#use the matrix that includes each DBP accross each promoter - lncrna_mrna_promoter_peak_matrix
-#gene names are in the columns, numbers as the row names (DBPs as first column but as their gene IDs)
-matrix_colnames <- colnames(occurence_matrix)
-matrix_rownames1 <- rownames(occurence_matrix[1])
-matrix_column1 <- occurence_matrix[1]
-matrix_column2 <- occurence_matrix[2]
+#
+occurence_matrix <- read.table("results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
 
-#attempt 1
-#want to pull out all columns that are found in the second peak gene id's list... not sure how
-second_peak_promoters_matrix <- 
-    filter(lncrna_mrna_promoter_peak_occurence_matrix,
-            "ENSG00000143870.12" %in% colnames(lncrna_mrna_promoter_peak_occurence_matrix))
-#this isn't working... not sure why. tried to get it to work for one column before matching to second_peak_gene_ids
-
-##attempt 2
-df_matrix <- as.data.frame(lncrna_mrna_promoter_peak_occurence_matrix)
-
-second_peak_promoters_matrix <- filter(df_matrix, colSums(df_matrix > 200))
-#then get row names of filtered table
-
-#attempt 3
-#re-make the matrix to with just second peak promoters
-filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/Katy/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus/", pattern = "*.bed",
-                            full.names = TRUE)
-filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
-names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/Katy/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus//|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
-#filter mRNA_lncrna_promoters to be just promoters with lots of DBPs bound (second_peak_gene_ids)
-promoter_peak_occurence <- count_peaks_per_feature(second_peak_gene_ids_Grange, filtered_consensus_peaks, type = "occurrence")
-#IDs needs to be Granges object
-
-
-## attempt 4 works!
-#matrix of only promters in the second hump and occurence matrix for each DBP
-super_promoter <- occurence_matrix[,colSums(occurence_matrix)>350]
-#350 cuttoff looks at promoters past the second peak
-
+super_promoter <- occurence_matrix[, colSums(occurence_matrix) > 350]
 super_promoter_dbps <- data.frame(dbp = rownames(super_promoter), num_super_promoter_overlaps = rowSums(super_promoter))
-
-super_promoter_features <- merge(num_peaks_df, super_promoter_dbps)
-
-#re-order the merged table (defaults to new info on the far right)
+num_peaks_df <- read.csv("results/num_peaks_df.csv")
+super_prom_features <- merge(super_promoter_dbps, num_peaks_df)
 super_promoter_features <- dplyr::select(super_promoter_features, dbp, num_super_promoter_overlaps, everything() )
-
 super_promoter_features <- super_promoter_features %>%
   mutate(percent_super_prom_ov = num_super_promoter_overlaps/peaks_overlapping_promoters * 100, 
          percent_of_total_peaks_at_super_prom = num_super_promoter_overlaps/num_peaks * 100,
-         zincfinger = ifelse(grepl(" ZF", dbd), "ZF", 
-                             "Other"))
-
-
+         zincfinger = ifelse(grepl(" ZF",dbd), "ZF", "Other"))
+table(super_promoter_features$zincfinger)
 ggplot(super_promoter_features, aes(x = percent_super_prom_ov, color = zincfinger)) +
   geom_density()
 ggplot(super_promoter_features, aes(x = percent_of_total_peaks_at_super_prom, y = percent_super_prom_ov)) + 
@@ -181,19 +147,15 @@ ggplot(super_promoter_features, aes(x = percent_of_total_peaks_at_super_prom, y 
 write.csv(super_promoter_features, "results/super_promoter_features.csv")
 
 
+
+#conclusion: it doesn't look like the ZF's are binding at higer rates to the "super promoters" than other DBPs
 ```
 
 ```{r}
 ##where are the uncharacterized zinc finger proteins binding?
 #make list of all ZNF proteins
-C2H2_ZF_num_peaks_df <- filter(num_peaks_df, dbd == "C2H2 ZF")
-C2H2_ZF_names <- as.data.frame(C2H2_ZF_num_peaks_df$dbp)
 
 #make a occurence matrix with just ZNF DBP's
-#filter matrix for just ZF DBPs
-ZF_matrix <- C2H2_ZF_names %in% lncrna_mrna_promoter_peak_occurence_matrix
-#filter didn't work, error variable names are limited to 1000 bytes
-
 
 
 ```
