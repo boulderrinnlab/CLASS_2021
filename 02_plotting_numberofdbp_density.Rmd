@@ -43,13 +43,15 @@ promoter_peak_occurence <- count_peaks_per_feature(lncrna_mrna_promoters, filter
 peak_occurence_df <- read_csv("/scratch/Shares/rinnclass/James/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv")
 ```
 ```{r}
-g <- ggplot(peak_occurence_df, aes(x = number_of_dbp))
- g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
-     theme_paperwhite() +
-     xlab(expression("Number of DBPs")) +
-     ylab(expression("Density")) +
-     ggtitle("Promoter binding events",
-             subtitle = "mRNA and lncRNA genes")
+g <- ggplot(peak_occurence_df, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+
+g + geom_density(alpha = 0.2, color = "#424242") +
+theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes")
+
 ```
 
 ```{r}
@@ -57,12 +59,64 @@ g <- ggplot(peak_occurence_df, aes(x = number_of_dbp))
 lncrna_peak_occurence_df <- filter(peak_occurence_df, gene_type == "lncRNA")
 mrna_peak_occurence_df <- filter(peak_occurence_df, gene_type == "protein_coding")
 
-## Including Plots
+##filtering to see the second peak or the first motif, written out as two new df
+num_dbp_threshold <- 200 
+second_peak_occurence <- filter(peak_occurence_df, peak_occurence_df$number_of_dbp > num_dbp_threshold)
+first_peak_occurence <- filter(peak_occurence_df, peak_occurence_df$number_of_dbp < num_dbp_threshold)
 
-You can also embed plots, for example:
+##write out dfs as csv
+write_csv(first_peak_occurence_df, "/scratch/Shares/rinnclass/James/CLASS_2021/analysis/gene_id_first_peak_dbp.csv")
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+## Read in 2020 class data to find genes in second peak in both data sets
+
+peak_occurence_2020 <- read.csv("/scratch/Shares/rinnclass/data/2020_peak_occurence_df.csv")
+
+## Plot density, similar to our data set. 
+
+g <- ggplot(num_peaks_df, aes (x = number_of_dbp, color = dbd, fill = dbd))
+
+g + geom_density(alpha = 0.2, color = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes")
+## Filter to only show gene promoters present in both data sets
+## lncRNA mRNA plot but just with zincfingers filter by DNA binding - color by dbp column
+## who is most present at these second peak, filter row sum for DBP, (whichmax) how has the most amount of binding in the second peak range. find who is binding the most with names, which, and max
+
+## sum every column in the matrix, filter to only show us things with colsums with 290-310 bound dbps
+colSums(lncrna_mrna_promoter_peak_occurence_matrix_df)
+## Plotting by what type of DNA binding domain is bound in the second peak
+c2h2_peak_occurence_df <- filter(peak_occurence_df, znf_num_peaks_df$dbp)
+
 ```
 
+```{r}
+## Making a new Super Matrix - this is looking at just the tail of the second hump, line 2 of this chunk has > 350, which only gives us the largest binders. This df is a combination of num_peaks_df and peak_occurence_df
+
+occurence_matrix <- read.table("results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+
+super_promoter <- occurence_matrix[, colSums(occurence_matrix) > 350]
+
+super_promoter_dbps <- data.frame(dbp = rownames(super_promoter), num_super_promoter_overlaps = rowSums(super_promoter))
+
+num_peaks_df <- read.csv("results/num_peaks_df.csv")
+
+super_promoter_features <- merge(num_peaks_df, super_promoter_dbps)
+
+super_promoter_features <- dplyr::select(super_promoter_features, dbp, num_super_promoter_overlaps, everything() )
+
+super_promoter_features <- super_promoter_features %>%
+  mutate(percent_super_prom_ov = num_super_promoter_overlaps/peaks_overlapping_promoters * 100, 
+         percent_of_total_peaks_at_super_prom = num_super_promoter_overlaps/num_peaks * 100,
+         zincfinger = ifelse(grepl(" ZF", dbd), "ZF", "Other"))
+
+ggplot(super_promoter_features, aes(x = percent_super_prom_ov, color = zincfinger)) +
+  geom_density()
+ggplot(super_promoter_features, aes(x = percent_of_total_peaks_at_super_prom, y = percent_super_prom_ov)) + 
+  geom_point()
+write.csv(super_promoter_features, "results/super_promoter_features.csv")
+```
 Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
