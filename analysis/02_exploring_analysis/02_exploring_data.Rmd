@@ -36,7 +36,7 @@ lncrna_mrna_gbody <- rtracklayer::import("/scratch/Shares/rinnclass/Katy/CLASS_2
 #read in df's
 num_peaks_df <- read_csv('analysis/01_global_peak_properties/results/num_peaks_df.csv')
 peak_occurence_df <- read_csv('analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv')
-lncrna_mrna_promoter_peak_occurence_matrix <- read_table('analysis/01_global_peak_properties/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv')
+occurence_matrix <- read.table('analysis/01_global_peak_properties/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv')
 
 ```
 
@@ -126,10 +126,10 @@ write_csv(first_peak_gene_ids, "analysis/02_exploring_analysis/first_peak_gene_i
 ##now looking at which DBP's ar in each peak and if there are DBPs that aren't in the second peak
 #use the matrix that includes each DBP accross each promoter - lncrna_mrna_promoter_peak_matrix
 #gene names are in the columns, numbers as the row names (DBPs as first column but as their gene IDs)
-matrix_colnames <- colnames(lncrna_mrna_promoter_peak_occurence_matrix)
-matrix_rownames1 <- rownames(lncrna_mrna_promoter_peak_occurence_matrix[1])
-matrix_column1 <- lncrna_mrna_promoter_peak_occurence_matrix[1]
-matrix_column2 <- lncrna_mrna_promoter_peak_occurence_matrix[2]
+matrix_colnames <- colnames(occurence_matrix)
+matrix_rownames1 <- rownames(occurence_matrix[1])
+matrix_column1 <- occurence_matrix[1]
+matrix_column2 <- occurence_matrix[2]
 
 #attempt 1
 #want to pull out all columns that are found in the second peak gene id's list... not sure how
@@ -148,17 +148,37 @@ second_peak_promoters_matrix <- filter(df_matrix, colSums(df_matrix > 200))
 #re-make the matrix to with just second peak promoters
 filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/Katy/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus/", pattern = "*.bed",
                             full.names = TRUE)
-
 filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
-
 names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/Katy/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus//|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
-
 #filter mRNA_lncrna_promoters to be just promoters with lots of DBPs bound (second_peak_gene_ids)
-
 promoter_peak_occurence <- count_peaks_per_feature(second_peak_gene_ids_Grange, filtered_consensus_peaks, type = "occurrence")
 #IDs needs to be Granges object
 
 
+## attempt 4 works!
+#matrix of only promters in the second hump and occurence matrix for each DBP
+super_promoter <- occurence_matrix[,colSums(occurence_matrix)>350]
+#350 cuttoff looks at promoters past the second peak
+
+super_promoter_dbps <- data.frame(dbp = rownames(super_promoter), num_super_promoter_overlaps = rowSums(super_promoter))
+
+super_promoter_features <- merge(num_peaks_df, super_promoter_dbps)
+
+#re-order the merged table (defaults to new info on the far right)
+super_promoter_features <- dplyr::select(super_promoter_features, dbp, num_super_promoter_overlaps, everything() )
+
+super_promoter_features <- super_promoter_features %>%
+  mutate(percent_super_prom_ov = num_super_promoter_overlaps/peaks_overlapping_promoters * 100, 
+         percent_of_total_peaks_at_super_prom = num_super_promoter_overlaps/num_peaks * 100,
+         zincfinger = ifelse(grepl(" ZF", dbd), "ZF", 
+                             "Other"))
+
+
+ggplot(super_promoter_features, aes(x = percent_super_prom_ov, color = zincfinger)) +
+  geom_density()
+ggplot(super_promoter_features, aes(x = percent_of_total_peaks_at_super_prom, y = percent_super_prom_ov)) + 
+  geom_point()
+write.csv(super_promoter_features, "results/super_promoter_features.csv")
 
 
 ```
