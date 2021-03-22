@@ -318,7 +318,8 @@ Let's make a heatmap of the promoters -- since it will take a long long time to 
 
 ```{r}
 # We'll start with the promoter peak occurrence and filter down to just those that have high numbers of dbps
-high_binders <- peak_occurence_matrix[,colSums(peak_occurence_matrix) > 350]
+high_binders <- promoter_peak_occurence[,colSums(promoter_peak_occurence) > 350]
+
 # Could filter out the rows that have zeros, but we don't have any
 min(rowSums(high_binders))
 
@@ -330,6 +331,7 @@ pheatmap(high_binders, show_colnames = FALSE, clustering_distance_rows = "binary
 
 # If we want to just plot the zinc fingers for example, we can reference the num_peaks_df 
 num_peaks_df <- read_csv('analysis/01_global_peak_properties/results/num_peaks_df.csv')
+
 
 zinc_finger_dbd <- num_peaks_df %>% filter(dbd == "C2H2 ZF")
 
