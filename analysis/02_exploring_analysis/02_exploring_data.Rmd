@@ -171,7 +171,7 @@ C2H2_ZF_names <- as.data.frame(C2H2_ZF_num_peaks_df$dbp)
 
 #make a occurence matrix with just ZNF DBP's
 #filter matrix for just ZF DBPs
-ZF_matrix <- C2H2_ZF_names %in% df_matrix
+ZF_matrix <- C2H2_ZF_names %in% lncrna_mrna_promoter_peak_occurence_matrix
 #filter didn't work, error variable names are limited to 1000 bytes
 
 
