@@ -6,6 +6,11 @@ source("util/_setup.R")
 
 
 #load in our consensus peaks and counted peak occurrence
+
+filtered_consensus_peaks_files <- list.files("/Users/maca9088/CLASS/Maria/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus_peaks",
+                                             pattern = "*.bed",
+                                             full.names = TRUE)
+filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
 num_peaks_df <- read_csv('./analysis/00_consensus_peaks/results/num_peaks_df.csv')
 peak_occurence_df <- read_csv('./analysis/00_consensus_peaks/results/peak_occurence_dataframe.csv')
 
@@ -133,7 +138,7 @@ write_csv(mid_bump2_promoters_geneids, "results/mid_bump2_promoters_geneids.csv"
 #remove the version
 #sed 's/\(ENSG[0-9]*\)\.[0-9]*/\1/g' file_with_version > file_without_version 
 
-#percentage of mRNA in bump2 vs. bump1
+#percentage of mRNA in bump2 
 
 n_bump2_mrna_promoters = filter(bump2_promoters, bump2_promoters$gene_type == 'protein_coding')
 n_bump2_lncrna_promoters = filter(bump2_promoters, bump2_promoters$gene_type == 'lncRNA')
@@ -143,4 +148,14 @@ n_bump2_lncrna_promoters <- nrow(n_bump2_lncrna_promoters)
 
 percent_mrna_bump2 <- n_bump2_mrna_promoters/(n_bump2_mrna_promoters+n_bump2_lncrna_promoters)
 
+#percent mrna in bump1
+n_bump1_mrna_promoters = filter(bump1_promoters, bump1_promoters$gene_type == 'protein_coding')
+n_bump1_lncrna_promoters = filter(bump1_promoters, bump1_promoters$gene_type == 'lncRNA')
 
+n_bump1_mrna_promoters <- nrow(n_bump1_mrna_promoters)
+n_bump1_lncrna_promoters <- nrow(n_bump1_lncrna_promoters)
+
+percent_mrna_bump1 <- n_bump1_mrna_promoters/(n_bump1_mrna_promoters+n_bump1_lncrna_promoters)
+
+
+#interesting!!! The percent mrna in bump1 is 39.53 % and in bump2 is 76.06%
