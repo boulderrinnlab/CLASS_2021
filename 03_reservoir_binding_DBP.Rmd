@@ -1,0 +1,189 @@
+---
+title: "Global peak properties"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+library(Gviz)
+library(BiocManager)
+library(regioneR)
+library(ggplot2)
+library(ggdendro)
+library(hexbin)
+source("~/CLASS/Justin/util/intersect_functions.R")
+source("~/CLASS/Justin/CLASS_2021/util/plotting_functions.R")
+source("~/CLASS/Justin/CLASS_2021/util/_setup.R")
+```
+
+```{r}
+base_path <- "~/CLASS/Justin/CLASS_2021/analysis/00_consensus_peaks/results"
+peak_list <- import_peaks(file.path(base_path,
+                                    "filtered_consensus/"))
+
+```
+
+DBP distribution of mRNA and lncRNA
+```{r}
+po_2020_df <- read.csv(file = '/scratch/Shares/rinnclass/data/2020_peak_occurence_df.csv')
+po_2021_df <- read.csv(file = '~/CLASS/Justin/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv')
+
+
+
+g <- ggplot(po_2021_df, aes(x = number_of_dbp, color = gene_type))
+
+#AES layer will know to make a histogram since there is only one set of values for x.
+g + geom_density(alpha = 0.2, fill = "#424242") +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("DBPs distribution",
+          subtitle = "mRNA and lncRNA genes") 
+
+```
+
+Scatter plot of normalized number of DBP bound to each reservoir in K562 and those in HEPG2
+```{r}
+#get the reservoir gene names in 2020 peak_occurence_df
+reservoir_2020 <- po_2020_df %>% filter(po_2020_df$reservoir == 1) 
+reservoir_name_list <- reservoir_2020$gene_name
+#get the reservior gene names in 2021 peak_occurence_df
+reservoir_2021 <- po_2021_df %>% filter(po_2021_df$gene_name %in% reservoir_name_list)
+
+
+#normalize by the total number of DBP
+normalized_2020 <- reservoir_2020 %>%
+  dplyr::select(gene_name, gene_type, number_of_dbp) %>%
+  dplyr::mutate(dbp_norm = number_of_dbp/length(dbp_promoter_binding_table$dbp)) %>%
+  dplyr::rename(norm_num_dbp_HEPG2 = dbp_norm)
+
+normalized_2021 <-reservoir_2021 %>%
+  dplyr::select(gene_name, gene_type, number_of_dbp) %>%
+  dplyr::mutate(dbp_norm = number_of_dbp/length(peak_names)) %>%
+  dplyr::rename(norm_num_dbp_K562 = dbp_norm)
+
+comparison_df <- merge(normalized_2020, normalized_2021, by=c("gene_name","gene_type"))
+#ratio tells us the correlation between each gene in HEPG2 and K562
+comparison_df$ratio_of_HEPG2_K562 <- comparison_df$norm_num_dbp_HEPG2/comparison_df$norm_num_dbp_K562
+
+
+ggplot(comparison_df, aes(x = norm_num_dbp_K562, 
+                 y = norm_num_dbp_HEPG2,
+                 color = gene_type,
+                 label = gene_name)) +
+  geom_point(alpha = 0.8) +
+  geom_text(data = dplyr::filter(comparison_df,norm_num_dbp_K562 >= 0.75 & norm_num_dbp_HEPG2 >= 0.5 ), alpha = 0.9)+
+  geom_vline(xintercept = 0.4, linetype="dashed")+
+  geom_hline(yintercept = 0.5, linetype="dashed")+
+  ggtitle("Normalized num of dbp bound to each reservoir in HEPG2 vs in K562")
+ggsave("~/CLASS/Justin/CLASS_2021/analysis/02_content_of_peaks_per_promoter/figures/Normalized_distribution_num_dbp_HEPG2_K562.png", height = 5, width = 8)
+
+```
+Plot num of dbp bound to each gene in HEPG2 vs in K562
+```{r}
+total_2020 <- po_2020_df %>%
+  dplyr::select(gene_name, gene_type, number_of_dbp) %>%
+  dplyr::mutate(dbp_norm = number_of_dbp/length(dbp_promoter_binding_table$dbp)) %>%
+  dplyr::rename(norm_num_dbp_2020 = dbp_norm)
+
+
+total_2021 <-po_2021_df %>%
+  dplyr::select(gene_name, gene_type, number_of_dbp) %>%
+  dplyr::mutate(dbp_norm = number_of_dbp/length(peak_names)) %>%
+  dplyr::rename(norm_num_dbp_2021 = dbp_norm)
+
+total_comparison_df <- merge(total_2020, total_2021, by=c("gene_name","gene_type"))
+
+
+ggplot(total_comparison_df, aes(x = norm_num_dbp_2021, 
+                 y = norm_num_dbp_2020,
+                 color = gene_type,
+                 label = gene_name)) +
+  geom_hex(bins = 40, alpha = 0.5)+
+  geom_smooth(method = "lm", span = 0.3)+
+  #scale_color_gradientn(colors = pals::ocean.amp(20)) +
+  ggtitle("Normalized num of dbp bound to each gene in HEPG2 vs in K562",
+          subtitle = "Colored by gene type")
+```
+
+DBP distribution comparison
+```{r}
+g <- ggplot(po_2021_df, aes(x = number_of_dbp, color = gene_type))
+g + geom_density(alpha = 0.2, fill = "#424242") +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("DBPs distribution of all genes in HEPG2",
+          subtitle = "mRNA and lncRNA genes") 
+
+g <- ggplot(reservoir_2021, aes(x = number_of_dbp, color = gene_type))
+g + geom_density(alpha = 0.2,  fill = "#424242") +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("DBPs distribution of reservoir",
+          subtitle = "mRNA and lncRNA genes") 
+ggsave("~/CLASS/Justin/CLASS_2021/analysis/03_reservoir_binding_DBP/figures/DBP_distribution_reservoir_in_HEPG2.png", height = 5, width = 8)
+```
+
+```{r}
+lncrna_mrna_promoters <- rtracklayer::import("~/CLASS/Justin/CLASS_2021/analysis/00_consensus_peaks/results/promoters/lncrna_mrna_promoters.gtf")
+
+lncrna_mrna_genebody <- rtracklayer::import("~/CLASS/Justin/CLASS_2021/analysis/00_consensus_peaks/results/genebody/lncrna_mrna_genebody.gtf")
+
+dbp_promoter_binding_table <- read.csv(file = '/scratch/Shares/rinnclass/data/dbp_promoter_binding_table.csv')
+
+reservoir_promoters <- lncrna_mrna_promoters[lncrna_mrna_promoters$gene_name %in% reservoir_name_list]
+
+reservoir_peak_store <- get_overlapping_peaks(reservoir_promoters, peak_list, 1)
+
+reservoir_df <- as.data.frame(as.table(reservoir_peak_store))
+colnames(reservoir_df) <- c('dbp','peak_id','freq')
+
+bound_reservoir_df <- reservoir_df %>% filter(reservoir_df$freq==1)
+dbp_reservoir_df <- bound_reservoir_df %>% count(dbp)
+colnames(dbp_reservoir_df) <- c('dbp','num_of_peak')
+
+num_peaks_threshold <- 300
+
+filtered_dbp_reservoir <- dbp_reservoir_df %>% filter(dbp_reservoir_df$num_of_peak >= num_peaks_threshold)
+
+
+g <- ggplot(filtered_dbp_reservoir, aes(x = dbp,
+                                  y = num_of_peak))
+
+#AES layer will know to make a histogram since there is only one set of values for x.
+g + geom_point(alpha = 0.5)+
+  xlab(expression("Name of DBP")) +
+  ylab(expression("Name of Peaks")) +
+  ggtitle("Number of reservoir peaks bound by each DBP"
+          ) 
+#reservoir_df <- as.data.frame(reservoir_peak_store)
+
+
+
+num_peaks_df <- data.frame("dbp" = names(peak_list),
+                           "num_peaks" = sapply(peak_list, length)
+                           )
+
+num_peaks_df$num_reservoir <- dbp_reservoir_df$num_of_peak
+num_peaks_df$ratio_reservoir_by_total_peaks <- num_peaks_df$num_reservoir/num_peaks_df$num_peaks * 100
+
+g <- ggplot(num_peaks_df, aes(x = log10(num_peaks),
+                              y = log10(num_reservoir),
+                              #color = ratio_reservoir_by_total_peaks,
+                              label = dbp)
+            )
+g + geom_point(alpha = 0.3) +
+  geom_text(data = dplyr::filter(num_peaks_df,log10(num_peaks) >= 5 | log10(num_reservoir) <= 1 ), alpha = 1)+
+  geom_text(data = dplyr::filter(num_peaks_df,log10(num_peaks) >= 4.5 & log10(num_reservoir) <= 1.5 ), alpha = 1)+
+  geom_smooth(method = "lm", span = 0.3)+
+  xlab(expression("Num of Total Peaks")) +
+  ylab(expression("Num of Reservoir Peaks")) +
+  ggtitle("Reservoir Peaks distribution of each DBP",
+          subtitle = "HEPG2") 
+ggsave("~/CLASS/Justin/CLASS_2021/analysis/03_reservoir_binding_DBP/figures/Reservoir_distribution_of_each_DBP_in_HEPG2.png", height = 5, width = 8)
+
+```
+
