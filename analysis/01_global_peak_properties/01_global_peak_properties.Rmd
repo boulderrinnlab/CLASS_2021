@@ -27,8 +27,13 @@ filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::
 
 names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus_peaks//filtered_consensus_peaks|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
 
+head(filtered_consensus_peaks)
+
+
+
 # Import annotations
 lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_promoters.gtf")
+
 lncrna_mrna_genebody <- rtracklayer::import("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_genebody.gtf")
 
 lncrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "lncRNA"]
@@ -40,8 +45,10 @@ mrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == 
 ```{r}
 num_peaks_df <- data.frame("dbp" = names(filtered_consensus_peaks),
                            "num_peaks" = sapply(filtered_consensus_peaks, length))
+head(num_peaks_df)
 
 
+num_peaks_df$total_peak_length <- sapply(filtered_consensus_peaks, function(x) sum(width(x)))
 
 num_peaks_df$total_peak_length <- sapply(filtered_consensus_peaks, function(x) sum(width(x)))
 
@@ -50,6 +57,8 @@ num_peaks_df$total_peak_length <- sapply(filtered_consensus_peaks, function(x) s
 ```{r}
 
 promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "counts")
+
+head(promoter_peak_counts)
 
 num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
 
@@ -62,9 +71,6 @@ num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,m
 ```
 
 ```{r}
-
-
-
 genebody_peak_counts <- count_peaks_per_feature(lncrna_mrna_genebody, 
                                                 filtered_consensus_peaks, 
                                                 type = "counts")

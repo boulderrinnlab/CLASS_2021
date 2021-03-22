@@ -17,9 +17,11 @@ library(ggplot2)
 
 ```
 
+Open dataframe
+
 ```{r}
 
-# scatterplot x: K562 % dbp and HepG
+# scatterplot x: K562 % dbp and HepG (460 DBP)
 
 peak_occurence_df_2020 <- read.csv(file = '/scratch/Shares/rinnclass/data/2020_peak_occurence_df.csv')
 head(peak_occurence_df_2020)
@@ -30,7 +32,7 @@ head(peak_occurence_df_new)
 
 ```
 
-
+plot Promoter binding events 
 
 
 ```{r}
@@ -95,19 +97,22 @@ g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
 
 
 
-
 # 2020 data - in one image
 ggplot(peak_occurence_df_2020, aes(x = number_of_dbp, fill = gene_type, color = gene_type)) +
    geom_density(alpha = 0.3)
 
 
-# 2021 data - in one image
+# 2021 data - in one image --> main one
 ggplot(peak_occurence_df_new, aes(x = number_of_dbp, fill = gene_type, color = gene_type)) +
    geom_density(alpha = 0.3)
 
 
+```
+
+filter for reservoirs 
 
 
+```{r}
 
 # filter for reservoirs
 
@@ -115,18 +120,6 @@ reservoir_list_2020 <- peak_occurence_df_2020 %>% filter(peak_occurence_df_2020$
 gene_w_reservoirs <-reservoir_list_2020$gene_id
 
 reservoir_new_data <- peak_occurence_df_new %>% filter(peak_occurence_df_new$gene_id %in% gene_w_reservoirs)
-
-# plot 
-# 2021 data - in one image
-
-g <- ggplot(reservoir_new_data, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
-
-g + geom_density(alpha = 0.3) +
-  xlab(expression("Number of DBPs")) +
-  ylab(expression("Density")) +
-  ggtitle("Promoter binding events of reservoirs",
-          subtitle = "mRNA and lncRNA genes - HepG2") 
-
 
 # make scatter plot 
 reservoir_new_data
@@ -144,49 +137,203 @@ names(gene_w_reservoirs)
 comparison_df <- merge(num_dbp_2020, num_reservoir_new_data)
 
 
-comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/161) #161
-comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/460) #460
+comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/460) #460
+comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/161) #161
+
+```
+
+plot reservoirs 
 
 
+```{r}
 
-# new data
+# 2021 data - density plot
 
+g <- ggplot(reservoir_new_data, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+
+g + geom_density(alpha = 0.3) +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events of reservoirs",
+          subtitle = "mRNA and lncRNA genes - HepG2") 
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/promoter_binding_events_reservoir.png")
+
+# scatterplot 
 ggplot(comparison_df, aes(x = dbp_HepG2_ratio,
                          y = dbp_K562_ratio)) +
   geom_point()
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/scatterplot_both_celllines_reservoirs.png")
 
-ggplot(comparison_df, aes(x = num_dbp_HepG2,
-                         y = num_dbp_K562)) +
+
+
+```
+
+non - reservoirs
+
+
+```{r}
+
+
+# non - reservoirs
+non_reservoir_list_2020 <- peak_occurence_df_2020 %>% filter(peak_occurence_df_2020$reservoir == 0)
+gene_w_no_reservoirs <- non_reservoir_list_2020$gene_id
+
+non_reservoir_new_data <- peak_occurence_df_new %>% filter(peak_occurence_df_new$gene_id %in% gene_w_no_reservoirs)
+
+
+num_dbp_2020 <- peak_occurence_df_2020 %>%
+  dplyr::select(gene_id, gene_type, number_of_dbp) %>%
+  dplyr::rename(num_dbp_K562 = number_of_dbp)
+num_nonreservoir_new_data <- non_reservoir_new_data %>%
+  dplyr::select(gene_id, number_of_dbp) %>%
+  dplyr::rename(num_dbp_HepG2 = number_of_dbp)
+
+names(peak_occurence_df_2020)
+names(non_reservoir_new_data)
+
+comparison_df_non_reservoir <- merge(num_dbp_2020, num_nonreservoir_new_data)
+
+
+comparison_df_non_reservoir <-comparison_df_non_reservoir %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/460)
+comparison_df_non_reservoir <- comparison_df_non_reservoir %>% mutate(dbp_K562_ratio = num_dbp_K562/161) 
+
+
+```
+
+plot non-reservoirs 
+
+
+```{r}
+g <- ggplot(reservoir_new_data, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+
+g + geom_density(alpha = 0.3) +
+  xlab(expression("Number of DBPs - non-reservoirs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events of non-reservoirs",
+          subtitle = "mRNA and lncRNA genes - HepG2") 
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/promoter_binding_events_non_reservoir.png")
+
+# make scatter plot 
+
+ggplot(comparison_df_non_reservoir, aes(x = dbp_HepG2_ratio,
+                         y = dbp_K562_ratio)) +
   geom_point()
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/scatterplot_both_celllines_non_reservoirs.png")
 
 
+```
 
-#### new data
-comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/406*100) #180
-comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/111*100) #460
+abundantly_bound_gene > 280
+high binding promoters
+
+```{r}
+# filter for number_of_dbp
+
+head(peak_occurence_df_new)
+
+filtered_peak_occurence_df_new <- peak_occurence_df_new %>% filter(peak_occurence_df_new$number_of_dbp > 300)
 
 
-ggplot(comparison_df, aes(x = dbp_HepG2_ratio,
+ggplot(filtered_peak_occurence_df_new, aes(x = number_of_dbp, fill = gene_type, color = gene_type)) +
+   geom_density(alpha = 0.3)
+
+
+```
+
+filter for reservoirs 
+
+```{r}
+
+
+# filter for reservoirs
+
+reservoir_list_2020 <- peak_occurence_df_2020 %>% filter(peak_occurence_df_2020$reservoir == 1)
+gene_w_reservoirs <-reservoir_list_2020$gene_id
+
+reservoir_new_data_abundant_bound_genes <- filtered_peak_occurence_df_new %>% filter(filtered_peak_occurence_df_new$gene_id %in% gene_w_reservoirs)
+
+# make scatter plot 
+
+
+num_dbp_2020 <- peak_occurence_df_2020 %>%
+  dplyr::select(gene_id, gene_type, number_of_dbp) %>%
+  dplyr::rename(num_dbp_K562 = number_of_dbp)
+num_reservoir_new_data <- reservoir_new_data_abundant_bound_genes %>%
+  dplyr::select(gene_id, number_of_dbp) %>%
+  dplyr::rename(num_dbp_HepG2 = number_of_dbp)
+
+
+names(peak_occurence_df_2020)
+names(reservoir_new_data_abundant_bound_genes)
+comparison_df_abundant_bound_genes <- merge(num_dbp_2020, num_reservoir_new_data)
+
+
+comparison_df_abundant_bound_genes <-comparison_df_abundant_bound_genes %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/460)
+comparison_df_abundant_bound_genes <- comparison_df_abundant_bound_genes %>% mutate(dbp_K562_ratio = num_dbp_K562/161) 
+
+
+```
+plot reservoirs 
+
+```{r}
+
+# 2021 data - density plot
+
+g <- ggplot(reservoir_new_data_abundant_bound_genes, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+
+g + geom_density(alpha = 0.3) +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events of reservoirs",
+          subtitle = "mRNA and lncRNA genes - HepG2") 
+
+
+# scatterplot 
+ggplot(comparison_df_abundant_bound_genes, aes(x = dbp_HepG2_ratio,
                          y = dbp_K562_ratio)) +
   geom_point()
 
-ggplot(comparison_df, aes(x = num_dbp_HepG2,
-                         y = num_dbp_K562)) +
-  geom_point()
+
+```
+
+non - reservoirs
 
 
+```{r}
 
 
 # non - reservoirs
 reservoir_list_2020 <- peak_occurence_df_2020 %>% filter(peak_occurence_df_2020$reservoir == 0)
 gene_w_reservoirs <-reservoir_list_2020$gene_id
 
-reservoir_new_data <- peak_occurence_df_new %>% filter(peak_occurence_df_new$gene_id %in% gene_w_reservoirs)
+reservoir_new_data_abundant_bound_genes <- filtered_peak_occurence_df_new %>% filter(filtered_peak_occurence_df_new$gene_id %in% gene_w_reservoirs)
 
-# plot 
-# 2021 data - in one image
+# make scatter plot 
 
-g <- ggplot(reservoir_new_data, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+
+num_dbp_2020 <- peak_occurence_df_2020 %>%
+  dplyr::select(gene_id, gene_type, number_of_dbp) %>%
+  dplyr::rename(num_dbp_K562 = number_of_dbp)
+num_reservoir_new_data <- reservoir_new_data_abundant_bound_genes %>%
+  dplyr::select(gene_id, number_of_dbp) %>%
+  dplyr::rename(num_dbp_HepG2 = number_of_dbp)
+
+
+names(peak_occurence_df_2020)
+names(reservoir_new_data_abundant_bound_genes)
+comparison_df_abundant_bound_genes <- merge(num_dbp_2020, num_reservoir_new_data)
+
+
+comparison_df_abundant_bound_genes <-comparison_df_abundant_bound_genes %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/460) 
+comparison_df_abundant_bound_genes <- comparison_df_abundant_bound_genes %>% mutate(dbp_K562_ratio = num_dbp_K562/161) 
+
+```
+
+plot non-reservoirs 
+
+
+```{r}
+g <- ggplot(reservoir_new_data_abundant_bound_genes, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
 
 g + geom_density(alpha = 0.3) +
   xlab(expression("Number of DBPs - non-reservoirs")) +
@@ -196,31 +343,236 @@ g + geom_density(alpha = 0.3) +
 
 
 # make scatter plot 
-reservoir_new_data
-
-num_dbp_2020 <- peak_occurence_df_2020 %>%
-  dplyr::select(gene_id, gene_type, number_of_dbp) %>%
-  dplyr::rename(num_dbp_K562 = number_of_dbp)
-num_reservoir_new_data <- reservoir_new_data %>%
-  dplyr::select(gene_id, number_of_dbp) %>%
-  dplyr::rename(num_dbp_HepG2 = number_of_dbp)
-
-
-names(peak_occurence_df_2020)
-names(gene_w_reservoirs)
-comparison_df <- merge(num_dbp_2020, num_reservoir_new_data)
-
-
-comparison_df <-comparison_df %>% mutate(dbp_HepG2_ratio = num_dbp_HepG2/180) #180
-comparison_df <- comparison_df %>% mutate(dbp_K562_ratio = num_dbp_K562/460) #460
-
-
-
-
-ggplot(comparison_df, aes(x = dbp_HepG2_ratio,
+ggplot(comparison_df_abundant_bound_genes, aes(x = dbp_HepG2_ratio,
                          y = dbp_K562_ratio)) +
   geom_point()
 
-ggplot(comparison_df, aes(x = num_dbp_HepG2,
-                         y = num_dbp_K562)) +
+```
+
+
+# filter peak occurance matrix to get DBP that bind >300
+
+```{r}
+# 1) open promoter_peak_occurecne_matrix we produced before 
+
+promoter_peak_occurence <- read.table('/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/01_global_peak_properties/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv')
+```
+!!!!!!!!!!!!!!!!!!!!!!!!! NOT OPENING!
+
+```{r}
+# Import annotations
+lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_promoters.gtf")
+
+filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus_peaks/", 
+                                             pattern = "*.bed",
+                                             full.names = TRUE)
+filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
+
+names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus_peaks//filtered_consensus_peaks|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
+
+
+# make promoter_peak_occurence
+promoter_peak_occurence <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
+
+
+#promoter_peak_occurence[10000:10020]
+
+peak_occurence_test_df <- data.frame("gene_id" = colnames(promoter_peak_occurence),
+                                "gene_name" = lncrna_mrna_promoters$gene_name,
+                                "number_of_dbp" = colSums(promoter_peak_occurence))
+head(peak_occurence_test_df)
+length(peak_occurence_test_df) #3
+nrow(peak_occurence_test_df) #36814
+
+peak_occurence_test_df2 <- peak_occurence_test_df %>% filter(peak_occurence_test_df$number_of_dbp > 300)
+head(peak_occurence_test_df2)
+length(peak_occurence_test_df2) #3
+nrow(peak_occurence_test_df2)# 5663
+peak_occurence_test_df2$ARID4B
+
+```
+
+
+```{r}
+#  use the peak occurence matrix we produced. You could use col sums to filter promoters with , lets say 300 DBPs bound. Then you know all those proteins are binding the same promter
+
+length(promoter_peak_occurence) # 16.934.440
+nrow(promoter_peak_occurence) # 460
+promoter_peak_occurence["ARID4B",1:5]
+#names(promoter_peak_occurence) <-colnames(promoter_peak_occurence)
+#names(promoter_peak_occurence)
+#head(promoter_peak_occurence)
+#colnames(promoter_peak_occurence)
+#rownames(promoter_peak_occurence)
+#tail(promoter_peak_occurence)
+
+
+
+
+# filter by number_of_dbp >300
+
+number_of_dbp <- colSums(promoter_peak_occurence)
+high_binding_promoters <- number_of_dbp >350
+# false ENSG00000126088.14 
+# true: ENSG00000162415.7
+
+length(high_binding_promoters) # 36814
+nrow(high_binding_promoter) # NULL
+
+
+high_binding_promoter_peak_occurence <- promoter_peak_occurence[,high_binding_promoters]
+length(high_binding_promoter_peak_occurence) #  #2.604.980
+nrow(high_binding_promoter_peak_occurence) #460
+high_binding_promoter_peak_occurence["ARID4B",1:5]
+
+colSums(high_binding_promoter_peak_occurence)
+
+
+# ARE THE tREU OR false EXAMPLES IN FILTERED MATRIX ???
+
+high_binding_promoter_peak_occurence["ARID4B","ENSG00000162415.7"] #, yes, one 
+high_binding_promoter_peak_occurence["ARID4B","ENSG00000126088.14"] #, error, subscript out of bounds
+
+```
+
+test if filtering worked
+
+```{r}
+
+#high_binding_promoter_peak_occurence
+
+high_binding_promoter_peak_occurence_number_db_df <- data.frame("gene_id" = colnames(high_binding_promoter_peak_occurence),
+                                "number_of_dbp" = colSums(high_binding_promoter_peak_occurence))
+
+
+```
+# make df with all or only high binders
+
+
+```{r}
+#  make an object of those promters as columns and all 446 DBPs as rows 
+# then do row sums to find which DBP is binding the most at these highly bound promoters
+# or make a distribution of how many of the highly bound promoters have the same proteins.
+ 
+
+colnames(high_binding_promoter_peak_occurence)
+rownames(high_binding_promoter_peak_occurence)
+
+high_binding_promoter_peak_occurence["AFF4",1:5]
+high_binding_promoter_peak_occurence["AFF4",]
+
+high_binding_promoter_peak_occurence_df <- data.frame("dbp" = rownames(high_binding_promoter_peak_occurence), "number_bound_RNAs" =rowSums(high_binding_promoter_peak_occurence))
+
+all_binding_promoter_peak_occurence_df <- data.frame("dbp" = rownames(promoter_peak_occurence), "number_bound_RNAs" =rowSums(promoter_peak_occurence))
+
+nrow(high_binding_promoter_peak_occurence_df)
+# 460
+length(high_binding_promoter_peak_occurence_df)
+# 2
+
+df_all <- all_binding_promoter_peak_occurence_df %>%
+  dplyr::select(dbp, number_bound_RNAs) %>%
+  dplyr::rename(number_bound_RNAs = number_bound_RNAs)
+
+df_high_bound <- high_binding_promoter_peak_occurence_df %>%
+  dplyr::select(dbp, number_bound_RNAs) %>%
+  dplyr::rename(number_bound_RNAs_high_binders = number_bound_RNAs)
+
+
+names(df_all)
+names(df_high_bound)
+both_bound_promoter_df <- merge(df_all, df_high_bound)
+
+
+```
+
+#merge with TF df
+
+```{r}
+# The human TFs
+# https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx
+
+human_tfs <- readxl::read_excel("/scratch/Shares/rinnclass/data/mmc2.xlsx",
+                                sheet = 2, skip = 1)
+names(human_tfs)[4] <- "is_tf"
+
+length(which(tolower(num_peaks_df$dbp) %in% tolower(human_tfs$Name)))
+
+
+human_tfs <- human_tfs[tolower(human_tfs$Name) %in% tolower(num_peaks_df$dbp), 1:4]
+names(human_tfs) <- c("ensembl_id",
+                      "dbp",
+                      "dbd",
+                      "tf")
+
+both_bound_promoter_df <- merge(both_bound_promoter_df, human_tfs, all.x = T, by = "dbp")
+
+# Let's check how many NAs -- we should have some missing values.
+```
+
+Plotting 
+
+```{r}
+
+names(both_bound_promoter_df)
+# "number_bound_RNAs" , "number_bound_RNAs_high_binders", "dbd",  "tf"    
+
+g <- ggplot(both_bound_promoter_df, aes(x = number_bound_RNAs))
+
+g + geom_density(alpha = 0.3) +
+  xlab(expression("Number of bound RNAs")) +
+  ylab(expression("Density")) +
+  ggtitle("Number of bound RNAs",
+          subtitle = "all genes - HepG2") 
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/Number_bound_RNAs.png")
+
+
+# save but high binders
+g <- ggplot(both_bound_promoter_df, aes(x = number_bound_RNAs_high_binders))
+
+g + geom_density(alpha = 0.3) +
+  xlab(expression("Number of bound RNAs")) +
+  ylab(expression("Density")) +
+  ggtitle("Number of bound RNAs by high binders",
+          subtitle = "all genes - HepG2") 
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/Number_bound_RNAs_for_high_binders.png")
+
+# scatterplot 
+ggplot(both_bound_promoter_df, aes(x = number_bound_RNAs,
+                         y = number_bound_RNAs_high_binders)) +
   geom_point()
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/scatterplot_Number_bound_RNAs_vs_for_high_binders.png")
+
+# scatterplot - tf
+ggplot(both_bound_promoter_df, aes(x = number_bound_RNAs, 
+                 y = number_bound_RNAs_high_binders
+                )) +
+  facet_wrap(tf ~ .) +
+  geom_point()
+
+
+
+# scatterplot - dbd
+ggplot(both_bound_promoter_df, aes(x = number_bound_RNAs,
+                         y = number_bound_RNAs_high_binders)) +
+  geom_point()
+
+
+ggplot(both_bound_promoter_df, aes(x = number_bound_RNAs, 
+                 y = number_bound_RNAs_high_binders
+                )) +
+  facet_wrap(dbd ~ .) +
+  geom_point()
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/scatterplot_Number_bound_RNAs_vs_for_high_binders_all_dbp.png")
+
+
+abundant_dbds <- table(both_bound_promoter_df$dbd) > 100
+names(which(abundant_dbds))
+
+ggplot(both_bound_promoter_df, aes(x = number_bound_RNAs, 
+                 y = number_bound_RNAs_high_binders,
+                 color = dbd == "C2H2 ZF")) +
+  geom_point()
+ggsave("/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/02_example_analysis_plots/scatterplot_Number_bound_RNAs_vs_for_high_binders_C2H2_Zn.png")
+```
+
