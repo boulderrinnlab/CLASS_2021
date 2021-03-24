@@ -85,3 +85,66 @@ pheatmap(high_binders, show_colnames = FALSE, clustering_distance_rows = "binary
 
 ```
 
+
+Exploring cluster with some ZNF's and 3 named proteins:
+
+(uniprot & OMIM data)
+
+protein structure:
+MTA1: one ZF domain (GATA-type, atypical)
+FUBP3: 4 KH domains
+ATF5: leucine zipper domain (CREB protein)
+
+cellular localization:
+all nuclear as expected
+
+cellular functions:
+MTA1: part of the chromatin remodeling complex
+FUBP3: binds FUSE elements with other FUBP proteins 1&2 
+    *but FUBP1 is on the far left of our clustering, far away from this cluster...
+ATF5: binds cAMP inducable promoters
+
+Tissue expression:
+MTA1: universally expressed
+FUBP3: universally expressed
+ATF5: universally expressed
+
+
+ZNF's seem to cluster based on the number of ZF domains per protein
+
+
+
+```{r}
+#tree cutting
+
+#set up hierarchy again (copied from above)
+peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) > 250, ]
+peak_occurence_dist <- dist(peak_occurence_matrix, method = "binary")
+bin_hier <- hclust(peak_occurence_dist, method = "complete")
+
+#filter hierarchy to get only clusters that are similar above a certain threshold based on height of the branch
+clust <- cutree(bin_hier, h=0.52)
+#clustering cuttoff set so that only the cluster seen by eye is defined
+table(clust)
+
+clust_df <- data.frame(dbp = names(clust), cluster = clust)
+#we're looking at cluster 11 based on this cuttoff
+
+##looking at promoters that all the proteins in that cluster bind to (Maria's code)
+#looking at dbps in cluster11
+cluster11 <- filter(clust_df,cluster == 11)
+#peak occurrences of cluster 11 dbps
+po_clust11 <- peak_occurence_matrix[row.names(peak_occurence_matrix) %in% row.names(cluster11),]
+#promoters that ALL dpbs in cluster 11 bind (there are 10 dpbs)
+pro_cluster11 <- po_clust11[,colSums(po_clust11) > 9]
+#pull out the promoter names that all dbps in cluster11 bound
+pro_clus11 <- data.frame(promoters = colnames(pro_cluster11))
+
+
+##questioning the validity of our clustering given that there's not clear similarities between the proteins in our cluster, and proteins that should be similar are not clustered together (FUBP1 and 3, & ATF's)
+
+
+#there are 3007 promoters bound by all the proteins in cluster 11 (10 proteins in the cluster)
+
+```
+

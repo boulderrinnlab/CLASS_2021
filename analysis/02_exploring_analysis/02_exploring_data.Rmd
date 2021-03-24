@@ -133,6 +133,7 @@ occurence_matrix <- read.table("results/lncrna_mrna_promoter_peak_occurence_matr
 super_promoter <- occurence_matrix[, colSums(occurence_matrix) > 350]
 super_promoter_dbps <- data.frame(dbp = rownames(super_promoter), num_super_promoter_overlaps = rowSums(super_promoter))
 num_peaks_df <- read.csv("results/num_peaks_df.csv")
+#merge the df's will only keep the rows shared between both df's
 super_prom_features <- merge(super_promoter_dbps, num_peaks_df)
 super_promoter_features <- dplyr::select(super_promoter_features, dbp, num_super_promoter_overlaps, everything() )
 super_promoter_features <- super_promoter_features %>%
