@@ -20,22 +20,22 @@ library(ggplot2)
 
 occurence_matrix <- read.table("results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
 
-super_promoter <- occurence_matrix[, colSums(occurence_df) > 350]
+super_promoter <- occurence_matrix[, colSums(occurence_matrix) > 350]
 
 super_promoter_dbps <- data.frame(dbp = rownames(super_promoter), num_super_promoter_overlaps = rowSums(super_promoter))
 
 num_peaks_df <- read.csv("results/num_peaks_df.csv")
 
-super_promoter_features <- merge(num_peaks_df, super_promoter_dbps)
+super_prom_features <- merge(super_promoter_dbps, num_peaks_df)
 
 super_promoter_features <- dplyr::select(super_promoter_features, dbp, num_super_promoter_overlaps, everything() )
 
 super_promoter_features <- super_promoter_features %>%
   mutate(percent_super_prom_ov = num_super_promoter_overlaps/peaks_overlapping_promoters * 100, 
          percent_of_total_peaks_at_super_prom = num_super_promoter_overlaps/num_peaks * 100,
-         zincfinger = ifelse(dbd == "C2H2 ZF", "C2H2 ZF", "Other"))
+         zincfinger = ifelse(grepl(" ZF",dbd), "ZF", "Other"))
 
-
+table(super_promoter_features$zincfinger)
 
 ggplot(super_promoter_features, aes(x = percent_super_prom_ov, color = zincfinger)) +
   geom_density()
