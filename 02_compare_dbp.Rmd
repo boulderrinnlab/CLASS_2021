@@ -1,0 +1,49 @@
+---
+title: "Untitled"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+```
+
+
+
+```{r}
+#
+promoters <- rtracklayer::import("analysis/00_consensus_peaks/results/lncrna_mrna_promoters.gtf")
+peak_occurence_matrix <- read.table("analysis/01_global_peak_properties/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+
+peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) > 250, ]
+
+high_binders <- peak_occurence_matrix[,colSums(peak_occurence_matrix) > 350]
+
+#how many promoters are bound by ATF5?
+ATF5_promoters <- peak_occurence_matrix[rownames(peak_occurence_matrix) == "ATF5",]
+ATF5_promoters <- ATF5_promoters[,colSums(ATF5_promoters) == 1]
+ATF5_promoters <- as.data.frame(t(ATF5_promoters))
+
+#how many high-binding promoters are bound by ATF5?
+ATF5_promoters_high <- high_binders[rownames(high_binders) == "ATF5",]
+ATF5_promoters_high <- ATF5_promoters_high[,colSums(ATF5_promoters_high) == 1]
+ATF5_promoters_high <- as.data.frame(t(ATF5_promoters_high))
+
+#how many high-binding promoters are bound by both ATF5 and ZNF34?
+ATF5_and_ZNF34_promoters <- high_binders[rownames(peak_occurence_matrix) %in% c("ATF5","ZNF34"),]
+ATF5_and_ZNF34_promoters <- ATF5_and_ZNF34_promoters[,colSums(ATF5_and_ZNF34_promoters) == 2]
+ATF5_and_ZNF34_promoters <- as.data.frame(t(ATF5_and_ZNF34_promoters))
+
+#how many high-binding promoters are bound by either ATF5 or ZNF34?
+ATF5_or_ZNF34_promoters <- high_binders[rownames(peak_occurence_matrix) %in% c("ATF5","ZNF34"),]
+ATF5_or_ZNF34_promoters <- ATF5_or_ZNF34_promoters[,colSums(ATF5_or_ZNF34_promoters) == 1]
+ATF5_or_ZNF34_promoters <- as.data.frame(t(ATF5_or_ZNF34_promoters))
+
+```
+
+
