@@ -1,0 +1,109 @@
+---
+title: "Global peak properties"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("/scratch/Shares/rinnclass/Nina/CLASS_2021/util/intersect_functions.R")
+source("/scratch/Shares/rinnclass/Nina/CLASS_2021/util/plotting_functions.R")
+source("/scratch/Shares/rinnclass/Nina/CLASS_2021/util/_setup.R")
+library(Gviz)
+library(ggplot2)
+
+```
+
+
+
+```{r}
+
+
+promoter_peak_occurence <- read.table('/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/01_global_peak_properties/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv')
+
+number_of_dbp <- colSums(promoter_peak_occurence)
+high_binding_promoters <- number_of_dbp >350
+
+high_binding_promoter_peak_occurence <- promoter_peak_occurence[,high_binding_promoters]
+#[,y]
+
+
+# ATF5, ZNF34, ZNF343
+promoter_ZNF34 <- high_binding_promoter_peak_occurence[rownames(high_binding_promoter_peak_occurence)== "ZNF34",]
+#[x,]
+
+length(promoter_ZNF34) # 1514
+
+promoter_ZNF34_df <- data.frame("gene_id" = colnames(promoter_ZNF34),
+                                "number_of_dbp" = colSums(promoter_ZNF34))
+
+promoter_ZNF34_bound_df <- promoter_ZNF34_df %>% filter(promoter_ZNF34_df$number_of_dbp == 1)
+
+peak_occurence_df_new <- read.csv(file = '/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv')
+
+names(peak_occurence_df_new)
+names(promoter_ZNF34_bound_df)
+merge_df <- merge(promoter_ZNF34_bound_df, peak_occurence_df_new, by = "gene_id")
+
+
+# ATF5, ZNF34, ZNF343
+promoter_ATF5 <- high_binding_promoter_peak_occurence[rownames(high_binding_promoter_peak_occurence)== "ATF5",]
+dim(promoter_ATF5)
+#[x,]
+
+length(promoter_ATF5) # 1514
+
+promoter_ATF5_df <- data.frame("gene_id" = colnames(promoter_ATF5),
+                                "number_of_dbp" = colSums(promoter_ATF5))
+
+promoter_ATF5_bound_df <- promoter_ATF5_df %>% filter(promoter_ATF5_df$number_of_dbp == 1)
+
+nrow(promoter_ATF5_bound_df) #1511
+
+names(promoter_ATF5_bound_df)
+merge_df_ATF5 <- merge(promoter_ZNF34_bound_df, peak_occurence_df_new, by = "gene_id")
+
+write_csv(promoter_ATF5_bound_df, "/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/promoter_ATF5_bound_df.csv")
+
+write_csv(merge_df, "/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/promoter_ZNF34_bound_df.csv")
+
+
+merge_df_ATF5_ZNF34 <- merge(promoter_ZNF34_bound_df, promoter_ATF5_bound_df, by = "gene_id")
+
+nrow(merge_df) # 1506
+nrow(promoter_ATF5_bound_df) # 1504
+nrow(merge_df_ATF5_ZNF34) # 1504
+
+
+################# or
+# to check examples
+dist(promoter_peak_occurence[1:4,], method = "binary")
+
+# run all
+peak_occurence_dist <- dist(promoter_peak_occurence, method = "binary")
+
+bin_hier <- hclust(peak_occurence_dist, method = "complete")
+
+plot(bin_hier)
+
+#tree cutting:
+clust <- cutree(bin_hier,h=.52)
+table(clust)
+clust_df <- data.frame(dbp = names(clust), cluster = clust)
+#choos dbps in cluster11
+cluster11 <- filter(clust_df,cluster == 11)
+#peak occurrences of cluster 11 dbps
+po_clust11 <- promoter_peak_occurence[row.names(promoter_peak_occurence) %in% row.names(cluster11),]
+#promoters that ALL dpbs in cluster 11 bind (there are 10 dpbs)
+pro_cluster11 <- po_clust11[,colSums(po_clust11) > 9]
+#pull out the promoter names that all dbps in cluster11 bound
+pro_clus11 <- data.frame(promoters = colnames(pro_cluster11))
+
+
+
+
+
+```
