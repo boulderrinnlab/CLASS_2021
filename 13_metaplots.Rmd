@@ -27,7 +27,7 @@ We'll be using the consensus peaks we generated previously (MACS peak calls filt
 data_path <- "/Shares/rinn_class/data/CLASS_2021/CLASS_2021"
 
 gencode_gr <- rtracklayer::import(file.path(data_path,"data/gencode.v32.annotation.gtf"))
-consensus_peaks <- import_peaks(file.path(data_path, "results/filtered_peaks"))
+consensus_peaks <- import_peaks(file.path(data_path, "/scratch/Shares/rinnclass/data/consensus_peaks"))
 ```
 
 ## Step 1: Create promoter windows
