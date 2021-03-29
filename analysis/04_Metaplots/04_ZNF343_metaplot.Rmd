@@ -1,0 +1,79 @@
+---
+title: "04_high_binder_gene_id_promters"
+author: "James Pratt"
+date: "3/29/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+# We can use any binding protein here (use names(consensus_peaks) to see the available DBPs)
+peak_coverage_ZNF343 <- coverage(consensus_peaks[["ZNF343"]])
+
+##### Filter promoters to bounds of peak coverage vectors
+
+# This is the length of each run-length encoded vector in the peak_coverage object
+# If the last peak on each chromosome falls near the end of that chromosome then
+# these lengths will be approximately the length of the chromosomes.
+coverage_length_ZNF343 <- elementNROWS(peak_coverage_ZNF343)
+
+# This will create a GRanges object where there is one range per chromosome
+# and it is the width of the coverage vector -- we can use these ranges to 
+# filter the promoters falling outside of these boundaries in the next step.
+# Each DBP will be different here.
+coverage_gr_ZNF343 <- GRanges(seqnames = names(coverage_length_ZNF343),
+                       IRanges(start = rep(1, length(coverage_length_ZNF343)), 
+                               end = coverage_length_ZNF343))
+
+# Okay, now we're all ready to filter out those promoters that fall beyond the bounds of the 
+# coverage vector. 
+all_promoters_gr_ZNF343 <- subsetByOverlaps(all_promoters_gr, 
+                                  coverage_gr, 
+                                  type="within", 
+                                  ignore.strand=TRUE)
+
+##### Keep track of the chromosomes that are in common and filter/reorder to match
+
+# This creates a vector of the chromosomes that are in common between the peak_coverage and promoters.
+# Keeping track of this will fix a similar problem to the step above since this DBP may not
+# bind on all chromosomes. 
+chromosomes <- intersect(names(peak_coverage_ZNF343), unique(as.character(seqnames(all_promoters_gr_ZNF343))))
+# We can also ensure they're in the same order and contain the same chromosomes
+# by indexing with this vector
+peak_coverage_ZNF343 <- peak_coverage[chromosomes]
+# In order to match the list format of the peak_coverage object
+# we'll also coerce the GRanges object into an IntegerRangesList.
+# If you recall, one of the main features of GRanges object is capturing
+# the chromosome information -- when converting to an IRanges list, 
+# each chromosome will be represented by a named element in the list.
+all_promoters_ir_ZNF343 <- as(all_promoters_gr_ZNF343, "IntegerRangesList")[chromosomes]
+```
+
+```{r}
+ggplot(metaplot_df, aes(x = x, y = dens)) + 
+  geom_vline(xintercept = 0, lty = 2) + 
+  geom_line(size = 1.5) + 
+  ggtitle("ZNF343 Promoter Metaplot") + 
+  scale_x_continuous(breaks = c(-3000, 0, 3000),
+                     labels = c("-3kb", "TSS", "+3kb"),
+                     name = "") + 
+  ylab("Peak frequency")
+```
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
