@@ -160,9 +160,9 @@ Let's get started by clustering all promoters first, then later we can see how t
 
 ```{r}
 # Let's grab both the lncRNA and mRNA promoters
+
 #promoters <- rtracklayer::import("results/lncrna_mrna_promoters.gtf")
 peak_occurence_matrix <- read.table('/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/01_global_peak_properties/results/lncrna_mrna_promoter_peak_occurence_matrix.tsv')
-
 
 # Let's filter again to make sure we have at least 250 peaks
 # This is a different filtering because we're now filtering on at least 250 peaks on 
@@ -181,6 +181,7 @@ peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) > 
 # for now we'll start with the DBPs.
 # If we just want to calculate the euclidean distance between the first two rows,
 # we can use the dist function.
+peak_occurence_matrix[1:2,1:10]
 dist(peak_occurence_matrix[1:2,], method = "euclidean")
 
 # There are a number of measures to calculate distance between two vectors and we can check those out in the documentation.
@@ -322,7 +323,9 @@ Let's make a heatmap of the promoters -- since it will take a long long time to 
 
 ```{r}
 # We'll start with the promoter peak occurrence and filter down to just those that have high numbers of dbps
+
 high_binders <- peak_occurence_matrix[,colSums(peak_occurence_matrix) > 350]
+
 # Could filter out the rows that have zeros, but we don't have any
 min(rowSums(high_binders))
 
