@@ -67,6 +67,7 @@ ggplot(metaplot_df, aes(x = x, y = dens)) +
                      labels = c("-3kb", "TSS", "+3kb"),
                      name = "") + 
   ylab("Peak frequency")
+ggsave("ZNF343_promoter_metaplot.pdf")
 ```
 ## Including Plots
 
