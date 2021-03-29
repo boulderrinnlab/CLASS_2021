@@ -24,11 +24,13 @@ source("util/_setup.R")
 We'll be using the consensus peaks we generated previously (MACS peak calls filtered to those that are overlapping across replicates) and the Gencode gene annotations. 
 
 ```{r import}
-data_path <- "/Shares/rinn_class/data/CLASS_2021/CLASS_2021"
 
-gencode_gr <- rtracklayer::import(file.path(data_path,"data/gencode.v32.annotation.gtf"))
-consensus_peaks <- import_peaks(file.path(data_path, "/scratch/Shares/rinnclass/data/consensus_peaks"))
+gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names = TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import)
+names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks/|.bed", "", fl)
 ```
+
 
 ## Step 1: Create promoter windows
 

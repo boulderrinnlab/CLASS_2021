@@ -15,7 +15,7 @@ source("util/intersect_functions.R")
 source("util/plotting_functions.R")
 source("util/_setup.R")
 library(Gviz)
-library(ggpubr)
+library(ggplot2)
 ```
 
 ```{r}
@@ -27,7 +27,8 @@ library(ggpubr)
  
 # First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
 
-fl <- list.files("results/consensus_peaks", full.names=TRUE)
+fl <- list.files("../../data/consensus_peaks", full.names=TRUE)
+
 consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
 
 consensus_peaks[[42]]$name %>%
@@ -63,11 +64,11 @@ num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
 ## Ok we are going to filter all samples that don't have at least 250 peaks. We
 ## can see how many this is in the environment sort too ...
 
-num_peaks_threshold <- 250
+num_peaks_threshold <- 500
 # Setting a threshold number in an object to be called below
+dbps_with_sufficient_peaks <- num_peaks_df$dbp[num_peaks_df$num_peaks > num_peaks_threshold]
 
-
-filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+filtered_consensus_peaks <- consensus_peaks[dbps_with_sufficient_peaks]
 
 
 # fun exeRcise to find what percentil 250 peaks is in the distribution of all 483 ChIP-seq data sets
@@ -161,7 +162,7 @@ g + geom_point() +
 ## is covered -- but hey that is a result !
 ```
 
-```{R finding overlaps with genomic features from GENCODE}
+```{r finding overlaps with genomic features from GENCODE}
 
 gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
 
@@ -196,6 +197,8 @@ gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode
 lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
 rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.gtf")
 
+table(gencode_gr$gene_type)
+
 # rtraklayer::export is going to make a file we can use in the future so we don't 
 # have to run this each time. Note we set up the parameters for                     # "get_promoter_regions" function. So we can repeat this process by changing
 # the biotype parameter to different gene-types.
@@ -217,10 +220,11 @@ rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
 # "countOverlaps" function that will find overlaps with a feature. 
 # the final parameter decides to produce a matrix or dataframe of the overlap counts
 
-promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "counts")
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
 
+promoter_peak_counts[1:10,1:10]
 # We can see the parameters of count_peaks_per_feature
-
+(rowSums(promoter_peak_counts)/ncol(promoter_peak_counts))*100
 # This is cool information so let's keep building our 'num_peaks_df' by indexing.
 
 num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
@@ -246,12 +250,14 @@ Now we are going to add some information ()
 # The human TFs
 # https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx
 library(janitor)
-human_tfs <- readxl::read_excel("data/mmc2.xlsx",
+human_tfs <- readxl::read_excel("../../data/mmc2.xlsx",
                                 sheet = 2, skip = 1)
 names(human_tfs)[4] <- "is_tf"
 
 # Checking to see how many overlaps there are.
 length(which(tolower(num_peaks_df$dbp) %in% tolower(human_tfs$Name)))
+
+length(which(is.na(num_peaks_df$ensembl_id)))
 
 # TODO: Manually match names -- doublecheck
 # Subset to just the columns we need.
@@ -262,8 +268,11 @@ names(human_tfs) <- c("ensembl_id",
                       "tf")
 
 num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
+
+table(num_peaks_df$tf)
+not_tfs <- num_peaks_df %>% filter(tf == "No")
 # Let's check how many NAs -- we should have some missing values.
-length(which(is.na(num_peaks_df$ensembl_id)))
+
 write_csv(num_peaks_df, "chipseq/results/num_peaks_df.csv")
 # A new column for the nunmber of overlaps with a mRNA
 ```
@@ -271,7 +280,7 @@ write_csv(num_peaks_df, "chipseq/results/num_peaks_df.csv")
 
 ## Let's take a look at num_peak_df
 
-
+```{r}
 # now let's plot x as num_peaks and y num overlapping promoters.
 
 ggplot(num_peaks_df,
@@ -290,9 +299,6 @@ ggplot(num_peaks_df,
   xlim(0,60100)
 ```
 
-```{r}
-
-```
 
 ```{r Let's see the overlaps with gene bodies}
 
@@ -417,6 +423,8 @@ Lets find how many promoters don't have any DBPs bound
 ```{r determining if a promoter is never bound}
 
 unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp < 1)
+
+nrow(unbound_promoters)
 # here is just a simple index and filter of the index to have at least 1 dbp bound.
 write_csv(unbound_promoters, "results/unbound_lncrna_mrna_promoters.csv")
 

@@ -66,16 +66,17 @@ Layer 1 : DATA (data types matter so good to label object accrodingly)
 # are first going to filter all DBPs that are not marked as DNA binding
 # proteins or the 'tf' column is yes.
 
-num_peaks_df <- read_csv('chipseq/results/num_peaks_df.csv')
-num_peaks_df <- num_peaks_df %>% filter(!is.na(tf))
+num_peaks_df <- read_csv('analysis/01_global_peak_properties/results/num_peaks_df.csv')
+
+peak_occurence_df <-
+
+#num_peaks_df_2020 <- read_csv('../../data/2020_peak_occurence_df.csv')
+
+#num_peaks_df <- num_peaks_df %>% filter(!is.na(tf))
 
 # ?is.na
 # Note the ! almost always will mean NOT
 
-table(num_peaks_df$tf)
-# There are 22 of our DBPs in here that don't have values
-# for the tf and dbp column -- let's take those
-# out since we'll be plotting those columns frequently
 
 ```
 
@@ -89,6 +90,8 @@ ggplot(num_peaks_df, aes(x = num_peaks,
                          y = total_peak_length)) +
   geom_point()
 
+
+?geom_point
 # here we are just looking at a x, y point plot (geom_point).
 # note there are not quotes on x, and y objects as they are being evaluated as "objects in ggplot"
 # note the +, we will see this everytime we are adding a new layer. # Yet within each layer it's standard comma 
@@ -113,11 +116,12 @@ ggplot(num_peaks_df, aes(x = num_peaks,
 # color and shape AFTER the aes(). To color by data that needs to be 
 # evaluated we need to have that color INSIDE aes()
 
-# DATA DEPENDENCE COLOR
-
+# DATA DEPENDENCE COLOR / not in GEOM layer
+?aes
 ggplot(num_peaks_df, aes(x = num_peaks, 
-                 y = total_peak_length,
-                 color = tf)) +
+                 y = total_peak_length
+                )) +
+  facet_wrap(tf ~ .) +
   geom_point()
 
 # Now color came in aes() because it depends on data values.
@@ -245,8 +249,12 @@ You can do a lot in the geometry layer and add features with + and then new geom
 
 ggplot(num_peaks_df, aes(x = num_peaks, 
                  y = total_peak_length)) +
-  geom_point()+
-  geom_abline(slope = 1000, intercept = 0)
+  geom_point() +
+  geom_abline(slope = 1000, intercept = 0) +
+  geom_smooth(method = "gam")
+
+?geom_smooth
+
 
 # cool this fits -- what does it mean?
 # hint average peaks size is 1kb
@@ -300,11 +308,10 @@ Now we have gone through these layers:
 # Ok now let's see how we can use the scales layer to change axes.
 #Let's look of using the scales layer by sclaing the axes
 
-ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
+ggplot(num_peaks_df, aes(x = log10(num_peaks), y =log10(total_peak_length), color = tf)) +
   geom_point()+
   scale_x_continuous(breaks = c(1e3, 1e4, 1e5, 1e6)) +
-  scale_y_continuous(trans = 'log10') +
-  scale_color_brewer(palette =  6) 
+  scale_color_brewer(palette = 3) 
 
 #? scale_x_continious (same for y) is calling the scale layer specifically
 # for the axes in ggplot. We are giving it where to put values on X-axis     # (note if a value is not met in largest break that break isn't printed)
@@ -314,10 +321,10 @@ ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
 # what if we want to set the limits of the axes? The scales layer is
 # just the place.
 
-ggplot(num_peaks_df, aes(x = num_peaks, y =total_peak_length, color = tf)) +
+ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length, color = tf)) +
   geom_point()+
   xlim(250, 2e3) +
-  ylim(1e5, 1e6) +
+  ylim(5, 6) +
   scale_color_brewer(palette =  2) 
 
 # so we add to scale functions with xlim and ylim (?xlim, ?ylim)
@@ -425,7 +432,7 @@ ggplot(num_peaks_df) +
   geom_bar(aes(x = dbd)) +
   coord_polar(theta = 'y')
 
-
+?
 
 ```
 
@@ -465,5 +472,4 @@ ggplot(num_peaks_df, aes(x = num_peaks)) +
 # Go take a look at _setup.R and see the features of paper white!
 ```
 
-Class exercise, go back to one of the other figures from 10_our_data_ranges. Try and change some feature or add a regression line etc. Slack us what you get :)
 
