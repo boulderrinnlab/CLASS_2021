@@ -1,0 +1,360 @@
+---
+title: "12_global_clustering_OL"
+author: "OL"
+date: "3/22/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+title: "12_Clustering"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(ggdendro)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+```
+
+The goal for today is to "cluster" the 438 DBPs to find which ones have similar binding profiles across the genome -- and those that are different. 
+
+A lot of what we are going to do today was set up in 10_our_data_ranges and a good 
+example of how you want to make output files for future analyses.
+
+Let's start by refreshing our memory of what all went down in 10_our_data_ranges.
+
+Briefly we did 2 really good things that we will need:
+
+1) We made a list of (i) all promoters (ii) lncRNA promoters only (iii) mRNA promoters
+2) We made a "tag_matrix" (.tsv) that is comprised of columns for each dbp. Rows are the DBP and filled 1 or 0 if that DBP binds to a given promoter. Or:
+
+Promoter 1, 2, 3, ....
+DBP      0, 0, 1,....
+
+Thus, each row has ~36,000 1/0 for a given DBP. This is binary data (1/0) and not contious data. We need to consider that when clustering as these similarity measurements will be influenced by continious or binary data.
+
+Here is what we did in 10_our_data_ranges:
+```{r}
+# We loaded Gencode annotaitons to get all the genome annotations. 
+# gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
+# then we used "get_promoter_regions" in our intersect_functions.R to get the promoter # regions from Gencode.
+# The function looks like this :
+get_promoter_regions <- function(gencode_gr, biotype, upstream = 3e3, downstream = 3e3) {
+   
+   genes <- gencode_gr[gencode_gr$type == "gene"]
+   genes <- genes[genes$gene_type %in% biotype]
+   
+   proms <- GenomicRanges::promoters(genes, upstream = upstream, downstream = downstream)
+   
+   return(proms)
+   
+ }
+ #Go over this function and explain as class exeRcise.
+```
+
+Once we have all of our promoter regions we then seperated them into all, lncNRA and mRNA promoters. Note that all we really did is index into gencode_gr and then biotype:
+
+
+```{r}
+# lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
+# rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.gtf")
+# 
+# lncrna_promoters <- get_promoter_regions(gencode_gr, biotype = "lncRNA")
+# rtracklayer::export(lncrna_promoters, "results/lncrna_promoters.gtf")
+# 
+# mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+# rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
+# So we did the intersections and then wrote out a .GTF file that we will use today.
+```
+
+The best thing we did is use our "count_peaks_per_feature" function. Let's take a look at that to review. Note the paramaters that can be used (either tag or count) the tag matrix will be used for clustering and the count function made our "num_peaks_df" that we used in our plotting exceRcise (11_R_plotting_introduction)
+
+Let's take a look at this function more closely.
+```{r}
+#' function to summarize the number of events in features on each individual promoter. 
+#' 
+#' @description 
+#' Take a gencode gtf to subset the biotype of promoters we want as a set of GRanges
+#' 
+#' @param features
+#' set of genomic features as a GRanges object
+#'  
+#' @param peak_list
+#' #list of peaks of dna binding proteins that will be intersected
+#' 
+#' @param type
+#' Return either a matrix of counts over features or a binary occurrence matrix
+# 
+# count_peaks_per_feature <- function(features, peak_list, type = "counts") {
+#   
+#   if(!(type %in% c("counts", "occurrence"))) {
+#     stop("Type must be either occurrence or counts.")
+#   }
+#   
+#   peak_count <- matrix(numeric(), ncol = length(features), nrow = 0)
+#   
+#   for(j in 1:length(peak_list)) {
+#     suppressWarnings(ov <- countOverlaps(features, peak_list[[j]]))
+#     peak_count <- rbind(peak_count, ov)
+#     rownames(peak_count)[nrow(peak_count)] <- names(peak_list)[j]
+#     colnames(peak_count) <- features$gene_id
+#   }
+#   
+#   peak_matrix <- peak_count
+#   
+#   if(type == "occurrence") {
+#     peak_occurrence <- matrix(as.numeric(peak_count > 0), 
+#                               nrow = dim(peak_count)[1],
+#                               ncol = dim(peak_count)[2])
+#     rownames(peak_occurrence) <- rownames(peak_count)
+#     colnames(peak_occurrence) <- colnames(peak_count)
+#     peak_matrix <- peak_occurrence
+#   }
+#   
+#   return(peak_matrix)
+#   
+# }
+# 
+# 
+# # Go through this function and present to class
+```
+
+Lastly, we printed out the peak_occurence_matrix as a tab seperated file .tsv
+```{r}
+# # First we will establish the promoter peak occurence matrix (rows = promoters, cols # = dbp binding {0,1}). The reason for doing this is it has all the information in
+# # a matrix where the row is a dBP and columns are a promoter. Our current dataframe
+# # only knows the number of promoters overlapped, but not the names of the promoters.
+# # That could be handy and why we made a parameter of "count_peaks_per_feature" to be
+# # able to provide the counts (as we did above) or "occurence" the matrix.
+# peak_file_list <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks/", full.names = T)
+# consensus_peaks <- lapply(peak_file_list, rtracklayer::import)
+# names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks//|.bed", "", peak_file_list)
+# 
+# filtered_consensus_peaks <- consensus_peaks[sapply(consensus_peaks, length) > 250]
+# 
+# promoter_peak_occurence <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, 
+#                                                type = "occurrence")
+# # Output to promoter_peak_occurecne_matrix
+# write.table(promoter_peak_occurence, "results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+```
+
+We exported this file to "results" folder and same for the GTFs. So we are all set to start clustering. Or you can rerun the above.
+
+There are numerous ways to do clustering, but the basic principle is that the algorithm will start from the bottom and move up. This means it will find to samples with highest similarity and then find the next and the next.. in agglormative manner.
+
+Really all this is a correlation (e.g. Pearson) between two vectors of ~60,000 values of 1/0. 
+
+Let's get started by clustering all promoters first, then later we can see how this changes when we seperate lncRNAs and mRNAs.
+
+```{r}
+# Let's grab both the lncRNA and mRNA promoters
+promoters <- rtracklayer::import("results/lncrna_mrna_promoters.gtf")
+peak_occurence_matrix <- read.table("results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+# Let's filter again to make sure we have at least 250 peaks
+# This is a different filtering because we're now filtering on at least 250 peaks on 
+# promoter regions rather than 250 peaks across the genome.
+peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) > 250, ]
+# ok now we have all the things we need to start clustering !
+# First we will use hclust
+# ?hclust
+# bin_hier
+# R is so savy with statistics that this is actually a base R function!
+# There are lots of methods to cluster by let's start with binary.
+# Clustering requires a distance matrix which represents each row in the matrix.
+# In this case rows are DBPs. We could also cluster on the columns (promoters) but
+# for now we'll start with the DBPs.
+# If we just want to calculate the euclidean distance between the first two rows,
+# we can use the dist function.
+dist(peak_occurence_matrix[1:2,], method = "euclidean")
+# There are a number of measures to calculate distance between two vectors and we can check those out in the documentation.
+?dist
+# Since this is a binary vector, let's use the binary distance measure.
+# The binary measure only considers those elements which are not zero in both vectors.
+# It is then the proportion of elements which are not shared (i.e. 0 in vector 1, and 1 in vector 2).
+dist(peak_occurence_matrix[1:4,], method = "binary")
+# We can create a distance matrix for each pairwise vector comparison for the whole matrix now.
+# This will result in a 460x460 matrix that is symmetric on either side of the diagonal.
+peak_occurence_dist <- dist(peak_occurence_matrix, method = "binary")
+# Now that we have that, we can do hierarchical clustering. In brief, this will cluster more closely
+# vectors that have small distances, and will iterate that process until everything is in the same cluster.
+?hclust
+# Hierarchical clustering with binary distance measure
+bin_hier <- hclust(peak_occurence_dist, method = "complete")
+plot(bin_hier)
+# To make this bigger, we can plot it as a pdf
+pdf("figures/dbp_hclust_dendro.pdf", height = 12, width = 70)
+plot(bin_hier)
+dev.off()
+bin_hier$labels[bin_hier$order]
+```
+
+Nice so we now have object "bin_hier" that will contain all the cross correlation values across all the samples. 
+
+Now we get to PLOT !! We will use ggdenro package that will plot the branch lengths that indicate how similar two samples are -- the longer the branch the more different they are -- closer more similar.
+
+Here is an alternative way to plot it:
+
+```{r}
+# First we are going to order the samples by the correlation matrix we just made.
+# You can also use ggdendro to plot with ggplot syntax -- which looks nice but for this many 
+# DBPs, it's a little bit easier to visualize with base R.
+# Now we can plot
+# ggdendro::ggdendrogram(bin_hier, rotate = FALSE,  size = 3, 
+#                        theme_dendro = TRUE) +
+#   coord_flip() +
+#   # scale_y_continuous() +
+#   # scale_x_continuous(position = "top") +
+#   scale_x_continuous(breaks = seq_along(bin_hier$labels[bin_hier$order]),
+#             labels = bin_hier$labels[bin_hier$order], position = "top",
+#             expand = c(0,0)) +
+#   theme(axis.text.x = element_text(angle = 90, hjust  = 1)) + 
+#   theme(axis.text.y = element_text(angle = 0,hjust = 1)) +
+#   scale_y_reverse(expand = c(0.01, 0)) +
+#   theme(
+#     plot.background = element_blank(),
+#     panel.grid.major = element_blank(),
+#     panel.grid.minor = element_blank(),
+#     panel.border = element_blank()
+#   )
+# Go over the plotting aspects as we discussed in 11_intro_plotting_R.Rmd
+# Especially thje scale_x_continious part -- we saw that in the 11_ class 
+# So this is very difficult to see since we have SO much data :)
+# one thing you can see is "phospho S5" and "phospho S2".
+# These are modifications on Pol II that indicate two different states:
+# S2 = distal or elongating Pol II so less on promoter more in genebody
+# S5 = Indicative of Pol II at promoter proximilar regions.
+# Note how these don't cluster anywhere near each other -- that is good news!
+# Let's save this as a figure -- we want to keep organized so we made a ChIPseq
+# folder and figures inside that folder. Let's put the figure there:
+# ggsave("chipseq/figures/all_hclust_binary_dist.pdf", height = 44, width = 5.0)
+# Nice, this will make it much easier to read :)
+# use file transfer to bring to desktop and take a look!
+# This is looking biologically relevant! Notice Pol II phospho 2 is
+# similar to all other compents of Pol II -- that is exactly what we expect.
+# also Pol II S5 is associated with H3K27ac which is a mark of active promoters
+# again what we would expect of promoter proximal Pol II.
+# MED DBPs all near each other too!
+# Sweet -- with a simple spot check we can see all of this data is making sense!
+```
+
+Here's some code to cluster mRNA promoters and lncRNA promoters separately. They end up looking pretty similar so we'll skip it for today.
+
+```{r}
+# # Let's start with lncRNA promoters -- why not?
+# 
+# # We first need to load the .GTF we made for lncRNAs and mRNAs.
+# 
+# lncrna_promoters <- rtracklayer::import("results/lncrna_promoters.gtf")
+# mrna_promoters <- rtracklayer::import("results/mrna_promoters.gtf")
+# 
+# # Cool now we can do the same as above:
+# 
+lncrna_peak_occurence <- peak_occurence_matrix[,lncrna_promoters$gene_id]
+# 
+bin_hier_lncrna <- hclust(dist(lncrna_peak_occurence, method = "binary"))
+# 
+ggdendro::ggdendrogram(bin_hier_lncrna, rotate = TRUE,  size = 70)
+# 
+ggsave("chipseq/figures/lncrna_hclust_binary_dist.pdf", height = 70, width = 70)
+# 
+# # Cool we can see the Pol II S2 and S5 diff right away again!
+# 
+# 
+# # Now for mRNA
+# 
+mrna_peak_occurence <- peak_occurence_matrix[,mrna_promoters$gene_id]
+# 
+bin_hier_mrna <- hclust(dist(lncrna_peak_occurence, method = "binary"))
+# 
+# ggdendro::ggdendrogram(bin_hier, rotate = TRUE,  size = 3)
+# 
+# ggsave("chipseq/figures/mrna_hclust_binary_dist.pdf", height = 44, width = 6)
+# Do a file transfer and open up lncRNA and mRNA clusters side by side:
+# They are almost identical !! That is another good sign.
+# Nice I think we have a solid data set here ! Let's explore more in the next class.
+```
+
+Class excercise: find regions of the clusters that make sense. For example my favorite is that SETDB1 is the methyltransferase that modifies histones to have H3K9me3. Note the two cluster next to each other -- another good sign.
+
+Let's make a heatmap of the promoters -- since it will take a long long time to plot we'll just plot the "super promoters"
+
+
+```{r}
+# We'll start with the promoter peak occurrence and filter down to just those that have high numbers of dbps
+high_binders <- promoter_peak_occurence[,colSums(promoter_peak_occurence) > 350]
+# Could filter out the rows that have zeros, but we don't have any
+min(rowSums(high_binders))
+# If you don't have pheatmap, install it.
+library(pheatmap)
+?pheatmap
+# We don't need to be able to read the promoter names and it takes a long time to plot those.
+pheatmap(high_binders, show_colnames = FALSE, clustering_distance_rows = "binary", clustering_distance_cols = "binary")
+# If we want to just plot the zinc fingers for example, we can reference the num_peaks_df 
+num_peaks_df <- read_csv("../../data/num_peaks_df.csv")
+zinc_finger_dbd <- num_peaks_df %>% filter(dbd == "C2H2 ZF")
+# Index this matrix using the names
+zf_matrix <- high_binders[zinc_finger_dbd$dbp,] 
+pheatmap(zf_matrix, show_colnames = FALSE, clustering_distance_rows = "binary", clustering_distance_cols = "binary")
+# We can also check out the dendrogram for just this matrix.
+zf_hclust <- hclust(dist(zf_matrix, method = "binary"))
+plot(zf_hclust)
+pdf("figures/zf_hclust.pdf", height = 12, width = 70)
+
+#Filtering for ZNF343
+
+number_of_dbp <- colSums(promoter_peak_occurence)
+high_binding_promoters <- number_of_dbp >350
+
+high_binding_ppo <- promoter_peak_occurence[,high_binding_promoters]
+
+znf343_promoters <- high_binding_ppo[rownames(high_binding_ppo) == 'ZNF343',]
+znf343_promoters_df <- data.frame('gene_id' = colnames(znf343_promoters), 'number_of_dbp' = colSums(znf343_promoters))
+ZNF343_promoters <- znf343_promoters[colSums(znf343_promoters) == 1]
+ZNF343_promoters <- data.frame(t(znf343_promoters))
+
+length(znf343_promoters) #1514
+
+znf343_promoters_id <- as.character(znf343_promoters$gene_name)
+
+peak_occurence_df_new <- read.csv(file = '/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv')
+
+merge_df <- merge(znf343_promoters_df, peak_occurence_df_new, by = "gene_id")
+
+Nina_ATF5 <- read.csv('/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/promoter_ATF5_bound_df.csv')
+
+Nina_ZNF34 <- read.csv('/scratch/Shares/rinnclass/Nina/CLASS_2021/analysis/promoter_ZNF34_bound_df.csv')
+
+ATF5_ZNF34_ZNF343 <- merge(merge_df, Nina_ZNF34, by = 'gene_id')
+#ATF5 is not complete here, may merge with Victor?
+
+write_csv(ATF5_ZNF34_ZNF343, '/scratch/Shares/rinnclass/Olivia/CLASS_2021/analysis/clustering_promoters_df.csv')
+```
+
+```{r}
+#Nina's code for comparison
+
+number_of_dbp <- colSums(promoter_peak_occurence)
+high_binding_promoters <- number_of_dbp >350
+
+high_binding_promoter_peak_occurence <- promoter_peak_occurence[,high_binding_promoters]
+#[,y]
+
+
+# ATF5, ZNF34, ZNF343
+promoter_ZNF34 <- high_binding_promoter_peak_occurence[rownames(high_binding_promoter_peak_occurence)== "ZNF34",]
+#[x,]
+
+promoter_ZNF34_df <- data.frame("gene_id" = colnames(promoter_ZNF34),
+                                "number_of_dbp" = colSums(promoter_ZNF34))
+
+
+#Hmm this also doesn't work. ColSums doesn't cooperate.
+```
