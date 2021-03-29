@@ -1,0 +1,151 @@
+---
+title: "KW_13_metaplots.Rmd"
+author: "Katy Walsh"
+date: "3/29/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+```{r setup, include=FALSE}
+options(stringsAsFactors = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+
+source("util/plotting_functions.R")
+source("util/intersect_functions.R")
+source("util/_setup.R")
+```
+
+## Import the data we need
+```{r import}
+gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
+
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names = TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import)
+names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks/|.bed", "", fl)
+```
+## Create promoter windows
+```{r}
+# Recall: The gencode annotation contains an entry for each exon, transcript, etc.
+# Use table(gencode_gr$type) to see how many of each entry there are. 
+# We don't want to create a "promoter" window around each exon for example
+# which is why we need to filter to just the genes.
+genes <- gencode_gr[gencode_gr$type == "gene"]
+# This function is a convenience function built into GenomicRanges
+all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
+```
+
+Function for making TSS plots (from RMD13)
+```{r profile_tss function}
+profile_tss <- function(peaks, 
+                        promoters_gr,
+                        upstream = 3e3,
+                        downstream = 3e3) {
+  
+
+  peak_coverage <- coverage(peaks)
+  
+  coverage_length <- elementNROWS(peak_coverage)
+  coverage_gr <- GRanges(seqnames = names(coverage_length),
+                         IRanges(start = rep(1, length(coverage_length)), 
+                                 end = coverage_length))
+  
+  promoters_gr <- subsetByOverlaps(promoters_gr, 
+                                       coverage_gr, 
+                                       type="within", 
+                                       ignore.strand=TRUE)
+  chromosomes <- intersect(names(peak_coverage), 
+                           unique(as.character(seqnames(promoters_gr))))
+  peak_coverage <- peak_coverage[chromosomes]
+  
+  promoters_ir <- as(promoters_gr, "IntegerRangesList")[chromosomes]
+  
+  promoter_peak_view <- Views(peak_coverage, promoters_ir)
+  
+  promoter_peak_view <- lapply(promoter_peak_view, function(x) t(viewApply(x, as.vector)))
+  promoter_peak_matrix <- do.call("rbind", promoter_peak_view)
+  
+  minus_idx <- which(as.character(strand(promoters_gr)) == "-")
+  promoter_peak_matrix[minus_idx,] <- promoter_peak_matrix[minus_idx,
+                                                           ncol(promoter_peak_matrix):1]
+  
+  promoter_peak_matrix <- promoter_peak_matrix[rowSums(promoter_peak_matrix) > 1,]
+  
+  peak_sums <- colSums(promoter_peak_matrix)
+  peak_dens <- peak_sums/sum(peak_sums)
+  
+  metaplot_df <- data.frame(x = -upstream:(downstream-1),
+                            dens = peak_dens)
+  
+  return(metaplot_df)
+}
+```
+
+
+make meta plots for a few DBPs
+ZNF34, ZNF343, ZZZ3, and ATF5
+```{r}
+POL2RA_metaplot_df <- profile_tss(consensus_peaks[["POLR2A"]], all_promoters_gr, upstream = 3e3, downstream = 3e3)
+
+ATF5_metaplot_df <- profile_tss(consensus_peaks[["ATF5"]], all_promoters_gr, upstream = 3e3, downstream = 3e3)
+
+ZZZ3_metaplot_df <- profile_tss(consensus_peaks[["ZZZ3"]], all_promoters_gr, upstream = 3e3, downstream = 3e3)
+
+ZNF34_metaplot_df <- profile_tss(consensus_peaks[["ZNF34"]], all_promoters_gr, upstream = 3e3, downstream = 3e3)
+
+ZNF343_metaplot_df <- profile_tss(consensus_peaks[["ZNF343"]], all_promoters_gr, upstream = 3e3, downstream = 3e3)
+
+```
+
+plot
+```{r}
+# Plot it with ggplot geom_line
+ggplot(POL2RA_metaplot_df, aes(x = x, y = dens)) + 
+  geom_vline(xintercept = 0, lty = 2) + 
+  geom_line(size = 1.5) + 
+  ggtitle("POLR2A Promoter Metaplot") + 
+  scale_x_continuous(breaks = c(-3000, 0, 3000),
+                     labels = c("-3kb", "TSS", "+3kb"),
+                     name = "") + 
+  ylab("Peak frequency")
+ggsave("POLR2A_promoter_metaplot.pdf")
+
+ggplot(ATF5_metaplot_df, aes(x = x, y = dens)) + 
+  geom_vline(xintercept = 0, lty = 2) + 
+  geom_line(size = 1.5) + 
+  ggtitle("ATF5 Promoter Metaplot") + 
+  scale_x_continuous(breaks = c(-3000, 0, 3000),
+                     labels = c("-3kb", "TSS", "+3kb"),
+                     name = "") + 
+  ylab("Peak frequency")
+ggsave("figures/ATF5_promoter_metaplot.pdf")
+
+ggplot(ZZZ3_metaplot_df, aes(x = x, y = dens)) + 
+  geom_vline(xintercept = 0, lty = 2) + 
+  geom_line(size = 1.5) + 
+  ggtitle("ZZZ3 Promoter Metaplot") + 
+  scale_x_continuous(breaks = c(-3000, 0, 3000),
+                     labels = c("-3kb", "TSS", "+3kb"),
+                     name = "") + 
+  ylab("Peak frequency")
+ggsave("figures/ZZZ3_promoter_metaplot.pdf")
+
+#plot two DBPs together
+#add dbp column
+?
+#make combined df
+multiple_DBPs_df <- bind_rows(ATF5_metaplot_df, ZZZ3_metaplot_df)
+
+ggplot(
+  multiple_DBPs_df, aes( x = x, y = dens, color = dbp) ) + 
+  geom_vline(xintercept = 0, lty = 2) + 
+  geom_line(size = 1.5) + 
+  ggtitle("combined Promoter Metaplot") + 
+  scale_x_continuous(breaks = c(-3000, 0, 3000),
+                     labels = c("-3kb", "TSS", "+3kb"),
+                     name = "") + 
+  ylab("Peak frequency")
+
+```
