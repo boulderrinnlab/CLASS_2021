@@ -248,3 +248,24 @@ ggplot(combined_metaplot_profile,
   ylab("Peak frequency") + 
   scale_color_manual(values = c("#424242","#a8404c"))
 ```
+
+```{r}
+# Let's now run this for all off the DBPs and compile it into one data frame.
+# Let's first define an empty data.frame to which we can row_bind each new one created.
+metaplot_df <- data.frame(x = integer(), dens = numeric(), dbp = character())
+# Started run at 9:58 PM -- finished at 1am
+# SKIP ZNF382 -- only 19 peaks -- probably none overlap promoters
+# Number 391
+for(i in 392:length(consensus_peaks)) {
+  print(names(consensus_peaks)[[i]])
+  tmp_df <- profile_tss(consensus_peaks[[i]], promoters_gr = all_promoters_gr)
+  tmp_df$dbp <- names(consensus_peaks)[[i]]
+  metaplot_df <- bind_rows(metaplot_df, tmp_df)
+}
+write_csv(metaplot_df, "metaplot_df.csv")
+table(names(consensus_peaks) %in% unique(metaplot_df$dbp))
+which(names(consensus_peaks) == "ZNF382")
+Sys.time()
+Sys.Date()
+```
+
