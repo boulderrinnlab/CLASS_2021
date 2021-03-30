@@ -134,8 +134,7 @@ promoter_peak_matrix[minus_idx,] <- promoter_peak_matrix[minus_idx, ncol(promote
 # We can get rid of the rows that have no peaks -- notice
 # that this reduces the size of the data quite a bit
 # even Pol II is not bound to every promoter
-promoter_peak_matrix <- promoter_peak_matrix[rowSums(promoter_peak_matrix) > 1,]
-
+promoter_peak_matrix <- promoter_peak_matrix[rowSums(promoter_peak_matrix) > 0,]
 ```
 
 ## Step 6: Sum the columns, normalize, and plot
