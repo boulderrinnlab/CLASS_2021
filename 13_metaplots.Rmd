@@ -120,6 +120,7 @@ We'll not just convert the run-length encoding vectors to actual vectors -- note
 promoter_peak_view <- lapply(promoter_peak_view, function(x) t(viewApply(x, as.vector)))
 # Convert this to a matrix. 
 promoter_peak_matrix <- do.call("rbind", promoter_peak_view)
+
 ```
 
 ## Step 5: Align the positive and negative strand promoters
