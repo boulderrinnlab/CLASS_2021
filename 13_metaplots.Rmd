@@ -28,10 +28,7 @@ We'll be using the consensus peaks we generated previously (MACS peak calls filt
 ```{r import}
 
 gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
-<<<<<<< HEAD
-=======
 
->>>>>>> origin/in_class
 fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names = TRUE)
 consensus_peaks <- lapply(fl, rtracklayer::import)
 names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks/|.bed", "", fl)
