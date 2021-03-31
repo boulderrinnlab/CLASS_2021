@@ -139,7 +139,7 @@ po_clust11 <- peak_occurence_matrix[row.names(peak_occurence_matrix) %in% row.na
 pro_cluster11 <- po_clust11[,colSums(po_clust11) > 9]
 #pull out the promoter names that all dbps in cluster11 bound
 pro_clus11 <- data.frame(promoters = colnames(pro_cluster11))
-
+write_csv(pro_clus11, "/scratch/Shares/rinnclass/Katy/CLASS_2021/analysis/02_exploring_analysis/cluster_11_promoters_bound.csv")
 
 ##questioning the validity of our clustering given that there's not clear similarities between the proteins in our cluster, and proteins that should be similar are not clustered together (FUBP1 and 3, & ATF's)
 

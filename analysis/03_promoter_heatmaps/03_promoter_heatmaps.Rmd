@@ -11,11 +11,12 @@ knitr::opts_chunk$set(echo = TRUE)
 library(GenomicRanges)
 library(rtracklayer)
 library(tidyverse)
+#BiocManager::install("ComplexHeatmap")
 library(ComplexHeatmap)
 
-source("../../util/plotting_functions.R")
-source("../../util/intersect_functions.R")
-source("../../util/_setup.R")
+source("/scratch/Shares/rinnclass/Katy/CLASS_2021/util/plotting_functions.R")
+source("/scratch/Shares/rinnclass/Katy/CLASS_2021/util/intersect_functions.R")
+source("/scratch/Shares/rinnclass/Katy/CLASS_2021/util/_setup.R")
 ```
 
 ```{r import}
