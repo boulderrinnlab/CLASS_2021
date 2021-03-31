@@ -240,3 +240,17 @@ plot_promoter_peak_matrix <- function(promoter_peak_matrix, gene_name, save_pdf 
     dev.off()
   }
 }
+
+plot_tss_profile <- function(tss_profile_matrix, dbp, save_pdf = FALSE,
+                             save_dir = "figures/") {
+  show(plot(tss_profile_matrix[dbp,], main = paste0(dbp, " promoter profile"),
+            xlab = "", ylab = "", type = "l", lwd = 2))
+  
+  if(save_pdf == TRUE) {
+    pdf(paste0(save_dir, dbp, "_tss_profile.pdf"))
+    plot(tss_profile_matrix[dbp,], main = paste0(dbp, " promoter profile"),
+         xlab = "", ylab = "", type = "l", lwd = 2)
+    dev.off()
+  }
+  return()
+}

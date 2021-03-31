@@ -11,6 +11,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(GenomicRanges)
 library(rtracklayer)
 library(tidyverse)
+library(ComplexHeatmap)
+library(circlize)
 
 source("util/plotting_functions.R")
 source("util/intersect_functions.R")
@@ -268,4 +270,52 @@ which(names(consensus_peaks) == "ZNF382")
 Sys.time()
 Sys.Date()
 ```
+
+```{r}
+# Let's filter out those peaks that don't pass the threshold, since
+# in particular here it will make a difference, since the 
+# average profile will be very lumpy for those DBPs with few peaks.
+passing_peaks <- names(consensus_peaks)[which(sapply(consensus_peaks, length) > 250)]
+
+# Let's cluster the metaplots df. First we need to turn it into a matrix.
+metaplot_df <- read_csv("../../data/metaplot_df.csv") %>%
+  filter(dbp %in% passing_peaks)
+
+# Pivot wider into a matrix
+metaplot_matrix <- metaplot_df %>% 
+  pivot_wider(names_from = x, values_from = dens) %>%
+  column_to_rownames("dbp") %>%
+  as.matrix()
+
+# Z-Scale the rows
+mm_scaled <- t(scale(t(metaplot_matrix)))
+
+metaplot_hclust <- hclust(dist(mm_scaled), method = "complete")
+
+# Plot the dendrogram
+pdf("figures/tss_profile_dendrogram.pdf", height = 10, width = 27)
+par(cex=0.3)
+plot(metaplot_hclust)
+dev.off()
+
+# Cut the tree to make some clusters
+clusters <- cutree(metaplot_hclust, h = 0.01)
+
+# Let's make a heatmap now.
+col_fun <- colorRamp2(c(-3, 0, 3), c("#5980B3", "#ffffff", "#B9605D"))
+split <- data.frame(split = c(rep("-3kb",3000), rep("+3kb", 3000)))
+
+pdf("figures/tss_profile_heatmap.pdf", height = 35, width = 10)
+Heatmap(mm_scaled, cluster_columns = FALSE, col = col_fun, border = TRUE, 
+        show_column_names = FALSE,
+        use_raster = TRUE,
+        column_split = split,
+        column_gap = unit(0, "mm"),row_names_gp = gpar(fontsize = 7))
+dev.off()
+
+# Let's plot some individual TSS profiles
+plot_tss_profile(metaplot_matrix, "H3K4me1", save_pdf = TRUE)
+plot_tss_profile(metaplot_matrix, "TCF12", save_pdf = TRUE)
+```
+
 
