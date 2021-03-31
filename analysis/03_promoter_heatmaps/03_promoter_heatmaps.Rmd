@@ -13,9 +13,9 @@ library(rtracklayer)
 library(tidyverse)
 library(ComplexHeatmap)
 
-source("../../util/plotting_functions.R")
-source("../../util/intersect_functions.R")
-source("../../util/_setup.R")
+source("util/plotting_functions.R")
+source("util/intersect_functions.R")
+source("util/_setup.R")
 ```
 
 ```{r import}
@@ -36,5 +36,16 @@ all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
 firre_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "FIRRE"]
 firre_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
 plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = "FIRRE", save_pdf = TRUE)
+```
+
+```{r}
+peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) > 250, ]
+peak_occurence_dist <- dist(peak_occurence_matrix, method = "binary")
+bin_hier <- hclust(peak_occurence_dist, method = "complete")
+clust <- cutree(bin_hier, h=0.52)
+clust_df <- data.frame(dbp = names(clust), cluster = clust) cluster11 <- filter(clust_df,cluster == 11)
+po_clust11 <- peak_occurence_matrix[row.names(peak_occurence_matrix) %in% row.names(cluster11),]
+pro_cluster11 <- po_clust11[,colSums(po_clust11) > 9]
+pro_clus11 <- data.frame(promoters = colnames(pro_cluster11))
 ```
 
