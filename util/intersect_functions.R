@@ -482,9 +482,11 @@ get_tag_matrix <- function(peak.gr, weightCol=NULL, windows, flip_minor_strand=T
 
 
 make_promoter_binding_matrix <- function(peak_list, promoter) {
-  
+
   # Filter the peaks to only those overlapping the promoter
   promoter_peaks <- lapply(peak_list, function(x) subsetByOverlaps(x, promoter))
+  
+  promoter_peaks <- promoter_peaks[sapply(promoter_peaks, length) > 0]
   
   # Set the seqlevels to only the chromosome that the promoter is on
   for(i in 1:length(promoter_peaks)) {
@@ -497,9 +499,10 @@ make_promoter_binding_matrix <- function(peak_list, promoter) {
   # Change promoter to a GRangesList
   promoter <- GRangesList(promoter)
   
-  promoter_peak_view <- lapply(firre_coverage, extract_peak_view, promoter)
+  promoter_peak_view <- lapply(promoter_coverage, extract_peak_view, promoter)
+
+  promoter_peak_matrix <- do.call(rbind, promoter_peak_view)
   
-  promoter_peak_matrix <- do.call("rbind", promoter_peak_view)
   
   if(as.character(strand(promoter[[1]])) == "-") {
     # Then flip the matrix so that downstream is always to the right
@@ -510,7 +513,6 @@ make_promoter_binding_matrix <- function(peak_list, promoter) {
 
 
 extract_peak_view <- function(peaks, promoter) {
-  
   peak_view <- Views(peaks, promoter)
   peak_view <- lapply(peak_view, function(x) t(viewApply(x, as.vector)))
   
