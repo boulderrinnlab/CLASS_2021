@@ -1,0 +1,5 @@
+hub BCHM5631_SPRING_2021
+shortLabel BCHM5631_SPRING_2021
+longLabel BCHM5631_SPRING_2021
+genomesFile genomes.txt
+email  michael.smallegan@colorado.edu
