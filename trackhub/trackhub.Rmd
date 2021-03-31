@@ -1,0 +1,283 @@
+---
+title: "UCSC genome browser trackhub"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+options(stringsAsFactors = FALSE)
+```
+
+```{r}
+
+# JEEEZ for some reason there are negative numbers in our consensus_peaks
+# .bed files. I need to fix that in order to the bigbed files
+# to load into UCSC properly.
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names = TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import)
+names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks/|.bed", "", fl)
+
+# THIS IS CRAZY.. Need to check if this is legit.
+# There may be some off by one accounting somewhere, but
+# I'm getting -1 on chrM (for ADNP for ex) in the bed files.. so.
+# I'm thinking rtracklayer shifts everything -1
+# and they're already at 0. maybe from exporting multiple times with rtracklayer::export. GAHH
+# cpeaks <- lapply(consensus_peaks, shift, shift = 2L)
+
+
+# Instead of shifting everything which has resulted in some chrM peaks
+# overflowing .. I'm wondering if the chrM sequence from Gencode is
+# larger than the chrM in UCSC. -- so fun..
+# I'm just going to set the 0 values equal to 2 (which
+# will ultimately equal 1 when exported by rtracklayer::export)
+# TODO: still need to check on whether the globally off-by-one
+# thing is an issue.
+for(i in 1:length(consensus_peaks)) {
+  start(consensus_peaks[[i]][which(start(consensus_peaks[[i]]) < 2)]) <- 2
+}
+
+for(i in 1:length(consensus_peaks)) {
+  rtracklayer::export(consensus_peaks[[i]], paste0("/scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/consensus_peaks/", names(consensus_peaks)[[i]], ".bed"))
+}
+
+f <- data.frame(file = list.files("/scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/consensus_peaks", full.names = T, pattern = ".bed")) %>%
+  mutate(target = gsub("/scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/consensus_peaks/|.bed", "", file),
+         command = paste0("bedToBigBed ",
+                          file, " chrom_sizes.txt consensus_bb/",
+                          target, ".bb")) %>%
+  dplyr::select(command) %>%
+  write_tsv("bed2bb.sh", col_names = FALSE)
+
+# wget http://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes
+# mv hg38.chrom.sizes chrom_sizes.txt
+# chmod u+x bed2bb.sh
+# ./bed2bb.sh
+
+# aws s3 sync /scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/consensus_bb  s3://bchm5631sp2021/consensus_peaks/ --acl public-read
+
+
+
+# Convert broadPeak files into bigBed
+
+
+
+write_as <- function(rep_name) {
+  paste0('table ', rep_name, '_peaks
+"ENCODE ', gsub("_R", " rep ", rep_name),' ChIP-seq peaks in K562 called with nf-core/chipseq v1.1.0 pipeline"
+(
+string  chrom;		"Reference sequence chromosome or scaffold"
+uint    chromStart;	"Start position of feature on chromosome"
+uint    chromEnd;	"End position of feature on chromosome"
+string  name;		"Name of gene"
+uint    score;		"Score"
+char[1] strand;		"+ or - for strand"
+string    signalValue;	"Measurement of overall (usually, average) enrichment for the region."
+string    pValue;	"Measurement of statistical significance (-log10). Use -1 if no pValue is assigned."
+string  	qValue;	"Measurement of statistical significance using false discovery rate (-log10). Use -1 if no qValue is assigned."
+)
+')
+}
+
+f <- data.frame(files = list.files("/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files", full.names = T, pattern = "broadPeak")) %>%
+  mutate(rep_name = gsub("/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files/|_peaks.broadPeak", "", files)) %>%
+  rowwise() %>%
+  mutate(as_file = write_as(rep_name),
+         as_filename = paste0("as_files/", rep_name, ".as"))
+lapply(1:nrow(f), function(x) write.table(f[x,"as_file"], f$as_filename[[x]], col.names = F, row.names = F, quote = F))
+
+
+f <- data.frame(files = list.files("/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files", full.names = T, pattern = "broadPeak")) %>%
+  rowwise() %>%
+  mutate(bpfile = map(files, ~ read.table(.x, skip = 1)))
+# Also get rid of the score column -- could also normalize it to 1000
+# But since it's suppose to be the score from 0 to 1000 and it's not -- we'll delete
+# It changes the peak shading basedon that and we don't want that anyway.
+# Also there seems to be a problem with an underscore in the name column
+for(i in 1:nrow(f)) {
+  f$bpfile[[i]]$V5 <- 0
+  f$bpfile[[i]]$V4 <- gsub("-", "_", f$bpfile[[i]]$V4)
+  f$bpfile[[i]] <- f$bpfile[[i]] %>% filter(V1 %in% c(paste0("chr", 1:22),"chrX", "chrY", "chrM"))
+}
+
+# Also need to filter out non-canonical chromosomes
+
+
+lapply(1:nrow(f), function(x) write.table(f$bpfile[[x]], gsub(".broadPeak", ".bed",
+                                                              gsub("/Shares/rinn_class/data/CLASS_2021/CLASS_2021/data/test_work/all_peak_files","/scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/peaks_bed", f$files[[x]])), quote = F, row.names = F, col.names = F))
+
+
+
+f <- data.frame(files = list.files("/scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/peaks_bed", full.names = T, pattern = "bed")) %>%
+  mutate(rep_name = gsub("/scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/peaks_bed/|_peaks.bed", "", files),
+         command = paste0(">&2 echo '", gsub("-", "_", rep_name), "\n'; bedToBigBed -as=as_files/", gsub("-", "_", rep_name),
+                          ".as -type=bed6+3 -extraIndex=signalValue,pValue,qValue /scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/peaks_bed/", rep_name, "_peaks.bed chrom_sizes.txt peaks_bb/", rep_name, ".bb")) %>%
+  dplyr::select(command) %>%
+  write.table("broadpeak2bb.sh", quote = F, col.names = F, row.names = F)
+
+
+# aws s3 sync /scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/peaks_bb  s3://bchm5631sp2021/peaks/ --acl public-read
+
+```
+
+```{r}
+# Let's get the list of files on S3
+fl_df <- read_csv("bhcm5631sp2021_s3urls.csv")
+
+fl_df <- fl_df %>%
+  mutate(target = gsub("https://bchm5631sp2021.s3-us-west-2.amazonaws.com/","", s3urls)) %>%
+  filter(!grepl("scale", s3urls))
+fl_df$filetype <- sapply(fl_df$target, function(x) unlist(strsplit(x, "/"))[[1]])
+# Get the DBP
+# Doesn't work as a tibble
+fl_df <- fl_df %>% as.data.frame()
+# bigwigs
+fl_df[which(fl_df$filetype == "bigwig"),"target"] <- sapply(fl_df[which(fl_df$filetype == "bigwig"),"target"],
+                                                            function(x) unlist(strsplit(unlist(strsplit(x,"_"))[[1]], "/"))[[2]])
+# broadpeak
+fl_df[which(fl_df$filetype == "peaks"),"target"] <- sapply(fl_df[which(fl_df$filetype == "peaks"),"target"],
+                                                           function(x) unlist(strsplit(unlist(strsplit(x,"_"))[[1]], "/"))[[2]])
+
+# consensus
+fl_df[which(fl_df$filetype == "consensus_peaks"), "target"] <- sapply(fl_df[which(fl_df$filetype == "consensus_peaks"), "target"],
+                                                                      function(x) gsub(".bb", "", unlist(strsplit(x,"/"))[[2]]))
+targets <- unique(fl_df$target)
+
+# Make replicate column
+fl_df[which(fl_df$filetype %in% c("bigwig","peaks")),"replicate"] <- sapply(fl_df[which(fl_df$filetype %in% c("bigwig","peaks")),"s3urls"],
+                                                                            function(x) {
+                                                                              x <- gsub("https://bchm5631sp2021.s3-us-west-2.amazonaws.com/", "", x)
+                                                                              x <- unlist(strsplit(x, "/"))[[2]]
+                                                                              gsub(".bigWig|.bb", "",x)
+                                                                            })
+
+# separate out
+bigwigs <- fl_df %>% filter(filetype == "bigwig")
+peaks <- fl_df %>% filter(filetype == "peaks")
+consensus <- fl_df %>% filter(filetype == "consensus_peaks")
+
+colors <- c("color 2,192,199",
+            "color 82,68,211",
+            "color 232,135,26",
+            "color 218,52,145",
+            "color 145,136,250",
+            "color 43,128,235",
+            "color 72,226,111",
+            "color 43,128,235",
+            "color 112,56,177",
+            "color 223,191,3",
+            "color 203,112,15",
+            "color 38,141,108",
+            "color 155,236,84")
+
+make_supertrack <- function(target, color, pri_start, bws, pks, cons) {
+  pri <- pri_start + 1
+  st_stanza <- paste0("#########################################################
+track ", target, "
+superTrack on
+shortLabel ", target, "
+longLabel ENCODE ChIP-seq for ", target, " in HEPG2 cells processed using nf-core/chipseq v1.1.0
+html BCHM5631_info
+")
+  
+  
+  default_width <- 16 * nrow(bws)
+  bw_header <- paste0("track ", target, "_bigWig
+parent ", target, "
+container multiWig
+shortLabel ", target, "
+longLabel ", target, " ChIP-seq read depth normalized signal in HEPG2
+type bigWig
+visibility full
+autoScale on
+aggregate none
+showSubtrackColorOnUi on
+maxHeightPixels 500:", default_width,":8
+priority ", pri ,"
+")
+  
+  bw_stanzas <- c()
+  for(j in 1:nrow(bws)) {
+    rep <- bws$replicate[[j]]
+    fn <- bws$s3urls[[j]]
+    bw_stanza <- paste0("track ", rep, "
+bigDataUrl ", fn, "
+shortLabel ", rep, "
+longLabel ", gsub("_R", " rep ", rep), " ChIP-seq read depth normalized signal in HEPG2
+type bigWig
+parent ", target, "_bigWig
+alwaysZero on
+", color, "
+")
+    bw_stanzas <- c(bw_stanzas, bw_stanza)
+  }
+  
+  if(nrow(pks) > 0) {
+    
+    
+    pk_stanzas <- c()
+    for(k in 1:nrow(pks)) {
+      rep <- pks$replicate[[k]]
+      fn <- pks$s3urls[[k]]
+      pri <- pri + 1
+      pk_stanza <- paste0("track ", rep, "_peaks
+parent ", target, "
+bigDataUrl ", fn, "
+shortLabel ", rep, " peaks
+longLabel ", gsub("_R", " rep ", rep), " peaks
+visibility dense
+type bigBed
+priority ",  pri, "
+", color, "
+")
+      pk_stanzas <- c(pk_stanzas, pk_stanza)
+    }
+  } else { pk_stanzas <- NULL }
+  
+  if(nrow(cons) == 1) {
+    pri <- pri + 1
+    fn <- cons$s3urls[[1]]
+    con_stanza <- paste0("track ", target, "_consensus_peaks
+parent ", target, "
+bigDataUrl ", fn, "
+shortLabel ", target, " consensus
+longLabel ", target, " consensus -- merge of peaks present in all replicates
+visibility dense
+type bigBed
+priority ", pri ,"
+", color, "
+")
+    
+    st <- unlist(c(st_stanza, bw_header, bw_stanzas, pk_stanzas, con_stanza))
+    st <- paste(st, collapse = "\n")
+    return(st)
+  } else {
+    st <- unlist(c(st_stanza, bw_header, bw_stanzas, pk_stanzas))
+    st <- paste(st, collapse = "\n")
+    return(st)
+  }
+}
+
+
+supertracks <- c()
+set.seed(987)
+for(i in 1:length(targets)) {
+  st <- make_supertrack(target = targets[[i]], 
+                        color = sample(colors, 1),
+                        pri_start = i * 10,
+                        bws = bigwigs %>% filter(target == targets[[i]]),
+                        pks = peaks %>% filter(target == targets[[i]]),
+                        cons = consensus %>% filter(target == targets[[i]]))  
+  
+  supertracks <- c(supertracks, st)
+}
+write_lines(supertracks, "trackhub/hg38/trackDb.txt")
+
+# aws s3 sync /scratch/Shares/rinnclass/Michael/CLASS_2021/trackhub/trackhub  s3://bchm5631sp2021/ --acl public-read
+
+
+```
+
+The trackhub url is: https://bchm5631sp2021.s3-us-west-2.amazonaws.com/hub.txt
