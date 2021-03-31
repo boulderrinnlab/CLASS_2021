@@ -258,7 +258,7 @@ metaplot_df <- data.frame(x = integer(), dens = numeric(), dbp = character())
 # Started run at 9:58 PM -- finished at 1am
 # SKIP ZNF382 -- only 19 peaks -- probably none overlap promoters
 # Number 391
-for(i in 392:length(consensus_peaks)) {
+for(i in c(1:390, 392:length(consensus_peaks))) {
   print(names(consensus_peaks)[[i]])
   tmp_df <- profile_tss(consensus_peaks[[i]], promoters_gr = all_promoters_gr)
   tmp_df$dbp <- names(consensus_peaks)[[i]]
@@ -275,7 +275,7 @@ Sys.Date()
 # Let's filter out those peaks that don't pass the threshold, since
 # in particular here it will make a difference, since the 
 # average profile will be very lumpy for those DBPs with few peaks.
-passing_peaks <- names(consensus_peaks)[which(sapply(consensus_peaks, length) > 250)]
+passing_peaks <- names(consensus_peaks)[sapply(consensus_peaks, length) > 250]
 
 # Let's cluster the metaplots df. First we need to turn it into a matrix.
 metaplot_df <- read_csv("../../data/metaplot_df.csv") %>%
@@ -313,9 +313,15 @@ Heatmap(mm_scaled, cluster_columns = FALSE, col = col_fun, border = TRUE,
         column_gap = unit(0, "mm"),row_names_gp = gpar(fontsize = 7))
 dev.off()
 
+
+
+par(cex = 1)
 # Let's plot some individual TSS profiles
 plot_tss_profile(metaplot_matrix, "H3K4me1", save_pdf = TRUE)
 plot_tss_profile(metaplot_matrix, "TCF12", save_pdf = TRUE)
+
+# Look at what the average profiles look like in each cluster.
+
 ```
 
 

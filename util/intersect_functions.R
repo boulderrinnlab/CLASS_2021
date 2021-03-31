@@ -523,3 +523,47 @@ extract_peak_view <- function(peaks, promoter) {
 }
 
 
+profile_tss <- function(peaks, 
+                        promoters_gr,
+                        upstream = 3e3,
+                        downstream = 3e3) {
+  
+  
+  peak_coverage <- coverage(peaks)
+  
+  coverage_length <- elementNROWS(peak_coverage)
+  coverage_gr <- GRanges(seqnames = names(coverage_length),
+                         IRanges(start = rep(1, length(coverage_length)), 
+                                 end = coverage_length))
+  
+  promoters_gr <- subsetByOverlaps(promoters_gr, 
+                                   coverage_gr, 
+                                   type="within", 
+                                   ignore.strand=TRUE)
+  chromosomes <- intersect(names(peak_coverage), 
+                           unique(as.character(seqnames(promoters_gr))))
+  peak_coverage <- peak_coverage[chromosomes]
+  
+  promoters_ir <- as(promoters_gr, "IntegerRangesList")[chromosomes]
+  
+  promoter_peak_view <- Views(peak_coverage, promoters_ir)
+  
+  promoter_peak_view <- lapply(promoter_peak_view, function(x) t(viewApply(x, as.vector)))
+  promoter_peak_matrix <- do.call("rbind", promoter_peak_view)
+  
+  minus_idx <- which(as.character(strand(promoters_gr)) == "-")
+  promoter_peak_matrix[minus_idx,] <- promoter_peak_matrix[minus_idx,
+                                                           ncol(promoter_peak_matrix):1]
+  
+  promoter_peak_matrix <- promoter_peak_matrix[rowSums(promoter_peak_matrix) > 1,]
+  
+  peak_sums <- colSums(promoter_peak_matrix)
+  peak_dens <- peak_sums/sum(peak_sums)
+  
+  metaplot_df <- data.frame(x = -upstream:(downstream-1),
+                            dens = peak_dens)
+  
+  return(metaplot_df)
+}
+
+
