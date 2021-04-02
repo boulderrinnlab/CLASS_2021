@@ -1,0 +1,467 @@
+---
+title: "our_data_in_ranges"
+author: "JR"
+date: "12/3/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("util/intersect_functions.R")
+source("util/plotting_functions.R")
+source("util/_setup.R")
+library(Gviz)
+library(ggpubr)
+```
+
+```{r}
+# We have now have explored our function to make "consensus peaks". Now we want
+# to get them all into a named list of Granges (so we can track where the peaks are
+# and which chromosome they are on).
+
+# We can immediately start to analyze the results of our consensus peaks!
+ 
+# First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
+
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names=TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import, format = 'bed')
+
+
+# Now we are going to use an unamed or annonymous function to add the name of 
+# the DBP associated with it's Granges. Here the function simply uses 'strsplit'
+# function to split the current consensus peak in X and append the name column
+# with the index of the name of the DPB being 1.
+names(consensus_peaks) <- sapply(consensus_peaks, function(x){
+  unlist(strsplit(x$name, "_"))[[1]]
+})
+
+## Now we have a named list of consensus peaks in the environment -- let's take a look
+
+```
+
+# We now want to turn our list of Granges into a data frame (data.frame) which
+more like your typical excel spreadsheet. 
+
+# we will first use data.frame and name the columns of the data frame "dbp" & num_peaks for the number of peaks -- we will call this dataframe num_peaks_df.
+
+# To get the names we use name(consensus peaks) which is the DBP name in Granges list
+
+# To get the number of peaks (each peak has a unique name DBP_peak#) we use the 
+length function to get the length of that vector of peak ranges for each DBP.
+
+```{r}
+num_peaks_df <- data.frame("dbp" = names(consensus_peaks),
+                           "num_peaks" = sapply(consensus_peaks, length))
+
+## Let's take a look at what we got.
+
+## Ok we are going to filter all samples that don't have at least 250 peaks. We
+## can see how many this is in the environment sort too ...
+
+num_peaks_threshold <- 500
+# Setting a threshold number in an object to be called below
+
+
+filtered_consensus_peaks <- consensus_peaks[num_peaks_df$num_peaks > num_peaks_threshold]
+
+
+# fun exeRcise to find what percentil 250 peaks is in the distribution of all 483 ChIP-seq data sets
+# hint ?ecdf (google it too :)
+#threshold_percentile <- round(ecdf(num_peaks_df$num_peaks)(num_peaks_threshold)*100,1)
+
+# we are going to calculate what percentile of the data 250 peaks would account for.
+# it looks scary but can be distilled pretty easy. 
+# round is rounding the number that comes out of the inner functions.
+# ecdf is empircal cumulative distribution function. This will work on the number of  # peaks for each DBP in our num_peaks_df. So it will generate a 483 ECDFs one for
+# the list of peaks for each DBP. Then it is filtering out all samples with less
+# than 250 peaks. 
+  
+# In the end we generate a list of filtered consensus peaks of DBPs > 250 peaks.
+
+
+## We can see that there are 23 elements that don't have at least 250 peaks.
+## Find out which genes went missing. Hint: change the threshold from > to <
+```
+
+
+```{r Making plots of peak numbers per DBP}
+
+## We will go over plotting more soon. For now let's just look at the first line
+## or the AESthetics line of what the data being plotted is:
+
+g <- ggplot(num_peaks_df, aes(x = num_peaks)) + 
+  geom_histogram(bins = 70)
+
+show(g)
+# ?ggplot
+# We see that we are going to plot from num_peaks_df. The first parameter is data     # then where the data maps (aes). Since we are only looking at number of peaks we just # need the x axis and a histogram -- with some fancy formatting we will get into later # for now we just want to focus on the AES layer.
+
+g + 
+  geom_vline(xintercept = num_peaks_threshold, lty = 2,
+             size = 1.1, color = "#a8404c") +
+  annotate(geom = "text", x = num_peaks_threshold + 3e3, y = 35, 
+           color = "#a8404c", label = paste0("t=", num_peaks_threshold)) +
+    annotate(geom = "text", x = num_peaks_threshold + 2.2e3, y = 32, 
+           color = "#a8404c", label = paste0(round(threshold_percentile,0), "%")) +
+  xlab("Number of consensus peaks") +
+  ylab("Count") +
+  ggtitle("Distribution of number of consensus peaks")
+
+
+
+ggsave("figures/consensus_peaks_histogram.pdf")
+```
+
+
+
+```{r Let's make a nice table of our filtered consensus peaks}
+
+# we need to run a for loop over all the files in filtered_consensus_peaks (460)
+# for each interaction the function (the good stuff is betwee {} ) will use           # rtracklayer::export function for file 1 and make a bed file for each filtered       # consensus peak file.
+
+for(i in 1:length(filtered_consensus_peaks)) {
+  rtracklayer::export(filtered_consensus_peaks[[i]], paste0("results/filtered_peaks/", names(filtered_consensus_peaks)[i], 
+"_consensus_peaks_filter.bed"))
+}
+```
+
+
+```{r getting the total coverage of the peaks for each DBP}
+num_peaks_df <- num_peaks_df %>% filter(dbp %in% names(filtered_consensus_peaks))
+# we are resetting our num_peaks_df to just be the filtered list now. The filter
+# function is looking for the dbp name in the list of filtered_consensu_peaks. So 
+# num_peaks_df will be reduced to 460 enteries.
+
+num_peaks_df$total_peak_length <- sapply(filtered_consensus_peaks, function(x) sum(width(x)))
+# We are making a new column by indexing into a new name for num_peaks_df.
+# $total_peak_length will creat the column with that name and the result of sapply
+# is added as a row entry for each DBP (x) into the total_peak_legth column
+# Now we are going to get the sum of peak widths using sapply on filtered_peaks...
+
+
+# Let's plot the total peak coverage for each DBP.
+g <- ggplot(num_peaks_df, aes(x = num_peaks, y = total_peak_length, label = dbp))
+# we see the aes now has X and Y values! X is the number of peaks we just plotted.
+# Y is going to be the total genomic space covered by the peaks for a given DBP.
+
+g + geom_point() + 
+  geom_smooth(method = "lm", se = FALSE, color = "black", lty = 2,
+              formula = 'y ~ x') +
+  geom_text() +
+  ylab("BP covered") +
+  xlab("Number of peaks") +
+  ggtitle("Peak count vs. total bases covered")
+
+## Perhaps as expected we see that the more peaks a DBP has the more genomic space
+## is covered -- but hey that is a result !
+```
+
+```{r finding overlaps with genomic features from GENCODE}
+
+gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
+
+# we have seen this before, but we are now loading all the features of the human 
+# genome (according to GENCODE). So we will now know the ranges of our peaks and 
+# the ranges of genome features making it very easy to do overlaps.
+
+# Let's start with promoters since they are the region that regulates               # gene-expression. Further let's make a list of lncRNA and mRNA promoters
+# Since we do this very often we made a function called "get_promoter_regions"
+# It is very simple to set a promter equal to 3Kb upstream and 3Kb downstream
+# from the transcripitonal start site (TSS). 
+# The core of the work is done by "GenomicRanges::promoters" that knows where the 
+# TSS is in genocde_gr and then asks for the parameters of how much up and          # downstream sequences is wanted.
+
+#Here it is:
+#  get_promoter_regions <- function(gencode_gr, biotype, upstream = 3e3, downstream = 3e3) {
+  
+#  genes <- gencode_gr[gencode_gr$type == "gene"]
+#  genes <- genes[genes$gene_type %in% biotype]
+  
+#  proms <- GenomicRanges::promoters(genes, upstream = upstream, downstream = downstream)
+  
+#  return(proms)
+  
+#}
+  
+# OK now we have seen under the hood let's put this useful funciton to work!
+
+
+# get promoter regions is working on genocde and extracting both lncRNA and mRNA    # promoters
+
+lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
+rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.gtf")
+
+# rtraklayer::export is going to make a file we can use in the future so we don't 
+# have to run this each time. Note we set up the parameters for                     # "get_promoter_regions" function. So we can repeat this process by changing
+# the biotype parameter to different gene-types.
+
+
+lncrna_promoters <- get_promoter_regions(gencode_gr, biotype = "lncRNA")
+rtracklayer::export(lncrna_promoters, "results/lncrna_promoters.gtf")
+# Same idea to make a lncRNA list of promoters only
+
+mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+rtracklayer::export(mrna_promoters, "results/mrna_promoters.gtf")
+# Same idea to make a mRNA list of promoters only
+
+# Let's count the number of times a DBP peak overlapped a promoter
+# We will use another function we made "count_peaks_per_feature"
+# this way we can pick a feature and the funciton will return the overlaps for 
+# that feature with the peaks for each DBP.
+# The core of this funciton is to take a peak list and run GenomicRanges
+# "countOverlaps" function that will find overlaps with a feature. 
+# the final parameter decides to produce a matrix or dataframe of the overlap counts
+
+promoter_peak_counts <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, type = "occurrence")
+
+# We can see the parameters of count_peaks_per_feature
+
+# This is cool information so let's keep building our 'num_peaks_df' by indexing.
+
+num_peaks_df$peaks_overlapping_promoters <- rowSums(promoter_peak_counts)
+# we can see we just made a new column 'peaks_overlapping_promters' 
+
+
+num_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[,lncrna_promoters$gene_id])
+# A new column for the nunmber of overlaps with a lncRNA
+
+num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_promoters$gene_id])
+
+# This is a handy data frame of information we will plot from in 
+# 11_R_plotting_intro:
+
+```
+
+
+Class Exercise ! Let's add some infomration about the DBPs that we will discuss in the next class (what are these DBPs). We will use the human transcription factor database.
+
+
+Now we are going to add some information ()
+```{r}
+# The human TFs
+# https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx
+library(janitor)
+human_tfs <- readxl::read_excel("../../data/mmc2.xlsx",
+                                sheet = 2, skip = 1)
+names(human_tfs)[4] <- "is_tf"
+
+# Checking to see how many overlaps there are.
+length(which(tolower(num_peaks_df$dbp) %in% tolower(human_tfs$Name)))
+
+# TODO: Manually match names -- doublecheck
+# Subset to just the columns we need.
+human_tfs <- human_tfs[tolower(human_tfs$Name) %in% tolower(num_peaks_df$dbp), 1:4]
+names(human_tfs) <- c("ensembl_id",
+                      "dbp",
+                      "dbd",
+                      "tf")
+
+num_peaks_df <- merge(num_peaks_df, human_tfs, all.x = T)
+# Let's check how many NAs -- we should have some missing values.
+length(which(is.na(num_peaks_df$ensembl_id)))
+write_csv(num_peaks_df, "/scratch/Shares/rinnclass/Olivia/CLASS_2021/results/num_peaks_df.csv")
+# A new column for the nunmber of overlaps with a mRNA
+```
+
+
+## Let's take a look at num_peak_df
+
+```{r}
+# now let's plot x as num_peaks and y num overlapping promoters.
+
+ggplot(num_peaks_df,
+       aes(x = num_peaks, y = peaks_overlapping_promoters)) +
+  
+# setting up the AES to plot num_peaks on x and promoter overlaps on Y
+  xlab("Peaks per DBP") +
+  ylab("Number of peaks overlapping promoters") +
+  ggtitle("Relationship Between Number of DBP Peaks and Promoter Overlaps")+
+  geom_point() +
+  geom_abline(slope = 1, linetype="dashed") +
+  geom_smooth(method = "lm", se=F, formula = 'y ~ x',
+              color = "#a8404c") +
+  ylim(0,60100) +
+  xlim(0,60100)
+```
+
+
+```{r Let's see the overlaps with gene bodies}
+
+lncrna_mrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
+                                     gencode_gr$gene_type %in% c("lncRNA", "protein_coding")]
+
+# First we are setting up the lncRNA and mRNA genebodies similar as we did above
+# previously we used biotype nad here we will use gene. We are indexing into 
+# gencode_gr to the type index inside @elementMetadata.
+
+
+genebody_peak_counts <- count_peaks_per_feature(lncrna_mrna_genebody, 
+                                                filtered_consensus_peaks, 
+                                                type = "occurrence")
+
+# Using the count_peaks_per_feature function again, see it's getting handy :)
+# This time the parameters above is set to gene body and uses findOverlaps instead
+# of GenomicRages::promoters function. 
+
+stopifnot(all(rownames(genebody_peak_counts) == num_peaks_df$dbp))
+num_peaks_df$peaks_overlapping_genebody <- rowSums(genebody_peak_counts)
+
+# This is double checking to make sure the same numbers of rows were included.
+# all the rownames neeed to be equal to the number of DBPs in num_peaks_df.
+# The second line is creating a new column in the num_peaks_df that will contain
+# the sum of the number of peaks overlapping a genebody for each DBP.
+
+# Plotting the number of peaks per DBP and how many gene bodies were overlapped.
+ggplot(num_peaks_df,
+       aes(x = num_peaks, y = peaks_overlapping_genebody)) +
+  
+## Setting up AES for x num_peaks and y peaks_overlapping_gene_bodies.
+  
+  xlab("Peaks per DBP") +
+  ylab("Number of peaks overlapping genes") +
+  ggtitle("Relationship Between Number of DBP Peaks and Gene Body Overlaps")+
+  geom_point() +
+  geom_abline(slope = 1, linetype="dashed") +
+  geom_smooth(method = "lm", se=F, formula = 'y ~ x',
+              color = "#a8404c") +
+  stat_regline_equation(label.x = 35000, label.y = 18000) +
+  ylim(0,60100) +
+  xlim(0,60100)
+
+## Interesting result !! Gene bodies explain amost all the places of binding in 
+## the genome! Where as promoters had a non linear asymptope after a certain number 
+## of peaks.
+```
+
+Ok so we have started generating results in this handy num_peaks_df. As we continue
+through the class we will want to keep adding columns of properties for each DBP.
+So let's take the time now to convert this into a matrix and new data_frame to work
+from.
+
+```{r}
+# First we will establish the promoter peak occurence matrix (rows = promoters, cols # = dbp binding {0,1}). The reason for doing this is it has all the information in
+# a matrix where the row is a dBP and columns are a promoter. Our current dataframe
+# only knows the number of promoters overlapped, but not the names of the promoters.
+# That could be handy and why we made a parameter of "count_peaks_per_feature" to be
+# able to provide the counts (as we did above) or "occurence" the matrix.
+
+promoter_peak_occurence <- count_peaks_per_feature(lncrna_mrna_promoters, filtered_consensus_peaks, 
+                                               type = "occurrence")
+# Output to promoter_peak_occurecne_matrix
+write.table(promoter_peak_occurence, "results/lncrna_mrna_promoter_peak_occurence_matrix.tsv")
+# Now we want to make into a data frame using the promoter annotations as rows and attributes as columns.
+# We will use lncrna_mrna_promoters to index "all promoters"
+# First make sure promoter_peak_occurence and lncrna_mrna_promoters are in the same order
+stopifnot(all(colnames(promoter_peak_occurence) == lncrna_mrna_promoters$gene_id))
+
+
+
+# We are going to use the promoter peak occurence matrix above to essentially
+# recreate a working version of num_peaks_df. However we will now organize it more
+# this is a good example of how to set up a bunch of columns in dataframe. using the
+# data.frame() fucntion.
+# essentially we will index values from the objects we created and make a .CSV 
+# to keep adding onto in future classes.
+
+peak_occurence_df <- data.frame("gene_id" = colnames(promoter_peak_occurence),
+                                "gene_name" = lncrna_mrna_promoters$gene_name,
+                                "gene_type" = lncrna_mrna_promoters$gene_type,
+                                "chr" = lncrna_mrna_promoters@seqnames,   
+                                "3kb_up_tss_start" = lncrna_mrna_promoters@ranges@start,
+                                "strand" = lncrna_mrna_promoters@strand,
+                                "number_of_dbp" = colSums(promoter_peak_occurence))
+# This is the CSV file we will start building upon adding columns of properties as we analyze them
+# The output file name will change based on what is added later, but the "peak_occurence_df" will be used throughout.
+write_csv(peak_occurence_df, "results/peak_occurence_dataframe.csv")
+```
+
+
+
+
+```{r Density plot of number of DBPs per promoter}
+
+# Since we are making a density plot we only need the X axis.
+# this is the number_of_dbp -- which we added to the dataframe above using
+# colsums function across the promoter peak occurence matrix. So it essentially
+# returns the number of times a DBP overlaps a promoter (we didn't include genebody)
+g <- ggplot(peak_occurence_df, aes(x = number_of_dbp))
+
+#AES layer will know to make a histogram since there is only one set of values for x.
+g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes") 
+
+# Wow what a result! Last year we only saw up to 111 binding events at a promoter
+# this is kind of validated where the first peak in the distribution falls at 100
+# binding events -- yet there is a second distribution of regions of 300 or more 
+# binding events -- wonder what those are :) ?
+
+
+```
+
+
+Lets find how many promoters don't have any DBPs bound
+
+```{r determining if a promoter is never bound}
+
+unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp < 1)
+# here is just a simple index and filter of the index to have at least 1 dbp bound.
+write_csv(unbound_promoters, "results/unbound_lncrna_mrna_promoters.csv")
+
+
+
+
+```
+
+
+Do any DBPs never bind a promoter?
+
+```{r determing how many DBPs have no overlaps with promoters}
+# Determining how many DBPs don't bind to any promoters.
+dbp_promoter_ovl <- get_overlapping_peaks(lncrna_mrna_promoters, filtered_consensus_peaks)
+num_ovl <- sapply(dbp_promoter_ovl, length)
+min(num_ovl)
+summary(num_ovl)
+table(num_ovl)
+
+# There are no DBPs that have no promoter overlaps. The minimum number of promoter
+# overlaps is 54
+```
+
+
+```{r comparing lncRNAs and mRNA promoter overlaps}
+
+# Class exercise, try and make sense of what was done here based on the above
+
+num_peaks_dfl <- num_peaks_df %>%
+  dplyr::select(-peaks_overlapping_promoters) %>%
+  pivot_longer(cols = peaks_overlapping_lncrna_promoters:peaks_overlapping_mrna_promoters,
+               names_to = "gene_type",
+               values_to = "peaks_overlapping_promoters") %>%
+  mutate(gene_type = gsub("peaks_overlapping_", "", gene_type))
+ggplot(num_peaks_dfl, aes(x = num_peaks, y = peaks_overlapping_promoters, 
+                         col = gene_type)) +
+         geom_point() +
+         geom_abline(slope = 1, linetype="dashed") +
+  geom_smooth(method = "lm", se = FALSE, formula = "y ~ x") +
+  stat_regline_equation() +
+  scale_color_manual(values = c("#a8404c", "#424242"))+
+  xlab("Peaks per DBP") +
+  ylab("Peaks Overlapping Promoters") +
+  ggtitle("Number of DBP Peaks and Promoter Overlaps")
+ggsave("figures/peaks_overlaps_relationship_by_gene_type.png", height = 5, width = 8)
+ggsave("figures/peaks_overlaps_relationship_by_gene_type.pdf", height = 5, width = 8)
+``` 
+
+
+
+
+
+

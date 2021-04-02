@@ -478,4 +478,95 @@ get_tag_matrix <- function(peak.gr, weightCol=NULL, windows, flip_minor_strand=T
 }
 
 
+make_promoter_binding_matrix <- function(peak_list, promoter) {
+  
+  # Filter the peaks to only those overlapping the promoter
+  promoter_peaks <- lapply(peak_list, function(x) subsetByOverlaps(x, promoter))
+
+  promoter_peaks <- promoter_peaks[sapply(promoter_peaks, length) > 0]
+  
+  # Set the seqlevels to only the chromosome that the promoter is on
+  for(i in 1:length(promoter_peaks)) {
+    seqlevels(promoter_peaks[[i]]) <- as.character(seqnames(promoter))
+  }
+  
+  # Get the Rle coverage values for the promoter
+  promoter_coverage <- lapply(promoter_peaks, coverage)
+  
+  # Change promoter to a GRangesList
+  promoter <- GRangesList(promoter)
+  
+  promoter_peak_view <- lapply(firre_coverage, extract_peak_view, promoter)
+  
+  promoter_peak_view <- lapply(promoter_coverage, extract_peak_view, promoter)
+  
+  promoter_peak_matrix <- do.call(rbind, promoter_peak_view)
+  
+  promoter_peak_matrix <- do.call("rbind", promoter_peak_view)
+  
+  if(as.character(strand(promoter[[1]])) == "-") {
+    # Then flip the matrix so that downstream is always to the right
+    promoter_peak_matrix <- promoter_peak_matrix[,ncol(promoter_peak_matrix):1]
+  }
+ return(promoter_peak_matrix) 
+}
+
+
+extract_peak_view <- function(peaks, promoter) {
+  
+  peak_view <- Views(peaks, promoter)
+  peak_view <- lapply(peak_view, function(x) t(viewApply(x, as.vector)))
+  
+  peak_vector <- as.vector(peak_view[[as.character(seqnames(promoter))]])
+  
+  # Extend the vector to the promoter window length
+  # padding with zeros
+  peak_vector <- c(peak_vector, rep(0,width(promoter[[1]]) - length(peak_vector)))
+  return(peak_vector)
+}
+
+
+profile_tss <- function(peaks, 
+                        promoters_gr,
+                        upstream = 3e3,
+                        downstream = 3e3) {
+  
+  
+  peak_coverage <- coverage(peaks)
+  
+  coverage_length <- elementNROWS(peak_coverage)
+  coverage_gr <- GRanges(seqnames = names(coverage_length),
+                         IRanges(start = rep(1, length(coverage_length)), 
+                                 end = coverage_length))
+  
+  promoters_gr <- subsetByOverlaps(promoters_gr, 
+                                   coverage_gr, 
+                                   type="within", 
+                                   ignore.strand=TRUE)
+  chromosomes <- intersect(names(peak_coverage), 
+                           unique(as.character(seqnames(promoters_gr))))
+  peak_coverage <- peak_coverage[chromosomes]
+  
+  promoters_ir <- as(promoters_gr, "IntegerRangesList")[chromosomes]
+  
+  promoter_peak_view <- Views(peak_coverage, promoters_ir)
+  
+  promoter_peak_view <- lapply(promoter_peak_view, function(x) t(viewApply(x, as.vector)))
+  promoter_peak_matrix <- do.call("rbind", promoter_peak_view)
+  
+  minus_idx <- which(as.character(strand(promoters_gr)) == "-")
+  promoter_peak_matrix[minus_idx,] <- promoter_peak_matrix[minus_idx,
+                                                           ncol(promoter_peak_matrix):1]
+  
+  promoter_peak_matrix <- promoter_peak_matrix[rowSums(promoter_peak_matrix) > 1,]
+  
+  peak_sums <- colSums(promoter_peak_matrix)
+  peak_dens <- peak_sums/sum(peak_sums)
+  
+  metaplot_df <- data.frame(x = -upstream:(downstream-1),
+                            dens = peak_dens)
+  
+  return(metaplot_df)
+}
+
 
