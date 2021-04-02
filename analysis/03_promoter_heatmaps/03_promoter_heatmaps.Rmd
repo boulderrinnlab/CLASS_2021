@@ -39,6 +39,7 @@ plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = "FIRRE", save_pdf =
 ```
 
 ```{r}
+#Generate the list of clustered promoters
 peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) > 250, ]
 peak_occurence_dist <- dist(peak_occurence_matrix, method = "binary")
 bin_hier <- hclust(peak_occurence_dist, method = "complete")
