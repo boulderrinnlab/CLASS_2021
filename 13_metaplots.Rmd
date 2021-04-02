@@ -249,3 +249,10 @@ ggplot(combined_metaplot_profile,
   ylab("Peak frequency") + 
   scale_color_manual(values = c("#424242","#a8404c"))
 ```
+
+```{r}
+POLR2AphosphoS2 <- profile_tss(consensus_peaks[["POLR2AphosphoS2"]], all_promoters_gr)
+
+
+
+```

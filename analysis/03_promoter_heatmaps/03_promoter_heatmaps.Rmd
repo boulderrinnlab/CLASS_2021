@@ -1,0 +1,40 @@
+---
+title: "Promoter binding heatmaps"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+options(stringsAsFactors = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+library(ComplexHeatmap)
+
+source("../../util/plotting_functions.R")
+source("../../util/intersect_functions.R")
+source("../../util/_setup.R")
+```
+
+```{r import}
+gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
+
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names = TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import)
+names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks/|.bed", "", fl)
+```
+
+```{r make-promoters}
+genes <- gencode_gr[gencode_gr$type == "gene"]
+all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
+```
+
+```{r}
+# Let's look at what's binding on Firre and where it's binding.
+firre_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "FIRRE"]
+firre_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
+plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = "FIRRE", save_pdf = TRUE)
+```
+
