@@ -71,5 +71,7 @@ vignettes/*.pdf
 *fastq*
 *results*
 *work*
+*.bb
+*.as
 
 

@@ -44,7 +44,11 @@ filtered_consensus_peaks <- consensus_peaks[sapply(consensus_peaks, length) > nu
 #Export consensus peaks
 for(i in 1:length(filtered_consensus_peaks)) {
   rtracklayer::export(filtered_consensus_peaks[[i]], 
+<<<<<<< HEAD
                       paste0("/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/--- 00 consensus peaks -- /chipseq/filtered_consensus/", 
+=======
+                      paste0("/scratch/Shares/rinnclass/YOUR_FOLDER/X/results/chipseq/filtered_consensus/", 
+>>>>>>> origin/in_class
                              names(filtered_consensus_peaks)[i], 
                              "_filtered_consensus_peaks.bed"))
 }
@@ -70,7 +74,11 @@ rtracklayer::export(lncrna_promoters, "/scratch/Shares/rinnclass/YOUR_FOLDER/ana
 
 
 mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+<<<<<<< HEAD
 rtracklayer::export(mrna_promoters, "/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/ -- oo consensus peaks -- results/mrna_promoters.gtf")
+=======
+rtracklayer::export(mrna_promoters, "/scratch/Shares/rinnclass/YOUR_FOLDER/analysis/--- 00 consensus peaks -- /mrna_promoters.gtf")
+>>>>>>> origin/in_class
 ```
 
 
@@ -94,5 +102,8 @@ rtracklayer::export(mrna_genebody, "/scratch/Shares/rinnclass/YOUR_FOLDER/analys
 ```
 
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> origin/in_class

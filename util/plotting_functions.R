@@ -212,3 +212,45 @@ plotRanges <- function(x, xlim = x, main = deparse(substitute(x)),  col = "black
   title(main)
   axis(1)
 }
+
+
+
+plot_promoter_peak_matrix <- function(promoter_peak_matrix, gene_name, save_pdf = FALSE, show = TRUE,
+                                      save_dir = "figures/") {
+  # Set the colors for the binary heatmap
+  colors <- structure(c("#ffffff","#a8404c"), names = c("0", "1"))
+  split <- data.frame(split = c(rep("-3kb",3000), rep("+3kb", 3000)))
+  
+  ht <- Heatmap(promoter_peak_matrix, cluster_columns = FALSE, col = colors,
+                border = "black", show_heatmap_legend = FALSE,
+                use_raster = TRUE,
+                column_split = split,
+                column_gap = unit(0, "mm"),
+                row_names_gp = gpar(fontsize = 7))
+  
+  if(show == TRUE) {
+    draw(ht, column_title = paste0(gene_name, " promoter peaks"))
+  }
+  
+  
+  if(save_pdf == TRUE) {
+    pdf(file.path(save_dir, paste0(gene_name, "_promoter_peaks.pdf")), 
+        height = ceiling(0.091*nrow(promoter_peak_matrix)*2)/2, width = 7)
+    draw(ht, column_title = paste0(gene_name, " promoter peaks"))
+    dev.off()
+  }
+}
+
+plot_tss_profile <- function(tss_profile_matrix, dbp, save_pdf = FALSE,
+                             save_dir = "figures/") {
+  show(plot(tss_profile_matrix[dbp,], main = paste0(dbp, " promoter profile"),
+            xlab = "", ylab = "", type = "l", lwd = 2))
+  
+  if(save_pdf == TRUE) {
+    pdf(paste0(save_dir, dbp, "_tss_profile.pdf"))
+    plot(tss_profile_matrix[dbp,], main = paste0(dbp, " promoter profile"),
+         xlab = "", ylab = "", type = "l", lwd = 2)
+    dev.off()
+  }
+  return()
+}
