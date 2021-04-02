@@ -22,8 +22,30 @@ This is an R Markdown document. Markdown is a simple formatting syntax for autho
 
 When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
-```{r cars}
-summary(cars)
+```{r}
+peak_occurence_matrix <- peak_occurence_matrix[rowSums(peak_occurence_matrix) > 250, ]
+# Hierarchical clustering with binary distance measure
+bin_hier <- hclust(peak_occurence_dist, method = "complete")
+
+plot(bin_hier)
+
+# To make this bigger, we can plot it as a pdf
+pdf("figures/dbp_hclust_dendro.pdf", height = 12, width = 70)
+plot(bin_hier)
+dev.off()
+
+bin_hier$labels[bin_hier$order]
+
+## tree cutting: 
+
+clust <- cutree(bin_hier, h=.52)
+table(clust)
+
+clust_df <- data.frame(dbp = names(clust), cluster = clust)
+
+
+##figure out what this cluster is binding to using the peak occurence matrix
+
 ```
 
 ## Including Plots
