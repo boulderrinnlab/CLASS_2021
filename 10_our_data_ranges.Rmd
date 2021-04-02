@@ -27,12 +27,10 @@ library(ggplot2)
  
 # First we will make a list of files (list.files) and then use lapply to run the "rtracklayer::import" function on the file list (fl)
 
-fl <- list.files("../../data/consensus_peaks", full.names=TRUE)
+fl <- list.files("../00_consensus_peaks/results/filtered_consensus/", full.names=TRUE)
 
 consensus_peaks <- lapply(fl, rtracklayer::import, format = "bed")
 
-consensus_peaks[[42]]$name %>%
-  head()
 # Now we are going to use an unamed or annonymous function to add the name of 
 # the DBP associated with it's Granges. Here the function simply uses 'strsplit'
 # function to split the current consensus peak in X and append the name column

@@ -1,0 +1,163 @@
+---
+title: "04_profile_plots_heatmaps"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+
+```{r setup, include=FALSE}
+options(stringsAsFactors = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+library(ComplexHeatmap)
+library(circlize)
+
+source("../../util/plotting_functions.R")
+source("../../util/intersect_functions.R")
+source("../../util/_setup.R")
+```
+
+# TSS profile plots
+
+## Import the data we need
+
+We'll be using the consensus peaks we generated previously (MACS peak calls filtered to those that are overlapping across replicates) and the Gencode gene annotations. 
+
+```{r import}
+
+gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
+
+fl <- list.files("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus/", full.names = TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import)
+names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus//|_filtered_consensus_peaks.bed", "", fl)
+```
+
+
+## Step 1: Create promoter windows
+
+Here we're going to create a GRanges object that contains 6kb promoter windows for each gene in the Gencode annotation. First we'll need to filter the Gencode GRanges object to just the genes and then we can use the promoter function from GRanges that will allow us to specify how big of a window we want upstream and downstream of the TSS (you can have asymmetrical windows).
+
+```{r}
+# Recall: The gencode annotation contains an entry for each exon, transcript, etc.
+# Use table(gencode_gr$type) to see how many of each entry there are. 
+# We don't want to create a "promoter" window around each exon for example
+# which is why we need to filter to just the genes.
+genes <- gencode_gr[gencode_gr$type == "gene"]
+# This function is a convenience function built into GenomicRanges
+all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
+table(width(all_promoters_gr))
+```
+
+## Step 2: Transform peaks into a coverage object
+
+In order to calculate what the peak coverage across each promoter is we'll convert the peaks GRanges object which currently holds a range for each peak into a run-length encoded list where 0 represents the genomic coordinates where there is no peak present and 1 represents the locations where a peak is present. The reason for run length encoding is that storing this vector without this compression means that we would be storing a numeric value for each of the 3.2 billion base pairs. This would mean allocating a vector in memory that's ~180 GB -- instead with run-length encoding we're in the ~100 KB range. 
+
+```{r}
+# We can use any binding protein here (use names(consensus_peaks) to see the available DBPs)
+peak_coverage <- GenomicRanges::coverage(consensus_peaks[["POLR2A"]])
+```
+
+
+## Use this function to make separate plots for lncRNA and mRNA
+
+First we'll create separate objects for lncRNA promoters and mRNA promoters, then we'll supply each of these to the new function we just made.
+
+
+# This is to run all the DBPs promoter profile plots
+# However the output is in /rinnclass/data
+
+```{r}
+# Let's now run this for all off the DBPs and compile it into one data frame.
+# Let's first define an empty data.frame to which we can row_bind each new one created.
+metaplot_df <- data.frame(x = integer(), dens = numeric(), dbp = character())
+# Started run at 9:58 PM -- finished at 1am
+# SKIP ZNF382 -- only 19 peaks -- probably none overlap promoters
+# Number 391
+for(i in c(1:length(consensus_peaks))) {
+  print(names(consensus_peaks)[[i]])
+  tmp_df <- profile_tss(consensus_peaks[[i]], promoters_gr = all_promoters_gr)
+  tmp_df$dbp <- names(consensus_peaks)[[i]]
+  metaplot_df <- bind_rows(metaplot_df, tmp_df)
+}
+write_csv(metaplot_df, "metaplot_df.csv")
+table(names(consensus_peaks) %in% unique(metaplot_df$dbp))
+which(names(consensus_peaks) == "ZNF382")
+Sys.time()
+Sys.Date()
+```
+
+# Starting by reading in the output from above
+# Here we will cluster all the promter profiles
+
+```{r}
+# Let's filter out those peaks that don't pass the threshold, since
+# in particular here it will make a difference, since the 
+# average profile will be very lumpy for those DBPs with few peaks.
+passing_peaks <- names(consensus_peaks)
+
+# Let's cluster the metaplots df. First we need to turn it into a matrix.
+metaplot_df <- read_csv("/scratch/Shares/rinnclass/data/metaplot_df.csv") %>%
+  filter(dbp %in% passing_peaks)
+
+# Pivot wider into a matrix
+metaplot_matrix <- metaplot_df %>% 
+  pivot_wider(names_from = x, values_from = dens) %>%
+  column_to_rownames("dbp") %>%
+  as.matrix()
+
+# Z-Scale the rows
+mm_scaled <- t(scale(t(metaplot_matrix)))
+
+metaplot_hclust <- hclust(dist(mm_scaled), method = "complete")
+
+# Plot the dendrogram
+pdf("figures/tss_profile_dendrogram.pdf", height = 10, width = 27)
+par(cex=0.3)
+plot(metaplot_hclust)
+dev.off()
+
+```
+
+
+# Cluster all the promoter profiles
+```{r}
+# Cut the tree to make some clusters
+clusters <- cutree(metaplot_hclust, h = 0.01)
+
+# Let's make a heatmap now.
+col_fun <- colorRamp2(c(-3, 0, 3), c("#5980B3", "#ffffff", "#B9605D"))
+split <- data.frame(split = c(rep("-3kb",3000), rep("+3kb", 3000)))
+
+pdf("figures/tss_profile_heatmap.pdf", height = 35, width = 10)
+Heatmap(mm_scaled, cluster_columns = FALSE, col = col_fun, border = TRUE, 
+        show_column_names = FALSE,
+        use_raster = TRUE,
+        column_split = split,
+        column_gap = unit(0, "mm"),row_names_gp = gpar(fontsize = 7))
+dev.off()
+
+
+
+par(cex = 1)
+# Let's plot some individual TSS profiles
+plot_tss_profile(metaplot_matrix, "H3K4me1", save_pdf = TRUE)
+plot_tss_profile(metaplot_matrix, "TCF12", save_pdf = TRUE)
+
+# Look at what the average profiles look like in each cluster.
+
+```
+
+
+# How to look at peaks on one promoter
+```{r}
+
+# Let's look at what's binding on Firre and where it's binding.
+firre_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "FIRRE"]
+firre_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
+plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = "FIRRE", save_pdf = TRUE)
+```
+
+
