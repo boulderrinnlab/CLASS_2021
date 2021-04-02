@@ -295,7 +295,7 @@ Sys.Date()
 passing_peaks <- names(consensus_peaks)[sapply(consensus_peaks, length) > 250]
 
 # Let's cluster the metaplots df. First we need to turn it into a matrix.
-metaplot_df <- read_csv("../../data/metaplot_df.csv") %>%
+metaplot_df <- read_csv("/scratch/Shares/rinnclass/data/metaplot_df.csv") %>%
   filter(dbp %in% passing_peaks)
 
 # Pivot wider into a matrix
@@ -316,16 +316,21 @@ plot(metaplot_hclust)
 dev.off()
 
 # Cut the tree to make some clusters
-clusters <- cutree(metaplot_hclust, h = 0.01)
+clusters <- cutree(metaplot_hclust, h = 75.0)
+table(clusters)
 
+clus1 <- mm_scaled[clusters == 2,]
+dim(clus1)
 # Let's make a heatmap now.
 col_fun <- colorRamp2(c(-3, 0, 3), c("#5980B3", "#ffffff", "#B9605D"))
 split <- data.frame(split = c(rep("-3kb",3000), rep("+3kb", 3000)))
 
-pdf("figures/tss_profile_heatmap.pdf", height = 35, width = 10)
+?Heatmap
+pdf("figures/tss_profile_heatmap_25.pdf", height = 35, width = 10)
 Heatmap(mm_scaled, cluster_columns = FALSE, col = col_fun, border = TRUE, 
         show_column_names = FALSE,
         use_raster = TRUE,
+        row_split = 25,
         column_split = split,
         column_gap = unit(0, "mm"),row_names_gp = gpar(fontsize = 7))
 dev.off()

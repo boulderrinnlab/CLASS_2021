@@ -493,11 +493,14 @@ make_promoter_binding_matrix <- function(peak_list, promoter) {
     seqlevels(promoter_peaks[[i]]) <- as.character(seqnames(promoter))
   }
   
+  
+
+  
   # Get the Rle coverage values for the promoter
-  promoter_coverage <- lapply(promoter_peaks, extract_peak_view, promoter)
+  promoter_coverage <- lapply(promoter_peaks, coverage)
   
   # Change promoter to a GRangesList
-  promoter <- GRangesList(promoter)
+  promoter <- GRangesList(promoter) 
   
   promoter_peak_view <- lapply(promoter_coverage, extract_peak_view, promoter)
   
@@ -510,9 +513,9 @@ make_promoter_binding_matrix <- function(peak_list, promoter) {
  return(promoter_peak_matrix) 
 }
 
-
 extract_peak_view <- function(peaks, promoter) {
-  
+
+
   peak_view <- Views(peaks, promoter)
   peak_view <- lapply(peak_view, function(x) t(viewApply(x, as.vector)))
   

@@ -41,7 +41,7 @@ num_peaks_threshold <- 250
 
 filtered_consensus_peaks <- consensus_peaks[sapply(consensus_peaks, length) > num_peaks_threshold]
 
-#Export consensus peaks
+#Export consensus readpeaks
 for(i in 1:length(filtered_consensus_peaks)) {
   rtracklayer::export(filtered_consensus_peaks[[i]], 
                       paste0("/scratch/Shares/rinnclass/Chelsea/analysis/results/chipseq/filtered_consensus/", 
