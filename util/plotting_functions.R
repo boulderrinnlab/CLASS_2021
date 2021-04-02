@@ -216,7 +216,7 @@ plotRanges <- function(x, xlim = x, main = deparse(substitute(x)),  col = "black
 
 
 plot_promoter_peak_matrix <- function(promoter_peak_matrix, gene_name, save_pdf = FALSE, show = TRUE,
-                                      save_dir = "figures/") {
+                                      save_dir = "figures") {
   # Set the colors for the binary heatmap
   colors <- structure(c("#ffffff","#a8404c"), names = c("0", "1"))
   split <- data.frame(split = c(rep("-3kb",3000), rep("+3kb", 3000)))
