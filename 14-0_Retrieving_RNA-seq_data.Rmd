@@ -31,9 +31,9 @@ wget -O files.txt "https://www.encodeproject.org/batch_download/?type=Experiment
 # Now cd to the rnaseq/fastq directory 
 # If the fastq directory doesn't exist, let's create it.
 # You can either use the terminal and mkdir or create the directory in R.
-if(!dir.exists("rnaseq/fastq")) dir.create("rnaseq/fastq")
+# if(!dir.exists("rnaseq/fastq")) dir.create("rnaseq/fastq")
 # Download the fastq files -- ~50 GB
-xargs -L 1 curl -O -J -L < files.txt
+# xargs -L 1 curl -O -J -L < files.txt
 ```
 
 Let's look at this table in the RStudio viewer. You can see that there are a number of columns that we don't need and a number of empty columns. 
