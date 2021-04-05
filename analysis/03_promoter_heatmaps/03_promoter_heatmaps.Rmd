@@ -36,8 +36,25 @@ all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
 ```{r}
 # Let's look at what's binding on Firre and where it's binding.
 firre_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "FIRRE"]
+
 firre_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
+
 plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = "FIRRE", save_pdf = TRUE)
+
+# other promoters- 
+# = 10: TCHH, COL24A1, TEX35, C1QA
+# > HECTD1, UCKL1, CELSR3, STX16, HIST1H1E, HIST1H2BD
+# STX16-NPEPL1
+
+i <-"STX16-NPEPL1"
+
+firre_promoter <- all_promoters_gr[all_promoters_gr$gene_name == i]
+
+firre_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
+
+plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = i, save_pdf = TRUE)
+
+
 
 ```
 

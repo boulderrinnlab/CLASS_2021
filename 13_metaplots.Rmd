@@ -14,9 +14,9 @@ library(tidyverse)
 library(ComplexHeatmap)
 library(circlize)
 
-source("util/plotting_functions.R")
-source("util/intersect_functions.R")
-source("util/_setup.R")
+source("/scratch/Shares/rinnclass/Nina/CLASS_2021/util/plotting_functions.R")
+source("/scratch/Shares/rinnclass/Nina/CLASS_2021/util/intersect_functions.R")
+source("/scratch/Shares/rinnclass/Nina/CLASS_2021/util/_setup.R")
 ```
 
 # TSS profile plots
@@ -279,7 +279,7 @@ Sys.Date()
 passing_peaks <- names(consensus_peaks)[sapply(consensus_peaks, length) > 250]
 
 # Let's cluster the metaplots df. First we need to turn it into a matrix.
-metaplot_df <- read_csv("../../data/metaplot_df.csv") %>%
+metaplot_df <- read_csv("/scratch/Shares/rinnclass/data/metaplot_df.csv") %>%
   filter(dbp %in% passing_peaks)
 
 # Pivot wider into a matrix
@@ -287,33 +287,39 @@ metaplot_matrix <- metaplot_df %>%
   pivot_wider(names_from = x, values_from = dens) %>%
   column_to_rownames("dbp") %>%
   as.matrix()
+dim(metaplot_matrix)
 
 # Z-Scale the rows
 mm_scaled <- t(scale(t(metaplot_matrix)))
 
+
 metaplot_hclust <- hclust(dist(mm_scaled), method = "complete")
 
 # Plot the dendrogram
-pdf("figures/tss_profile_dendrogram.pdf", height = 10, width = 27)
+pdf("/scratch/Shares/rinnclass/Nina/CLASS_2021/figures/tss_profile_dendrogram.pdf", height = 10, width = 27)
 par(cex=0.3)
 plot(metaplot_hclust)
 dev.off()
 
 # Cut the tree to make some clusters
-clusters <- cutree(metaplot_hclust, h = 0.01)
+clusters <- cutree(metaplot_hclust, h = 1) # cut at dendogram; smaller high more clusters, 
+table(clusters)
+
+clust2 <- mm_scaled[clusters ==2,]
+dim(clust2)
 
 # Let's make a heatmap now.
 col_fun <- colorRamp2(c(-3, 0, 3), c("#5980B3", "#ffffff", "#B9605D"))
 split <- data.frame(split = c(rep("-3kb",3000), rep("+3kb", 3000)))
 
-pdf("figures/tss_profile_heatmap.pdf", height = 35, width = 10)
+pdf("/scratch/Shares/rinnclass/Nina/CLASS_2021/figures/tss_profile_heatmap_16.pdf", height = 35, width = 10)
 Heatmap(mm_scaled, cluster_columns = FALSE, col = col_fun, border = TRUE, 
         show_column_names = FALSE,
         use_raster = TRUE,
+        row_split = 5,
         column_split = split,
         column_gap = unit(0, "mm"),row_names_gp = gpar(fontsize = 7))
 dev.off()
-
 
 
 par(cex = 1)
