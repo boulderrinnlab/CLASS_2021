@@ -33,6 +33,7 @@ all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
 
 ```{r}
 # Let's look at what's binding on Firre and where it's binding.
+<<<<<<< HEAD
 
 i <- "APAF1"
 
@@ -40,5 +41,10 @@ promoter_of_interest <- all_promoters_gr[all_promoters_gr$gene_name == i]
 interesting_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, promoter_of_interest)
 plot_promoter_peak_matrix(interesting_promoter_matrix, gene_name = i, save_pdf = TRUE)
 
+=======
+firre_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "FIRRE"]
+firre_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
+plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = "FIRRE", save_pdf = TRUE)
+>>>>>>> origin/in_class
 ```
 
