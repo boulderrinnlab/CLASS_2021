@@ -291,7 +291,7 @@ Finally, we can write out a nicely formatted sample sheet that we will use downs
 ```{r}
 # Let's create the sample sheet that we will use later
 # to do the RNA-seq analysis in R.
-samplesheet <- samples %>%
+samples <- samples %>%
   dplyr::rename(fastq = fastq_file,
                 seq_type = Assay.title,
                 sample_name = Biosample.summary) %>%
@@ -342,14 +342,23 @@ design <- samplesheet %>%
   # We also need to add the proper file path
   mutate(group = gsub(" ", "_", sample_name) %>% tolower(),
          strandedness = "reverse",
-         fastq_1 = paste0("fastq/", fastq_1),
-         fastq_2 = paste0("fastq/", fastq_2)) %>%
+         fastq_1 = paste0("/scratch/Shares/rinnclass/data/rnaseq_fastq/", fastq_1),
+         fastq_2 = paste0("/scratch/Shares/rinnclass/data/rnaseq_fastq/", fastq_2)) %>%
   # We have the replicate number already, but it's just a part of the sample id
   # We can use the separate function (opposite of unite) to retrieve it.
   separate(sample_id, into = c("experiment_accession", "replicate"), sep = "_", remove = FALSE) %>%
   mutate(replicate = gsub("rep", "", replicate)) %>%
   # Now we gather just the columns we need
   dplyr::select(group, replicate, fastq_1, fastq_2, strandedness)
+
+design <- design %>%
+  mutate(group = gsub("_r1", "", group),
+         group = gsub("_r2", "", group))
+
+#Put the replicates in the correct order
+design <- design %>%
+  arrange(group, replicate)
+
 # Now we can write this out for input into nextflow
 write_csv(design, "rnaseq/design.csv")
 ```
