@@ -12,6 +12,7 @@
 
 pwd; hostname; date
 echo "Here we go You've requested $SLURM_CPUS_ON_NODE core."
+
 module load singularity/3.1.1
 
 nextflow run nf-core/rnaseq -r 3.0 \
@@ -19,8 +20,13 @@ nextflow run nf-core/rnaseq -r 3.0 \
 -profile singularity \
 --input design.csv \
 --aligner star_salmon \
+<<<<<<< HEAD
 --fasta /scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa \
 --gtf /scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf \
+=======
+--fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
+--gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
+>>>>>>> origin/in_class
 --gencode \
 --email chelsea.toner@colorado.edu \
 -c nextflow.config
