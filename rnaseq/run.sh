@@ -20,8 +20,8 @@ nextflow run nf-core/rnaseq -r 3.0 \
 -profile singularity \
 --input design.csv \
 --aligner star_salmon \
---fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
---gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
+--fasta /scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa \
+--gtf /scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf \
 --gencode \
 --email kawa3071@colorado.edu \
 -c nextflow.config
