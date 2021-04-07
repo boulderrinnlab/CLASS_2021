@@ -1,0 +1,62 @@
+Apr-05 15:14:54.090 [main] DEBUG nextflow.cli.Launcher - $> nextflow run nf-core/rnaseq -r 3.0 -resume -profile singularity --input design.csv --aligner star_salmon --fasta /scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa --gtf /scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf --gencode --email olivia.luyties@colorado.edu -c nextflow.config
+Apr-05 15:14:54.487 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 21.02.0-edge
+Apr-05 15:14:56.532 [main] DEBUG nextflow.scm.AssetManager - Git config: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/.git/config; branch: master; remote: origin; url: https://github.com/nf-core/rnaseq.git
+Apr-05 15:14:56.554 [main] DEBUG nextflow.scm.AssetManager - Git config: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/.git/config; branch: master; remote: origin; url: https://github.com/nf-core/rnaseq.git
+Apr-05 15:14:57.044 [main] INFO  nextflow.cli.CmdRun - Launching `nf-core/rnaseq` [festering_bhaskara] - revision: 3643a94411 [3.0]
+Apr-05 15:14:57.678 [main] DEBUG nextflow.config.ConfigBuilder - Found config base: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/nextflow.config
+Apr-05 15:14:57.681 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 15:14:57.689 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 15:14:57.690 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/nextflow.config
+Apr-05 15:14:57.691 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 15:14:57.694 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 15:14:57.713 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 15:14:58.473 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Apr-05 15:14:58.476 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Apr-05 15:14:58.500 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Apr-05 15:14:59.266 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 15:14:59.307 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 15:14:59.324 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [cfc_dev, ifb_core, denbi_qbic, bi, genotoul, bigpurple, uppmax, abims, imperial_mb, oist, docker, gis, utd_ganymede, mpcdf, conda, singularity, icr_davros, munin, prince, podman, test_sra, czbiohub_aws, hebbe, jax, cfc, uzh, ccga_med, debug, test, genouest, cbe, ebc, ccga_dx, crick, google, kraken, phoenix, seg_globe, shh, awsbatch, pasteur, uct_hpc, imperial, test_full, binac, eddie]
+Apr-05 15:14:59.380 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; plugins-dir=/Users/ollu7590/.nextflow/plugins
+Apr-05 15:14:59.384 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Apr-05 15:14:59.386 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins local root: .nextflow/plr/empty
+Apr-05 15:14:59.393 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Apr-05 15:14:59.394 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Apr-05 15:14:59.399 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Apr-05 15:14:59.416 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Apr-05 15:14:59.649 [main] DEBUG nextflow.Session - Session uuid: 61c2f38e-ad9c-491f-8130-c247080c3cc5
+Apr-05 15:14:59.652 [main] DEBUG nextflow.Session - Run name: festering_bhaskara
+Apr-05 15:14:59.654 [main] DEBUG nextflow.Session - Executor pool size: 64
+Apr-05 15:14:59.671 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 21.02.0-edge build 5516
+  Created: 01-02-2021 15:34 UTC (08:34 MDT)
+  System: Linux 3.10.0-1127.19.1.el7.x86_64
+  Runtime: Groovy 3.0.7 on OpenJDK 64-Bit Server VM 1.8.0_131-b12
+  Encoding: UTF-8 (UTF-8)
+  Process: 3328@fijinode-40 [10.224.32.60]
+  CPUs: 64 - Mem: 503.7 GB (403.8 GB) - Swap: 32 GB (32 GB)
+Apr-05 15:14:59.866 [main] DEBUG nextflow.Session - Work-dir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work [fhgfs]
+Apr-05 15:14:59.897 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Apr-05 15:14:59.913 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Apr-05 15:15:00.122 [main] ERROR nextflow.cli.Launcher - Unable to acquire lock on session with ID 61c2f38e-ad9c-491f-8130-c247080c3cc5
+
+Common reasons of this error are:
+ - You are trying to resume the execution of an already running pipeline
+ - A previous execution was abruptly interrupted leaving the session open
+
+You can check what process is holding the lock file by using the following command:
+ - lsof /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/.nextflow/cache/61c2f38e-ad9c-491f-8130-c247080c3cc5/db/LOCK
+java.io.IOException: Unable to acquire lock on session with ID 61c2f38e-ad9c-491f-8130-c247080c3cc5
+
+Common reasons of this error are:
+ - You are trying to resume the execution of an already running pipeline
+ - A previous execution was abruptly interrupted leaving the session open
+
+You can check what process is holding the lock file by using the following command:
+ - lsof /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/.nextflow/cache/61c2f38e-ad9c-491f-8130-c247080c3cc5/db/LOCK
+	at nextflow.CacheDB.openDb(CacheDB.groovy:110)
+	at nextflow.CacheDB.open(CacheDB.groovy:129)
+	at nextflow.Session.init(Session.groovy:373)
+	at nextflow.script.ScriptRunner.execute(ScriptRunner.groovy:112)
+	at nextflow.cli.CmdRun.run(CmdRun.groovy:297)
+	at nextflow.cli.Launcher.run(Launcher.groovy:475)
+	at nextflow.cli.Launcher.main(Launcher.groovy:657)

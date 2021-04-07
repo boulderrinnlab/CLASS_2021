@@ -1,0 +1,11 @@
+group,replicate,fastq_1,fastq_2,strandedness
+hepg2,1,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR181ZGR_rep1_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR181ZGR_rep1_read2.fastq.gz,reverse
+hepg2,2,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR181ZGR_rep2_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR181ZGR_rep2_read2.fastq.gz,reverse
+hepg2_cytosolic_fraction,1,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR862HPO_rep1_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR862HPO_rep1_read2.fastq.gz,reverse
+hepg2_cytosolic_fraction,2,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR862HPO_rep2_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR862HPO_rep2_read2.fastq.gz,reverse
+hepg2_insoluble_cytoplasmic_fraction,1,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR813BDU_rep1_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR813BDU_rep1_read2.fastq.gz,reverse
+hepg2_insoluble_cytoplasmic_fraction,2,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR813BDU_rep2_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR813BDU_rep2_read2.fastq.gz,reverse
+hepg2_membrane_fraction,1,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR887ZSY_rep1_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR887ZSY_rep1_read2.fastq.gz,reverse
+hepg2_membrane_fraction,2,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR887ZSY_rep2_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR887ZSY_rep2_read2.fastq.gz,reverse
+hepg2_nuclear_fraction,1,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR061SFU_rep1_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR061SFU_rep1_read2.fastq.gz,reverse
+hepg2_nuclear_fraction,2,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR061SFU_rep2_read1.fastq.gz,/scratch/Shares/rinnclass/data/rnaseq_fastq/ENCSR061SFU_rep2_read2.fastq.gz,reverse

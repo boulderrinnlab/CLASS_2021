@@ -1,0 +1,349 @@
+Apr-05 14:59:12.373 [main] DEBUG nextflow.cli.Launcher - $> nextflow run nf-core/rnaseq -r 3.0 -resume -profile singularity --input design.csv --aligner star_salmon --fasta /scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa --gtf /scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf --gencode --email olivia.luyties@colorado.edu -c nextflow.config
+Apr-05 14:59:12.880 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 21.02.0-edge
+Apr-05 14:59:14.522 [main] DEBUG nextflow.scm.AssetManager - Git config: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/.git/config; branch: master; remote: origin; url: https://github.com/nf-core/rnaseq.git
+Apr-05 14:59:14.549 [main] DEBUG nextflow.scm.AssetManager - Git config: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/.git/config; branch: master; remote: origin; url: https://github.com/nf-core/rnaseq.git
+Apr-05 14:59:15.380 [main] INFO  nextflow.cli.CmdRun - Launching `nf-core/rnaseq` [wise_bardeen] - revision: 3643a94411 [3.0]
+Apr-05 14:59:15.973 [main] DEBUG nextflow.config.ConfigBuilder - Found config base: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/nextflow.config
+Apr-05 14:59:15.977 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 14:59:15.985 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 14:59:15.986 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/nextflow.config
+Apr-05 14:59:15.988 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 14:59:15.990 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 14:59:16.016 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 14:59:16.820 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Apr-05 14:59:16.822 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Apr-05 14:59:16.829 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Apr-05 14:59:17.607 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 14:59:17.645 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 14:59:17.660 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [cfc_dev, ifb_core, denbi_qbic, bi, genotoul, bigpurple, uppmax, abims, imperial_mb, oist, docker, gis, utd_ganymede, mpcdf, conda, singularity, icr_davros, munin, prince, podman, test_sra, czbiohub_aws, hebbe, jax, cfc, uzh, ccga_med, debug, test, genouest, cbe, ebc, ccga_dx, crick, google, kraken, phoenix, seg_globe, shh, awsbatch, pasteur, uct_hpc, imperial, test_full, binac, eddie]
+Apr-05 14:59:17.706 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; plugins-dir=/Users/ollu7590/.nextflow/plugins
+Apr-05 14:59:17.709 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Apr-05 14:59:17.710 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins local root: .nextflow/plr/empty
+Apr-05 14:59:17.718 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Apr-05 14:59:17.720 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Apr-05 14:59:17.724 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Apr-05 14:59:17.738 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Apr-05 14:59:18.046 [main] DEBUG nextflow.Session - Session uuid: 61c2f38e-ad9c-491f-8130-c247080c3cc5
+Apr-05 14:59:18.048 [main] DEBUG nextflow.Session - Run name: wise_bardeen
+Apr-05 14:59:18.051 [main] DEBUG nextflow.Session - Executor pool size: 64
+Apr-05 14:59:18.076 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 21.02.0-edge build 5516
+  Created: 01-02-2021 15:34 UTC (08:34 MDT)
+  System: Linux 3.10.0-1127.19.1.el7.x86_64
+  Runtime: Groovy 3.0.7 on OpenJDK 64-Bit Server VM 1.8.0_131-b12
+  Encoding: UTF-8 (UTF-8)
+  Process: 60669@fijinode-58 [10.224.32.78]
+  CPUs: 64 - Mem: 503.7 GB (482.3 GB) - Swap: 32 GB (32 GB)
+Apr-05 14:59:18.284 [main] DEBUG nextflow.Session - Work-dir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work [fhgfs]
+Apr-05 14:59:18.323 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Apr-05 14:59:18.345 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Apr-05 14:59:24.167 [main] DEBUG nextflow.Session - Session start invoked
+Apr-05 14:59:24.177 [main] DEBUG nextflow.trace.TraceFileObserver - Flow starting -- trace file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/results/pipeline_info/execution_trace.txt
+Apr-05 14:59:24.229 [main] DEBUG nextflow.Session - Using default localLib path: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/lib
+Apr-05 14:59:24.240 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/lib
+Apr-05 14:59:25.551 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Apr-05 14:59:25.663 [main] INFO  nextflow.Nextflow - 
+
+-[2m----------------------------------------------------[0m-
+                                        [0;32m,--.[0;30m/[0;32m,-.[0m
+[0;34m        ___     __   __   __   ___     [0;32m/,-._.--~'[0m
+[0;34m  |\ | |__  __ /  ` /  \ |__) |__         [0;33m}  {[0m
+[0;34m  | \| |       \__, \__/ |  \ |___     [0;32m\`-._,-`-,[0m
+                                        [0;32m`._,._,'[0m
+[0;35m  nf-core/rnaseq v3.0[0m
+-[2m----------------------------------------------------[0m-
+
+Core Nextflow options
+    [1mrevision       : [1m3.0
+    [1mrunName        : [1mwise_bardeen
+    [1mcontainerEngine: [1msingularity
+    [1mlaunchDir      : [1m/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq
+    [1mworkDir        : [1m/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work
+    [1mprojectDir     : [1m/Users/ollu7590/.nextflow/assets/nf-core/rnaseq
+    [1muserName       : [1mollu7590
+    [1mprofile        : [1msingularity
+    [1mconfigFiles    : [1m/Users/ollu7590/.nextflow/assets/nf-core/rnaseq/nextflow.config, /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config, /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+
+Input/output options
+    [1minput          : [1mdesign.csv
+    [1memail          : [1molivia.luyties@colorado.edu
+
+Reference genome options
+    [1mfasta          : [1m/scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa
+    [1mgtf            : [1m/scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf
+    [1mgencode        : [1mtrue
+
+-[2m----------------------------------------------------[0m-
+
+If you use nf-core/rnaseq for your analysis please cite:
+
+* The pipeline
+  https://doi.org/10.5281/zenodo.1400710
+
+* The nf-core framework
+  https://dx.doi.org/10.1038/s41587-020-0439-x
+  https://rdcu.be/b1GjZ
+
+* Software dependencies
+  https://github.com/nf-core/rnaseq/blob/master/CITATIONS.md
+
+-[2m----------------------------------------------------[0m-
+Apr-05 14:59:25.799 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: 
+Apr-05 14:59:52.544 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches label `process_low` for process with name RNASEQ:PREPARE_GENOME:GTF2BED
+Apr-05 14:59:52.567 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:52.569 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:52.583 [main] DEBUG nextflow.executor.Executor - [warm up] executor > slurm
+Apr-05 14:59:52.600 [main] DEBUG n.processor.TaskPollingMonitor - Creating task monitor for executor 'slurm' > capacity: 100; pollInterval: 5s; dumpInterval: 5m 
+Apr-05 14:59:52.607 [main] DEBUG n.executor.AbstractGridExecutor - Creating executor 'slurm' > queue-stat-interval: 1m
+Apr-05 14:59:52.766 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:52.768 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:52.781 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches label `process_high` for process with name RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS
+Apr-05 14:59:52.785 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:52.787 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:52.799 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:52.800 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:52.817 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches label `process_high` for process with name RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE
+Apr-05 14:59:52.819 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:52.821 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:52.881 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:52.882 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:52.980 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:52.981 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:52.999 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:FASTQC_UMITOOLS_TRIMGALORE:FASTQC
+Apr-05 14:59:53.001 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.002 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.020 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches label `process_high` for process with name RNASEQ:FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE
+Apr-05 14:59:53.024 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.025 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.099 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches label `process_high` for process with name RNASEQ:ALIGN_STAR:STAR_ALIGN
+Apr-05 14:59:53.104 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.107 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.123 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:SAMTOOLS_SORT
+Apr-05 14:59:53.126 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.127 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.141 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.142 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.169 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.171 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.178 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.179 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.189 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.190 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.214 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_QUANT
+Apr-05 14:59:53.218 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.219 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.243 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches label `process_low` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_TX2GENE
+Apr-05 14:59:53.245 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.247 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.260 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_TXIMPORT
+Apr-05 14:59:53.264 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.265 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.297 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_MERGE_COUNTS
+Apr-05 14:59:53.300 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.303 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.320 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE
+Apr-05 14:59:53.322 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.323 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.332 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE_LENGTH_SCALED
+Apr-05 14:59:53.335 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.336 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.345 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE_SCALED
+Apr-05 14:59:53.347 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.348 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.357 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_TRANSCRIPT
+Apr-05 14:59:53.359 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.360 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.382 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:DESEQ2_QC_STAR_SALMON
+Apr-05 14:59:53.386 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.387 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.443 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.445 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.456 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:PRESEQ_LCEXTRAP
+Apr-05 14:59:53.458 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:error_ignore` matches label `error_ignore` for process with name RNASEQ:PRESEQ_LCEXTRAP
+Apr-05 14:59:53.461 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.462 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.480 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:MARK_DUPLICATES_PICARD:PICARD_MARKDUPLICATES
+Apr-05 14:59:53.482 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.484 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.496 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.497 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.511 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.513 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.522 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.523 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.532 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.533 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.547 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:STRINGTIE
+Apr-05 14:59:53.549 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.551 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.582 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:SUBREAD_FEATURECOUNTS
+Apr-05 14:59:53.585 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.586 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.599 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.600 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.608 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:BEDTOOLS_GENOMECOV
+Apr-05 14:59:53.610 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.611 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.625 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:UCSC_BEDCLIP
+Apr-05 14:59:53.628 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.629 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.638 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:UCSC_BEDGRAPHTOBIGWIG
+Apr-05 14:59:53.841 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.842 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.858 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUALIMAP_RNASEQ
+Apr-05 14:59:53.860 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.861 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.870 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_long` matches label `process_long` for process with name RNASEQ:DUPRADAR
+Apr-05 14:59:53.872 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.873 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.883 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_BAMSTAT
+Apr-05 14:59:53.884 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.885 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.897 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_INNERDISTANCE
+Apr-05 14:59:53.901 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.902 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.914 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_INFEREXPERIMENT
+Apr-05 14:59:53.916 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.917 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.927 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_JUNCTIONANNOTATION
+Apr-05 14:59:53.929 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.930 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.940 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_JUNCTIONSATURATION
+Apr-05 14:59:53.942 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.943 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.955 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_READDISTRIBUTION
+Apr-05 14:59:53.957 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.958 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:53.978 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_READDUPLICATION
+Apr-05 14:59:53.982 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:53.983 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:54.007 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:54.008 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:54.021 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:54.022 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:54.732 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:MULTIQC
+Apr-05 14:59:54.735 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 14:59:54.736 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 14:59:54.768 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.771 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.772 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.773 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.775 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.776 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.777 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.779 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.780 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.781 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 14:59:54.782 [main] DEBUG nextflow.Session - Ignite dataflow network (121)
+Apr-05 14:59:54.785 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:GTF2BED
+Apr-05 14:59:54.802 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER
+Apr-05 14:59:54.803 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS
+Apr-05 14:59:54.805 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES
+Apr-05 14:59:54.806 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE
+Apr-05 14:59:54.807 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK
+Apr-05 14:59:54.810 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:CAT_FASTQ
+Apr-05 14:59:54.811 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:FASTQC_UMITOOLS_TRIMGALORE:FASTQC
+Apr-05 14:59:54.812 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE
+Apr-05 14:59:54.813 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:STAR_ALIGN
+Apr-05 14:59:54.815 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:SAMTOOLS_SORT
+Apr-05 14:59:54.820 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:SAMTOOLS_INDEX
+Apr-05 14:59:54.821 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:BAM_STATS_SAMTOOLS:SAMTOOLS_STATS
+Apr-05 14:59:54.822 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:BAM_STATS_SAMTOOLS:SAMTOOLS_FLAGSTAT
+Apr-05 14:59:54.824 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:BAM_STATS_SAMTOOLS:SAMTOOLS_IDXSTATS
+Apr-05 14:59:54.830 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_QUANT
+Apr-05 14:59:54.831 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_TX2GENE
+Apr-05 14:59:54.833 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_TXIMPORT
+Apr-05 14:59:54.835 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_MERGE_COUNTS
+Apr-05 14:59:54.837 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE
+Apr-05 14:59:54.853 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE_LENGTH_SCALED
+Apr-05 14:59:54.855 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE_SCALED
+Apr-05 14:59:54.856 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_TRANSCRIPT
+Apr-05 14:59:54.857 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:DESEQ2_QC_STAR_SALMON
+Apr-05 14:59:54.858 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MULTIQC_CUSTOM_FAIL_MAPPED
+Apr-05 14:59:54.862 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PRESEQ_LCEXTRAP
+Apr-05 14:59:54.863 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:PICARD_MARKDUPLICATES
+Apr-05 14:59:54.864 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:SAMTOOLS_INDEX
+Apr-05 14:59:54.865 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:BAM_STATS_SAMTOOLS:SAMTOOLS_STATS
+Apr-05 14:59:54.867 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:BAM_STATS_SAMTOOLS:SAMTOOLS_FLAGSTAT
+Apr-05 14:59:54.868 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:BAM_STATS_SAMTOOLS:SAMTOOLS_IDXSTATS
+Apr-05 14:59:54.869 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:STRINGTIE
+Apr-05 14:59:54.870 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:SUBREAD_FEATURECOUNTS
+Apr-05 14:59:54.878 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MULTIQC_CUSTOM_BIOTYPE
+Apr-05 14:59:54.880 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:BEDTOOLS_GENOMECOV
+Apr-05 14:59:54.882 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:UCSC_BEDCLIP
+Apr-05 14:59:54.883 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:UCSC_BEDGRAPHTOBIGWIG
+Apr-05 14:59:54.884 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUALIMAP_RNASEQ
+Apr-05 14:59:54.886 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:DUPRADAR
+Apr-05 14:59:54.888 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_BAMSTAT
+Apr-05 14:59:54.891 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_INNERDISTANCE
+Apr-05 14:59:54.893 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_INFEREXPERIMENT
+Apr-05 14:59:54.894 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_JUNCTIONANNOTATION
+Apr-05 14:59:54.895 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_JUNCTIONSATURATION
+Apr-05 14:59:54.896 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_READDISTRIBUTION
+Apr-05 14:59:54.897 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_READDUPLICATION
+Apr-05 14:59:54.899 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MULTIQC_CUSTOM_STRAND_CHECK
+Apr-05 14:59:54.900 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:GET_SOFTWARE_VERSIONS
+Apr-05 14:59:54.905 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MULTIQC
+Apr-05 14:59:54.907 [main] DEBUG nextflow.script.ScriptRunner - > Await termination 
+Apr-05 14:59:54.908 [main] DEBUG nextflow.Session - Session await
+Apr-05 14:59:55.023 [Actor Thread 21] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/python:3.8.3; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-python-3.8.3.img
+Apr-05 14:59:55.024 [Actor Thread 18] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/samtools:1.10--h9402c20_2; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-samtools-1.10--h9402c20_2.img
+Apr-05 14:59:55.024 [Actor Thread 20] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/star:2.6.1d--0; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-star-2.6.1d--0.img
+Apr-05 14:59:55.024 [Actor Thread 16] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/perl:5.26.2; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-perl-5.26.2.img
+Apr-05 14:59:55.260 [Actor Thread 19] DEBUG nextflow.sort.BigSort - Sort completed -- entries: 1; slices: 1; internal sort time: 0.003 s; external sort time: 0.004 s; total time: 0.007 s
+Apr-05 14:59:55.262 [Actor Thread 19] DEBUG nextflow.file.FileCollector - >> temp file exists? false
+Apr-05 14:59:55.264 [Actor Thread 19] DEBUG nextflow.file.FileCollector - Missed collect-file cache -- cause: java.nio.file.NoSuchFileException: /tmp/e779b15f3ee56a2e745fcbfced810b96.collect-file
+Apr-05 14:59:55.291 [Actor Thread 11] INFO  nextflow.processor.TaskProcessor - [21/d1bf24] Cached process > RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)
+Apr-05 14:59:55.291 [Actor Thread 9] INFO  nextflow.processor.TaskProcessor - [f5/af27b8] Cached process > RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)
+Apr-05 14:59:55.329 [Actor Thread 10] INFO  nextflow.processor.TaskProcessor - [00/30e178] Cached process > RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)
+Apr-05 14:59:55.368 [Actor Thread 20] WARN  nextflow.container.SingularityCache - Singularity cache directory has not been defined -- Remote image will be stored in the path: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity -- Use env variable NXF_SINGULARITY_CACHEDIR to specify a different location
+Apr-05 14:59:55.373 [Actor Thread 20] INFO  nextflow.container.SingularityCache - Pulling Singularity image https://depot.galaxyproject.org/singularity/mulled-v2-cf0123ef83b3c38c13e3b0696a3f285d3f20f15b:606b713ec440e799d53a2b51a6e79dbfd28ecf3e-0 [cache /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-mulled-v2-cf0123ef83b3c38c13e3b0696a3f285d3f20f15b-606b713ec440e799d53a2b51a6e79dbfd28ecf3e-0.img]
+Apr-05 14:59:56.796 [Actor Thread 19] DEBUG nextflow.file.FileCollector - Saved collect-files list to: /tmp/e779b15f3ee56a2e745fcbfced810b96.collect-file
+Apr-05 14:59:56.840 [Actor Thread 19] DEBUG nextflow.file.FileCollector - Deleting file collector temp dir: /tmp/nxf-6432737158447295357
+Apr-05 14:59:57.494 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv) > jobId: 7353907; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/7d/39a44be61a2d21a8c3d44800cc4e73
+Apr-05 14:59:57.502 [Task submitter] INFO  nextflow.Session - [7d/39a44b] Submitted process > RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)
+Apr-05 14:59:58.647 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa) > jobId: 7353908; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/11/296ba2c050001e2e8cc3af7866db18
+Apr-05 14:59:58.649 [Task submitter] INFO  nextflow.Session - [11/296ba2] Submitted process > RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)
+Apr-05 15:00:02.638 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 7353907; id: 1; name: RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv); status: COMPLETED; exit: 1; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/7d/39a44be61a2d21a8c3d44800cc4e73 started: 1617656402623; exited: 2021-04-05T20:59:59Z; ]
+Apr-05 15:00:02.685 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)'
+
+Caused by:
+  Process `RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)` terminated with an error exit status (1)
+
+Command executed:
+
+  check_samplesheet.py design.csv samplesheet.valid.csv
+
+Command exit status:
+  1
+
+Command output:
+  ERROR: Please check samplesheet -> Replicate ids must start with 1..<num_replicates>!
+  Group: 'hepg2_cytosolic_fraction_r2'
+
+Command wrapper:
+  ERROR: Please check samplesheet -> Replicate ids must start with 1..<num_replicates>!
+  Group: 'hepg2_cytosolic_fraction_r2'
+
+Work dir:
+  /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/7d/39a44be61a2d21a8c3d44800cc4e73
+
+Tip: you can replicate the issue by changing to the process work dir and entering the command `bash .command.run`
+Apr-05 15:00:02.713 [Task monitor] INFO  nextflow.Session - Execution cancelled -- Finishing pending tasks before exit
+Apr-05 15:00:02.857 [main] DEBUG nextflow.Session - Session await > all process finished
+Apr-05 15:00:25.063 [Actor Thread 20] DEBUG nextflow.container.SingularityCache - Singularity pull complete image=https://depot.galaxyproject.org/singularity/mulled-v2-cf0123ef83b3c38c13e3b0696a3f285d3f20f15b:606b713ec440e799d53a2b51a6e79dbfd28ecf3e-0 path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-mulled-v2-cf0123ef83b3c38c13e3b0696a3f285d3f20f15b-606b713ec440e799d53a2b51a6e79dbfd28ecf3e-0.img
+Apr-05 15:04:57.629 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353908; id: 5; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/11/296ba2c050001e2e8cc3af7866db18 started: 1617656447621; exited: -; ]
+Apr-05 15:05:25.173 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor slurm > tasks in the submission queue: 1 -- tasks to be submitted are shown below
+~> TaskHandler[jobId: null; id: 6; name: RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa); status: NEW; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/85/6c77fd2eacc2f005fa12dcab967497 started: -; exited: -; ]
+Apr-05 15:09:57.643 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353908; id: 5; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/11/296ba2c050001e2e8cc3af7866db18 started: 1617656447621; exited: -; ]
+Apr-05 15:10:25.238 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor slurm > tasks in the submission queue: 1 -- tasks to be submitted are shown below
+~> TaskHandler[jobId: null; id: 6; name: RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa); status: NEW; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/85/6c77fd2eacc2f005fa12dcab967497 started: -; exited: -; ]
+Apr-05 15:14:57.660 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353908; id: 5; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/11/296ba2c050001e2e8cc3af7866db18 started: 1617656447621; exited: -; ]
+Apr-05 15:15:25.315 [Task submitter] DEBUG n.processor.TaskPollingMonitor - %% executor slurm > tasks in the submission queue: 1 -- tasks to be submitted are shown below
+~> TaskHandler[jobId: null; id: 6; name: RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa); status: NEW; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/85/6c77fd2eacc2f005fa12dcab967497 started: -; exited: -; ]
+Apr-05 15:16:17.674 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 7353908; id: 5; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: COMPLETED; exit: 143; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/11/296ba2c050001e2e8cc3af7866db18 started: 1617656447621; exited: 2021-04-05T21:16:15Z; ]
+Apr-05 15:16:17.692 [Task monitor] INFO  nextflow.processor.TaskProcessor - [11/296ba2] NOTE: Process `RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)` terminated with an error exit status (143) -- Execution is retried (1)
+Apr-05 15:16:21.921 [SIGTERM handler] DEBUG nextflow.Session - Session aborted -- Cause: SIGTERM

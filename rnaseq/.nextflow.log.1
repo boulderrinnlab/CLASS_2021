@@ -1,0 +1,385 @@
+Apr-05 15:16:37.128 [main] DEBUG nextflow.cli.Launcher - $> nextflow run nf-core/rnaseq -r 3.0 -resume -profile singularity --input design.csv --aligner star_salmon --fasta /scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa --gtf /scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf --gencode --email olivia.luyties@colorado.edu -c nextflow.config
+Apr-05 15:16:37.523 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 21.02.0-edge
+Apr-05 15:16:39.255 [main] DEBUG nextflow.scm.AssetManager - Git config: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/.git/config; branch: master; remote: origin; url: https://github.com/nf-core/rnaseq.git
+Apr-05 15:16:39.283 [main] DEBUG nextflow.scm.AssetManager - Git config: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/.git/config; branch: master; remote: origin; url: https://github.com/nf-core/rnaseq.git
+Apr-05 15:16:40.000 [main] INFO  nextflow.cli.CmdRun - Launching `nf-core/rnaseq` [cheeky_jones] - revision: 3643a94411 [3.0]
+Apr-05 15:16:40.552 [main] DEBUG nextflow.config.ConfigBuilder - Found config base: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/nextflow.config
+Apr-05 15:16:40.557 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 15:16:40.565 [main] DEBUG nextflow.config.ConfigBuilder - User config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 15:16:40.567 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/nextflow.config
+Apr-05 15:16:40.568 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 15:16:40.570 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+Apr-05 15:16:40.592 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 15:16:41.389 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Apr-05 15:16:41.392 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Apr-05 15:16:41.400 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Apr-05 15:16:41.988 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 15:16:42.021 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `singularity`
+Apr-05 15:16:42.040 [main] DEBUG nextflow.config.ConfigBuilder - Available config profiles: [cfc_dev, ifb_core, denbi_qbic, bi, genotoul, bigpurple, uppmax, abims, imperial_mb, oist, docker, gis, utd_ganymede, mpcdf, conda, singularity, icr_davros, munin, prince, podman, test_sra, czbiohub_aws, hebbe, jax, cfc, uzh, ccga_med, debug, test, genouest, cbe, ebc, ccga_dx, crick, google, kraken, phoenix, seg_globe, shh, awsbatch, pasteur, uct_hpc, imperial, test_full, binac, eddie]
+Apr-05 15:16:42.092 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; plugins-dir=/Users/ollu7590/.nextflow/plugins
+Apr-05 15:16:42.096 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Apr-05 15:16:42.098 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins local root: .nextflow/plr/empty
+Apr-05 15:16:42.105 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Apr-05 15:16:42.106 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Apr-05 15:16:42.111 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Apr-05 15:16:42.131 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Apr-05 15:16:42.319 [main] DEBUG nextflow.Session - Session uuid: 61c2f38e-ad9c-491f-8130-c247080c3cc5
+Apr-05 15:16:42.320 [main] DEBUG nextflow.Session - Run name: cheeky_jones
+Apr-05 15:16:42.323 [main] DEBUG nextflow.Session - Executor pool size: 64
+Apr-05 15:16:42.343 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 21.02.0-edge build 5516
+  Created: 01-02-2021 15:34 UTC (08:34 MDT)
+  System: Linux 3.10.0-1062.1.2.el7.x86_64
+  Runtime: Groovy 3.0.7 on OpenJDK 64-Bit Server VM 1.8.0_131-b12
+  Encoding: UTF-8 (UTF-8)
+  Process: 11217@fijinode-49 [10.224.32.69]
+  CPUs: 64 - Mem: 503.7 GB (429.4 GB) - Swap: 32 GB (32 GB)
+Apr-05 15:16:42.454 [main] DEBUG nextflow.Session - Work-dir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work [fhgfs]
+Apr-05 15:16:42.483 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Apr-05 15:16:42.500 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Apr-05 15:16:49.207 [main] DEBUG nextflow.Session - Session start invoked
+Apr-05 15:16:49.222 [main] DEBUG nextflow.trace.TraceFileObserver - Flow starting -- trace file: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/results/pipeline_info/execution_trace.txt
+Apr-05 15:16:49.283 [main] DEBUG nextflow.Session - Using default localLib path: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/lib
+Apr-05 15:16:49.291 [main] DEBUG nextflow.Session - Adding to the classpath library: /Users/ollu7590/.nextflow/assets/nf-core/rnaseq/lib
+Apr-05 15:16:50.261 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Apr-05 15:16:50.379 [main] INFO  nextflow.Nextflow - 
+
+-[2m----------------------------------------------------[0m-
+                                        [0;32m,--.[0;30m/[0;32m,-.[0m
+[0;34m        ___     __   __   __   ___     [0;32m/,-._.--~'[0m
+[0;34m  |\ | |__  __ /  ` /  \ |__) |__         [0;33m}  {[0m
+[0;34m  | \| |       \__, \__/ |  \ |___     [0;32m\`-._,-`-,[0m
+                                        [0;32m`._,._,'[0m
+[0;35m  nf-core/rnaseq v3.0[0m
+-[2m----------------------------------------------------[0m-
+
+Core Nextflow options
+    [1mrevision       : [1m3.0
+    [1mrunName        : [1mcheeky_jones
+    [1mcontainerEngine: [1msingularity
+    [1mlaunchDir      : [1m/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq
+    [1mworkDir        : [1m/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work
+    [1mprojectDir     : [1m/Users/ollu7590/.nextflow/assets/nf-core/rnaseq
+    [1muserName       : [1mollu7590
+    [1mprofile        : [1msingularity
+    [1mconfigFiles    : [1m/Users/ollu7590/.nextflow/assets/nf-core/rnaseq/nextflow.config, /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config, /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/nextflow.config
+
+Input/output options
+    [1minput          : [1mdesign.csv
+    [1memail          : [1molivia.luyties@colorado.edu
+
+Reference genome options
+    [1mfasta          : [1m/scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa
+    [1mgtf            : [1m/scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf
+    [1mgencode        : [1mtrue
+
+-[2m----------------------------------------------------[0m-
+
+If you use nf-core/rnaseq for your analysis please cite:
+
+* The pipeline
+  https://doi.org/10.5281/zenodo.1400710
+
+* The nf-core framework
+  https://dx.doi.org/10.1038/s41587-020-0439-x
+  https://rdcu.be/b1GjZ
+
+* Software dependencies
+  https://github.com/nf-core/rnaseq/blob/master/CITATIONS.md
+
+-[2m----------------------------------------------------[0m-
+Apr-05 15:16:50.698 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: 
+Apr-05 15:17:12.957 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches label `process_low` for process with name RNASEQ:PREPARE_GENOME:GTF2BED
+Apr-05 15:17:12.986 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:12.990 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.004 [main] DEBUG nextflow.executor.Executor - [warm up] executor > slurm
+Apr-05 15:17:13.015 [main] DEBUG n.processor.TaskPollingMonitor - Creating task monitor for executor 'slurm' > capacity: 100; pollInterval: 5s; dumpInterval: 5m 
+Apr-05 15:17:13.022 [main] DEBUG n.executor.AbstractGridExecutor - Creating executor 'slurm' > queue-stat-interval: 1m
+Apr-05 15:17:13.140 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.141 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.152 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches label `process_high` for process with name RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS
+Apr-05 15:17:13.156 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.157 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.167 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.168 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.180 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches label `process_high` for process with name RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE
+Apr-05 15:17:13.184 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.185 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.240 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.242 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.333 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.334 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.350 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:FASTQC_UMITOOLS_TRIMGALORE:FASTQC
+Apr-05 15:17:13.353 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.354 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.369 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches label `process_high` for process with name RNASEQ:FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE
+Apr-05 15:17:13.372 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.374 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.415 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_high` matches label `process_high` for process with name RNASEQ:ALIGN_STAR:STAR_ALIGN
+Apr-05 15:17:13.418 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.419 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.433 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:SAMTOOLS_SORT
+Apr-05 15:17:13.436 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.437 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.449 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.455 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.477 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.478 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.489 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.490 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.499 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.501 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.521 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_QUANT
+Apr-05 15:17:13.524 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.525 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.547 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_low` matches label `process_low` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_TX2GENE
+Apr-05 15:17:13.550 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.551 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.566 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_TXIMPORT
+Apr-05 15:17:13.569 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.570 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.589 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_MERGE_COUNTS
+Apr-05 15:17:13.591 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.592 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.601 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE
+Apr-05 15:17:13.604 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.605 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.610 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE_LENGTH_SCALED
+Apr-05 15:17:13.612 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.613 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.647 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE_SCALED
+Apr-05 15:17:13.649 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.650 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.657 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_TRANSCRIPT
+Apr-05 15:17:13.659 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.661 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.684 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:DESEQ2_QC_STAR_SALMON
+Apr-05 15:17:13.687 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.688 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.725 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.726 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.741 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:PRESEQ_LCEXTRAP
+Apr-05 15:17:13.742 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:error_ignore` matches label `error_ignore` for process with name RNASEQ:PRESEQ_LCEXTRAP
+Apr-05 15:17:13.746 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.747 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.761 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:MARK_DUPLICATES_PICARD:PICARD_MARKDUPLICATES
+Apr-05 15:17:13.763 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.765 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.773 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.774 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.784 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.785 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.794 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.795 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.808 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.810 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.825 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:STRINGTIE
+Apr-05 15:17:13.828 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.830 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.862 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:SUBREAD_FEATURECOUNTS
+Apr-05 15:17:13.864 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.866 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.881 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.883 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.891 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:BEDTOOLS_GENOMECOV
+Apr-05 15:17:13.893 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.895 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.907 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:UCSC_BEDCLIP
+Apr-05 15:17:13.909 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.910 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.918 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:UCSC_BEDGRAPHTOBIGWIG
+Apr-05 15:17:13.920 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.921 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.935 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:QUALIMAP_RNASEQ
+Apr-05 15:17:13.937 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.939 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.949 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_long` matches label `process_long` for process with name RNASEQ:DUPRADAR
+Apr-05 15:17:13.951 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.952 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.964 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_BAMSTAT
+Apr-05 15:17:13.966 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.968 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:13.987 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_INNERDISTANCE
+Apr-05 15:17:13.991 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:13.993 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.003 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_INFEREXPERIMENT
+Apr-05 15:17:14.005 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:14.006 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.022 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_JUNCTIONANNOTATION
+Apr-05 15:17:14.025 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:14.026 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.040 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_JUNCTIONSATURATION
+Apr-05 15:17:14.042 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:14.043 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.059 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_READDISTRIBUTION
+Apr-05 15:17:14.061 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:14.062 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.070 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:RSEQC:RSEQC_READDUPLICATION
+Apr-05 15:17:14.073 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:14.075 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.584 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:14.585 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.598 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:14.599 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.691 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withLabel:process_medium` matches label `process_medium` for process with name RNASEQ:MULTIQC
+Apr-05 15:17:14.693 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Apr-05 15:17:14.694 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Apr-05 15:17:14.716 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.719 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.720 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.721 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.723 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.725 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.726 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.727 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.728 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.729 [main] DEBUG nextflow.extension.CH - Bridging dataflow queue=DataflowQueue(queue=[])
+Apr-05 15:17:14.730 [main] DEBUG nextflow.Session - Ignite dataflow network (121)
+Apr-05 15:17:14.732 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:GTF2BED
+Apr-05 15:17:14.734 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER
+Apr-05 15:17:14.735 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS
+Apr-05 15:17:14.737 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES
+Apr-05 15:17:14.738 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE
+Apr-05 15:17:14.740 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK
+Apr-05 15:17:14.742 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:CAT_FASTQ
+Apr-05 15:17:14.744 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:FASTQC_UMITOOLS_TRIMGALORE:FASTQC
+Apr-05 15:17:14.745 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:FASTQC_UMITOOLS_TRIMGALORE:TRIMGALORE
+Apr-05 15:17:14.747 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:STAR_ALIGN
+Apr-05 15:17:14.748 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:SAMTOOLS_SORT
+Apr-05 15:17:14.749 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:SAMTOOLS_INDEX
+Apr-05 15:17:14.751 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:BAM_STATS_SAMTOOLS:SAMTOOLS_STATS
+Apr-05 15:17:14.752 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:BAM_STATS_SAMTOOLS:SAMTOOLS_FLAGSTAT
+Apr-05 15:17:14.754 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:ALIGN_STAR:BAM_SORT_SAMTOOLS:BAM_STATS_SAMTOOLS:SAMTOOLS_IDXSTATS
+Apr-05 15:17:14.756 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_QUANT
+Apr-05 15:17:14.757 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_TX2GENE
+Apr-05 15:17:14.759 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_TXIMPORT
+Apr-05 15:17:14.760 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_MERGE_COUNTS
+Apr-05 15:17:14.761 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE
+Apr-05 15:17:14.762 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE_LENGTH_SCALED
+Apr-05 15:17:14.763 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_GENE_SCALED
+Apr-05 15:17:14.764 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUANTIFY_STAR_SALMON:SALMON_SE_TRANSCRIPT
+Apr-05 15:17:14.765 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:DESEQ2_QC_STAR_SALMON
+Apr-05 15:17:14.767 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MULTIQC_CUSTOM_FAIL_MAPPED
+Apr-05 15:17:14.769 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:PRESEQ_LCEXTRAP
+Apr-05 15:17:14.770 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:PICARD_MARKDUPLICATES
+Apr-05 15:17:14.771 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:SAMTOOLS_INDEX
+Apr-05 15:17:14.772 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:BAM_STATS_SAMTOOLS:SAMTOOLS_STATS
+Apr-05 15:17:14.774 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:BAM_STATS_SAMTOOLS:SAMTOOLS_FLAGSTAT
+Apr-05 15:17:14.775 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MARK_DUPLICATES_PICARD:BAM_STATS_SAMTOOLS:SAMTOOLS_IDXSTATS
+Apr-05 15:17:14.776 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:STRINGTIE
+Apr-05 15:17:14.777 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:SUBREAD_FEATURECOUNTS
+Apr-05 15:17:14.779 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MULTIQC_CUSTOM_BIOTYPE
+Apr-05 15:17:14.780 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:BEDTOOLS_GENOMECOV
+Apr-05 15:17:14.785 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:UCSC_BEDCLIP
+Apr-05 15:17:14.787 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:UCSC_BEDGRAPHTOBIGWIG
+Apr-05 15:17:14.788 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:QUALIMAP_RNASEQ
+Apr-05 15:17:14.791 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:DUPRADAR
+Apr-05 15:17:14.891 [Actor Thread 18] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/samtools:1.10--h9402c20_2; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-samtools-1.10--h9402c20_2.img
+Apr-05 15:17:14.892 [Actor Thread 17] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/perl:5.26.2; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-perl-5.26.2.img
+Apr-05 15:17:14.892 [Actor Thread 19] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/star:2.6.1d--0; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-star-2.6.1d--0.img
+Apr-05 15:17:14.892 [Actor Thread 16] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/python:3.8.3; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-python-3.8.3.img
+Apr-05 15:17:14.995 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_BAMSTAT
+Apr-05 15:17:15.002 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_INNERDISTANCE
+Apr-05 15:17:15.003 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_INFEREXPERIMENT
+Apr-05 15:17:15.005 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_JUNCTIONANNOTATION
+Apr-05 15:17:15.006 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_JUNCTIONSATURATION
+Apr-05 15:17:15.007 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_READDISTRIBUTION
+Apr-05 15:17:15.009 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:RSEQC:RSEQC_READDUPLICATION
+Apr-05 15:17:15.010 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MULTIQC_CUSTOM_STRAND_CHECK
+Apr-05 15:17:15.012 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:GET_SOFTWARE_VERSIONS
+Apr-05 15:17:15.014 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > RNASEQ:MULTIQC
+Apr-05 15:17:15.015 [main] DEBUG nextflow.script.ScriptRunner - > Await termination 
+Apr-05 15:17:15.016 [main] DEBUG nextflow.Session - Session await
+Apr-05 15:17:15.258 [Actor Thread 20] DEBUG nextflow.sort.BigSort - Sort completed -- entries: 1; slices: 1; internal sort time: 0.001 s; external sort time: 0.002 s; total time: 0.003 s
+Apr-05 15:17:15.260 [Actor Thread 20] DEBUG nextflow.file.FileCollector - >> temp file exists? false
+Apr-05 15:17:15.262 [Actor Thread 20] DEBUG nextflow.file.FileCollector - Missed collect-file cache -- cause: java.nio.file.NoSuchFileException: /tmp/dc95b1aca35e669750a44f0b6c7f3fd9.collect-file
+Apr-05 15:17:15.263 [Actor Thread 7] INFO  nextflow.processor.TaskProcessor - [00/30e178] Cached process > RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)
+Apr-05 15:17:15.399 [Actor Thread 20] DEBUG nextflow.file.FileCollector - Saved collect-files list to: /tmp/dc95b1aca35e669750a44f0b6c7f3fd9.collect-file
+Apr-05 15:17:15.411 [Actor Thread 20] DEBUG nextflow.file.FileCollector - Deleting file collector temp dir: /tmp/nxf-2617043867252851681
+Apr-05 15:17:15.509 [Actor Thread 11] INFO  nextflow.processor.TaskProcessor - [f5/af27b8] Cached process > RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)
+Apr-05 15:17:15.918 [Actor Thread 9] INFO  nextflow.processor.TaskProcessor - [21/d1bf24] Cached process > RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)
+Apr-05 15:17:15.950 [Actor Thread 5] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=https://depot.galaxyproject.org/singularity/mulled-v2-cf0123ef83b3c38c13e3b0696a3f285d3f20f15b:606b713ec440e799d53a2b51a6e79dbfd28ecf3e-0; path=/scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/singularity/depot.galaxyproject.org-singularity-mulled-v2-cf0123ef83b3c38c13e3b0696a3f285d3f20f15b-606b713ec440e799d53a2b51a6e79dbfd28ecf3e-0.img
+Apr-05 15:17:16.282 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv) > jobId: 7353956; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/ab/9e034377fe70a7b23780fd45859a89
+Apr-05 15:17:16.290 [Task submitter] INFO  nextflow.Session - [ab/9e0343] Submitted process > RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)
+Apr-05 15:17:16.609 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa) > jobId: 7353957; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68
+Apr-05 15:17:17.678 [Task submitter] INFO  nextflow.Session - [bf/780238] Submitted process > RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)
+Apr-05 15:17:19.466 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa) > jobId: 7353958; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/ed/9cde83558ae7d8a0852c21a45a83a0
+Apr-05 15:17:19.470 [Task submitter] INFO  nextflow.Session - [ed/9cde83] Submitted process > RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)
+Apr-05 15:17:23.038 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 7353956; id: 2; name: RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv); status: COMPLETED; exit: 1; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/ab/9e034377fe70a7b23780fd45859a89 started: 1617657438033; exited: 2021-04-05T21:17:19Z; ]
+Apr-05 15:17:23.080 [Task monitor] ERROR nextflow.processor.TaskProcessor - Error executing process > 'RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)'
+
+Caused by:
+  Process `RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)` terminated with an error exit status (1)
+
+Command executed:
+
+  check_samplesheet.py design.csv samplesheet.valid.csv
+
+Command exit status:
+  1
+
+Command output:
+  ERROR: Please check samplesheet -> Replicate ids must start with 1..<num_replicates>!
+  Group: 'hepg2_cytosolic_fraction_r2'
+
+Command wrapper:
+  ERROR: Please check samplesheet -> Replicate ids must start with 1..<num_replicates>!
+  Group: 'hepg2_cytosolic_fraction_r2'
+
+Work dir:
+  /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/ab/9e034377fe70a7b23780fd45859a89
+
+Tip: view the complete command output by changing to the process work dir and entering the command `cat .command.out`
+Apr-05 15:17:23.109 [Task monitor] INFO  nextflow.Session - Execution cancelled -- Finishing pending tasks before exit
+Apr-05 15:17:23.240 [main] DEBUG nextflow.Session - Session await > all process finished
+Apr-05 15:19:28.047 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 7353958; id: 6; name: RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa); status: COMPLETED; exit: 0; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/ed/9cde83558ae7d8a0852c21a45a83a0 started: 1617657443257; exited: 2021-04-05T21:19:26Z; ]
+Apr-05 15:22:18.053 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 15:27:18.075 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 15:32:18.098 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 15:37:18.119 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 15:42:18.140 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 15:47:18.159 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 15:52:18.232 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 15:57:18.249 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:02:18.272 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:07:18.430 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:12:18.461 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:17:18.492 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:22:18.518 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:27:18.560 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:32:18.593 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:37:18.643 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:42:18.685 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:47:18.715 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: -; ]
+Apr-05 16:52:18.842 [Task monitor] DEBUG n.processor.TaskPollingMonitor - !! executor slurm > tasks to be completed: 1 -- submitted tasks are shown below
+~> TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: RUNNING; exit: -; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: 2021-04-05T22:52:17Z; ]
+Apr-05 16:52:19.096 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 7353957; id: 3; name: RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa); status: COMPLETED; exit: 0; error: -; workDir: /scratch/Shares/rinnclass/Olivia/CLASS_2021/rnaseq/work/bf/780238217a6d1e11ba656cf5a68c68 started: 1617657443250; exited: 2021-04-05T22:52:17Z; ]
+Apr-05 16:52:19.253 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Apr-05 16:52:19.756 [main] INFO  nextflow.Nextflow - -[0;35m[nf-core/rnaseq][0;32m Sent summary e-mail to olivia.luyties@colorado.edu (sendmail)-
+Apr-05 16:52:20.757 [main] INFO  nextflow.Nextflow - -[0;35m[nf-core/rnaseq][1;91m Pipeline completed with errors[0m-
+Apr-05 16:52:20.765 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=2; failedCount=1; ignoredCount=0; cachedCount=3; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=19h 22m 48s; failedDuration=5s; cachedDuration=3m 51s;loadCpus=0; loadMemory=0; peakRunning=2; peakCpus=24; peakMemory=144 GB; ]
+Apr-05 16:52:20.766 [main] DEBUG nextflow.trace.TraceFileObserver - Flow completing -- flushing trace file
+Apr-05 16:52:20.782 [main] DEBUG nextflow.trace.ReportObserver - Flow completing -- rendering html report
+Apr-05 16:52:20.850 [main] DEBUG nextflow.trace.ReportObserver - Execution report summary data:
+  [{"cpuUsage":{"mean":54.8,"min":54.8,"q1":54.8,"q2":54.8,"q3":54.8,"max":54.8,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"},"process":"GET_CHROM_SIZES","mem":{"mean":2490368,"min":2490368,"q1":2490368,"q2":2490368,"q3":2490368,"max":2490368,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"},"memUsage":{"mean":0.01,"min":0.01,"q1":0.01,"q2":0.01,"q3":0.01,"max":0.01,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"},"timeUsage":{"mean":0.3,"min":0.3,"q1":0.3,"q2":0.3,"q3":0.3,"max":0.3,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"},"vmem":{"mean":28278784,"min":28278784,"q1":28278784,"q2":28278784,"q3":28278784,"max":28278784,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"},"reads":{"mean":3321676233,"min":3321676233,"q1":3321676233,"q2":3321676233,"q3":3321676233,"max":3321676233,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"},"cpu":{"mean":54.8,"min":54.8,"q1":54.8,"q2":54.8,"q3":54.8,"max":54.8,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"},"time":{"mean":43000,"min":43000,"q1":43000,"q2":43000,"q3":43000,"max":43000,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"},"writes":{"mean":33571,"min":33571,"q1":33571,"q2":33571,"q3":33571,"max":33571,"minLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GET_CHROM_SIZES (GRCh38.p13.genome.fa)"}},{"cpuUsage":{"mean":40.9,"min":40.9,"q1":40.9,"q2":40.9,"q3":40.9,"max":40.9,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"},"process":"GTF2BED","mem":{"mean":3212582912,"min":3212582912,"q1":3212582912,"q2":3212582912,"q3":3212582912,"max":3212582912,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"},"memUsage":{"mean":24.93,"min":24.93,"q1":24.93,"q2":24.93,"q3":24.93,"max":24.93,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"},"timeUsage":{"mean":0.3,"min":0.3,"q1":0.3,"q2":0.3,"q3":0.3,"max":0.3,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"},"vmem":{"mean":3237216256,"min":3237216256,"q1":3237216256,"q2":3237216256,"q3":3237216256,"max":3237216256,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"},"reads":{"mean":1331972402,"min":1331972402,"q1":1331972402,"q2":1331972402,"q3":1331972402,"max":1331972402,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"},"cpu":{"mean":81.8,"min":81.8,"q1":81.8,"q2":81.8,"q3":81.8,"max":81.8,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"},"time":{"mean":64000,"min":64000,"q1":64000,"q2":64000,"q3":64000,"max":64000,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"},"writes":{"mean":28055283,"min":28055283,"q1":28055283,"q2":28055283,"q3":28055283,"max":28055283,"minLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q1Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q2Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)","q3Label":"RNASEQ:PREPARE_GENOME:GTF2BED (gencode.v32.annotation.gtf)"}},{"cpuUsage":{"mean":49.8,"min":49.8,"q1":49.8,"q2":49.8,"q3":49.8,"max":49.8,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"},"process":"GTF_GENE_FILTER","mem":{"mean":1591582720,"min":1591582720,"q1":1591582720,"q2":1591582720,"q3":1591582720,"max":1591582720,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"},"memUsage":{"mean":9.26,"min":9.26,"q1":9.26,"q2":9.26,"q3":9.26,"max":9.26,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"},"timeUsage":{"mean":0.42,"min":0.42,"q1":0.42,"q2":0.42,"q3":0.42,"max":0.42,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"},"vmem":{"mean":1619562496,"min":1619562496,"q1":1619562496,"q2":1619562496,"q3":1619562496,"max":1619562496,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"},"reads":{"mean":4655155182,"min":4655155182,"q1":4655155182,"q2":4655155182,"q3":4655155182,"max":4655155182,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"},"cpu":{"mean":49.8,"min":49.8,"q1":49.8,"q2":49.8,"q3":49.8,"max":49.8,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"},"time":{"mean":60000,"min":60000,"q1":60000,"q2":60000,"q3":60000,"max":60000,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"},"writes":{"mean":1331781127,"min":1331781127,"q1":1331781127,"q2":1331781127,"q3":1331781127,"max":1331781127,"minLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:GTF_GENE_FILTER (GRCh38.p13.genome.fa)"}},{"cpuUsage":null,"process":"SAMPLESHEET_CHECK","mem":null,"memUsage":null,"timeUsage":{"mean":0.03,"min":0.03,"q1":0.03,"q2":0.03,"q3":0.03,"max":0.03,"minLabel":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)","maxLabel":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)","q1Label":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)","q2Label":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)","q3Label":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)"},"vmem":null,"reads":null,"cpu":null,"time":{"mean":5004,"min":5004,"q1":5004,"q2":5004,"q3":5004,"max":5004,"minLabel":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)","maxLabel":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)","q1Label":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)","q2Label":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)","q3Label":"RNASEQ:INPUT_CHECK:SAMPLESHEET_CHECK (design.csv)"},"writes":null},{"cpuUsage":{"mean":4.7,"min":4.7,"q1":4.7,"q2":4.7,"q3":4.7,"max":4.7,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"},"process":"RSEM_PREPAREREFERENCE_TRANSCRIPTS","mem":{"mean":1403445248,"min":1403445248,"q1":1403445248,"q2":1403445248,"q3":1403445248,"max":1403445248,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"},"memUsage":{"mean":1.82,"min":1.82,"q1":1.82,"q2":1.82,"q3":1.82,"max":1.82,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"},"timeUsage":{"mean":0.21,"min":0.21,"q1":0.21,"q2":0.21,"q3":0.21,"max":0.21,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"},"vmem":{"mean":1687883776,"min":1687883776,"q1":1687883776,"q2":1687883776,"q3":1687883776,"max":1687883776,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"},"reads":{"mean":5016702599,"min":5016702599,"q1":5016702599,"q2":5016702599,"q3":5016702599,"max":5016702599,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"},"cpu":{"mean":56.4,"min":56.4,"q1":56.4,"q2":56.4,"q3":56.4,"max":56.4,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"},"time":{"mean":119000,"min":119000,"q1":119000,"q2":119000,"q3":119000,"max":119000,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"},"writes":{"mean":1604311089,"min":1604311089,"q1":1604311089,"q2":1604311089,"q3":1604311089,"max":1604311089,"minLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:RSEM_PREPAREREFERENCE_TRANSCRIPTS (GRCh38.p13.genome.fa)"}},{"cpuUsage":{"mean":45.98,"min":45.98,"q1":45.98,"q2":45.98,"q3":45.98,"max":45.98,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"},"process":"STAR_GENOMEGENERATE","mem":{"mean":70281392128,"min":70281392128,"q1":70281392128,"q2":70281392128,"q3":70281392128,"max":70281392128,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"},"memUsage":{"mean":90.91,"min":90.91,"q1":90.91,"q2":90.91,"q3":90.91,"max":90.91,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"},"timeUsage":{"mean":9.89,"min":9.89,"q1":9.89,"q2":9.89,"q3":9.89,"max":9.89,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"},"vmem":{"mean":89354350592,"min":89354350592,"q1":89354350592,"q2":89354350592,"q3":89354350592,"max":89354350592,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"},"reads":{"mean":58999350593,"min":58999350593,"q1":58999350593,"q2":58999350593,"q3":58999350593,"max":58999350593,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"},"cpu":{"mean":551.8,"min":551.8,"q1":551.8,"q2":551.8,"q3":551.8,"max":551.8,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"},"time":{"mean":5695000,"min":5695000,"q1":5695000,"q2":5695000,"q3":5695000,"max":5695000,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"},"writes":{"mean":81067174771,"min":81067174771,"q1":81067174771,"q2":81067174771,"q3":81067174771,"max":81067174771,"minLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","maxLabel":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q1Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q2Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)","q3Label":"RNASEQ:PREPARE_GENOME:STAR_GENOMEGENERATE (GRCh38.p13.genome.fa)"}}]
+Apr-05 16:52:23.315 [main] DEBUG nextflow.trace.TimelineObserver - Flow completing -- rendering html timeline
+Apr-05 16:52:25.437 [main] DEBUG nextflow.CacheDB - Closing CacheDB done
+Apr-05 16:52:25.572 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
