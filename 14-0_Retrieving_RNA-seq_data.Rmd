@@ -359,27 +359,24 @@ design <- samplesheet %>%
   # Now we gather just the columns we need
   dplyr::select(group, replicate, fastq_1, fastq_2, strandedness)
 
-<<<<<<< HEAD
+
 # remove r1/r2 from names
-=======
->>>>>>> origin/in_class
+
 design <- design %>%
   mutate(group = gsub("_r1", "", group),
          group = gsub("_r2", "", group))
 
-<<<<<<< HEAD
 # sort otherwise error during running
 design <- design %>% 
   arrange(group, replicate)
 
 
-=======
 design <- design %>% 
   arrange(group, replicate)
 
 all(sapply(design$fastq_1, file.exists))
 all(sapply(design$fastq_2, file.exists))
->>>>>>> origin/in_class
+
 # Now we can write this out for input into nextflow
 write_csv(design, "rnaseq/design.csv")
 
