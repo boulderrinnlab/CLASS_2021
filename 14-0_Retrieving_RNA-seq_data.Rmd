@@ -72,6 +72,7 @@ library(httr)
 
 # Let's look at an example request for this experiment accession: ENCSR541TIG
 request_url <- "https://www.encodeproject.org/report.tsv?type=File&status=released&file_format=fastq&dataset=%2Fexperiments%2FENCSR541TIG%2F&field=accession&field=read_count&field=md5sum&field=controlled_by&field=paired_end&field=paired_with&field=replicate&field=target"
+
 # Let's break this down into your parts.
 # Just like a function, we have paramters and accomanying values separated by equal signs.
 # https://www.encodeproject.org/report.tsv?type=File&status=released&file_format=fastq
@@ -271,6 +272,7 @@ rename_script <- samples %>%
 # We include a shebang header line so that the script is interpreted by bash.
 
 write_lines(c("#!/bin/bash", rename_script$command), "rnaseq/fastq/rename.sh")
+
 # Here we use an R command to call bash and cd into that directory, then make the file executable, and then run it.
 # system("cd rnaseq/fastq; chmod u+x rename.sh; ./rename.sh")
 ```
@@ -355,8 +357,22 @@ design <- samplesheet %>%
   mutate(replicate = gsub("rep", "", replicate)) %>%
   # Now we gather just the columns we need
   dplyr::select(group, replicate, fastq_1, fastq_2, strandedness)
+
+# remove r1/r2 from names
+design <- design %>%
+  mutate(group = gsub("_r1", "", group),
+         group = gsub("_r2", "", group))
+
+# sort otherwise error during running
+design <- design %>% 
+  arrange(group, replicate)
+
+
 # Now we can write this out for input into nextflow
 write_csv(design, "rnaseq/design.csv")
+
+file.exists(design$fastq_1[[1]])
+
 ```
 
 

@@ -2,7 +2,7 @@
 #SBATCH -p long
 #SBATCH --job-name=HEPG2_rna_seq
 #SBATCH --mail-type=END,FAIL
-#SBATCH --mail-user=john.rinn@colorado.edu
+#SBATCH --mail-user=nina.ripin@colorado.edu
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --mem=6gb
@@ -23,7 +23,7 @@ nextflow run nf-core/rnaseq -r 3.0 \
 --fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
 --gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
 --gencode \
---email john.rinn@colorado.edu \
+--email nina.ripin@colorado.edu \
 -c nextflow.config
 
 date
