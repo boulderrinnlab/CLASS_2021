@@ -30,7 +30,7 @@ samplesheet <- samplesheet %>%
 ```{r}
 # We want to include the gene annotation info in the DEseq2 object,
 # so we'll need to read that in.
-gencode_gtf <- rtracklayer::import("/scratch/Shares/rinn/genomes/Homo_sapiens/Gencode/v32/gencode.v32.annotation.gtf")
+gencode_gtf <- rtracklayer::import("/scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf")
 genes <- gencode_gtf[gencode_gtf$type == "gene"]
 
 # Salmon's primary level of quantifying is at the transcript-level.
