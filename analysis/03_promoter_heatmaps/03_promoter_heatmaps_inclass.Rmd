@@ -1,0 +1,64 @@
+---
+title: "03_promoter_heatmaps_inclass"
+author: "James Pratt"
+date: "4/2/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+options(stringsAsFactors = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+library(ComplexHeatmap)
+
+source("../../util/plotting_functions.R")
+source("../../util/intersect_functions.R")
+source("../../util/_setup.R")
+```
+
+```{r import}
+gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
+
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names = TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import)
+names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks/|.bed", "", fl)
+```
+
+```{r make-promoters}
+genes <- gencode_gr[gencode_gr$type == "gene"]
+all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
+```
+
+```{r}
+# Let's look at what's binding on Hectd1 and where it's binding.
+hectd1_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "HECTD1"]
+hectd1_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, hectd1_promoter)
+plot_promoter_peak_matrix(hectd1_promoter_matrix, gene_name = "HECTD1", save_pdf = TRUE)
+```
+
+```{r}
+#DMRTA2
+dmrta2_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "DMRTA2"]
+dmrta2_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, dmrta2_promoter)
+plot_promoter_peak_matrix(dmrta2_promoter_matrix, gene_name = "DMRTA2", save_pdf = TRUE)
+
+```
+
+```{r}
+#G3BP1
+g3bp1_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "G3BP1"]
+g3bp1_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, g3bp1_promoter)
+plot_promoter_peak_matrix(g3bp1_promoter_matrix, gene_name = "G3BP1", save_pdf = TRUE)
+
+```
+
+
+```{r}
+#NORAD
+norad_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "NORAD"]
+norad_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, norad_promoter)
+plot_promoter_peak_matrix(norad_promoter_matrix, gene_name = "NORAD", save_pdf = TRUE)
+
+```

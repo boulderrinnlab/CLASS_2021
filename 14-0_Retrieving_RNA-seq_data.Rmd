@@ -178,6 +178,7 @@ It's very similar to sapply or lapply, but is more consisten with tidyverse synt
 # In this example we'll take the digits 1 through 10 and "map" each to the rnorm function. 
 map_example <- 1:10 %>%
   map(rnorm, n = 10)
+?rnorm
 # It returns a nested list. 
 map_example[[1]]
 map_example[[1]][[1]]
@@ -355,6 +356,16 @@ design <- samplesheet %>%
   mutate(replicate = gsub("rep", "", replicate)) %>%
   # Now we gather just the columns we need
   dplyr::select(group, replicate, fastq_1, fastq_2, strandedness)
+
+design <- design %>%
+  mutate(group = gsub("_r1", "", group),
+         group = gsub("_r2", "", group))
+
+design <- design %>% 
+  arrange(group, replicate)
+
+all(sapply(design$fastq_1, file.exists))
+all(sapply(design$fastq_2, file.exists))
 # Now we can write this out for input into nextflow
 write_csv(design, "rnaseq/design.csv")
 ```
