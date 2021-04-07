@@ -21,8 +21,13 @@ nextflow run nf-core/rnaseq -r 3.0 \
 --input design.csv \
 --aligner star_salmon \
 <<<<<<< HEAD
+<<<<<<< HEAD
 --fasta /scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa \
 --gtf /scratch/Shares/rinnclass/data/genomes/gencode.v32.annotation.gtf \
+=======
+--fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
+--gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \
+>>>>>>> origin/in_class
 =======
 --fasta /Shares/rinn_class/data/genomes/human/gencode/v32/GRCh38.p13.genome.fa \
 --gtf /Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf \

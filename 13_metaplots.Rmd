@@ -303,9 +303,12 @@ metaplot_matrix <- metaplot_df %>%
   pivot_wider(names_from = x, values_from = dens) %>%
   column_to_rownames("dbp") %>%
   as.matrix()
+dim(metaplot_matrix)
+
 
 # Z-Scale the rows
 mm_scaled <- t(scale(t(metaplot_matrix)))
+
 
 metaplot_hclust <- hclust(dist(mm_scaled), method = "complete")
 
