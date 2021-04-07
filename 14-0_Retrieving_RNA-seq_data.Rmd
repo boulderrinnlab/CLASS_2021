@@ -23,6 +23,7 @@ Goal: to get a rational samplesheet for use in downstream analysis (ie., differe
 ```{bash}
 # You'll want to change directory to the rnaseq directory for this following bit.
 # Retrieve experiment info table
+# cd to rnaseq directory (/scratch/Shares/rinnclass/<your_dir>/rnaseq)
 wget -O samples.txt "https://www.encodeproject.org/report.tsv?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all&advancedQuery=date_released:[2009-01-01%20TO%202021-12-31]"
 
 # Retrieve fastq file urls
@@ -31,9 +32,9 @@ wget -O files.txt "https://www.encodeproject.org/batch_download/?type=Experiment
 # Now cd to the rnaseq/fastq directory 
 # If the fastq directory doesn't exist, let's create it.
 # You can either use the terminal and mkdir or create the directory in R.
-if(!dir.exists("rnaseq/fastq")) dir.create("rnaseq/fastq")
+# if(!dir.exists("rnaseq/fastq")) dir.create("rnaseq/fastq")
 # Download the fastq files -- ~50 GB
-xargs -L 1 curl -O -J -L < files.txt
+# xargs -L 1 curl -O -J -L < files.txt
 ```
 
 Let's look at this table in the RStudio viewer. You can see that there are a number of columns that we don't need and a number of empty columns. 
@@ -271,7 +272,7 @@ rename_script <- samples %>%
 
 write_lines(c("#!/bin/bash", rename_script$command), "rnaseq/fastq/rename.sh")
 # Here we use an R command to call bash and cd into that directory, then make the file executable, and then run it.
-system("cd rnaseq/fastq; chmod u+x rename.sh; ./rename.sh")
+# system("cd rnaseq/fastq; chmod u+x rename.sh; ./rename.sh")
 ```
 
 Additionally from all of this information we've gathered we can create a text file to run the md5sum check.
@@ -283,7 +284,7 @@ md5 <- samples %>%
   unite(line, md5sum, fastq_file, sep = "  ")
 write_lines(md5$line, "rnaseq/fastq/md5.txt")
 # Now let's run it.
-system("cd rnaseq/fastq; md5sum -c md5.txt")
+# system("cd rnaseq/fastq; md5sum -c md5.txt")
 ```
 
 Finally, we can write out a nicely formatted sample sheet that we will use downstream for further analysis of the read counts in R.
@@ -291,7 +292,7 @@ Finally, we can write out a nicely formatted sample sheet that we will use downs
 ```{r}
 # Let's create the sample sheet that we will use later
 # to do the RNA-seq analysis in R.
-samplesheet <- samples %>%
+samples <- samples %>%
   dplyr::rename(fastq = fastq_file,
                 seq_type = Assay.title,
                 sample_name = Biosample.summary) %>%
@@ -330,6 +331,10 @@ write_csv(samplesheet, "rnaseq/samplesheet.csv")
 
 We also need to make a design file for the nf-core/rnaseq
 
+The design file needs to be in a specific format (as we saw with nf-core/chipseq)
+It needs the following columns:
+group,replicate,fastq_1,fastq_2,strandedness
+
 ```{r}
 # This will have the following columns:
 # group,replicate,fastq_1,fastq_2,strandedness
@@ -342,14 +347,22 @@ design <- samplesheet %>%
   # We also need to add the proper file path
   mutate(group = gsub(" ", "_", sample_name) %>% tolower(),
          strandedness = "reverse",
-         fastq_1 = paste0("fastq/", fastq_1),
-         fastq_2 = paste0("fastq/", fastq_2)) %>%
+         fastq_1 = paste0("/scratch/Shares/rinnclass/data/rnaseq_fastq/", fastq_1),
+         fastq_2 = paste0("/scratch/Shares/rinnclass/data/rnaseq_fastq/", fastq_2)) %>%
   # We have the replicate number already, but it's just a part of the sample id
   # We can use the separate function (opposite of unite) to retrieve it.
   separate(sample_id, into = c("experiment_accession", "replicate"), sep = "_", remove = FALSE) %>%
   mutate(replicate = gsub("rep", "", replicate)) %>%
   # Now we gather just the columns we need
   dplyr::select(group, replicate, fastq_1, fastq_2, strandedness)
+
+design <- design %>%
+  mutate(group = gsub("_r1", "", group),
+         group = gsub("_r2", "", group))
+
+design <- design %>% 
+  arrange(group, replicate)
+
 # Now we can write this out for input into nextflow
 write_csv(design, "rnaseq/design.csv")
 ```
