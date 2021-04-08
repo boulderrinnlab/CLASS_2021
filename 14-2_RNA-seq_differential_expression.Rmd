@@ -118,7 +118,7 @@ g + geom_point()
 ```
 
 ```{r}
-# Now we can check out the results from this analysis.
+# Now we can check out the results from this analysis. #resultNames and results are DEseq2 functions
 resultsNames(dds)
 res <- results(dds, name = "condition_cytosolic_fraction_vs_nuclear_fraction")
 
