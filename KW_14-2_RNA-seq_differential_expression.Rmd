@@ -326,13 +326,17 @@ lfc_matrix <- master_res_df %>% dplyr::select(gene_id, log2FoldChange, result_na
   pivot_wider(names_from = "result_name", values_from = "log2FoldChange")
 
 #ommit NAs
+lfc_matrix_no_NA <- na.omit(lfc_matrix)
 
-#col to rowname
-lfc_matrix <- lfc_matrix %>% column_to_rownames("gene_id") %>% as.matrix()
+#col names to row names
+lfc_matrix_no_NA <- lfc_matrix_no_NA %>% column_to_rownames("gene_id") %>% as.matrix()
 
-#convert to matrix
-
-heatmap
+#make heatmap
+library(ComplexHeatmap)
+pdf("figures/lfc_matrix_allconditions_heatmap.pdf", height = 35, width = 10)
+Heatmap(lfc_matrix_no_NA,show_row_names = FALSE, show_column_names=TRUE)
+dev.off()
+##heatmap not plotting and I'm not sure why...
 
 ```
 
