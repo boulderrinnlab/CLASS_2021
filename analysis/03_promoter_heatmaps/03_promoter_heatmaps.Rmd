@@ -13,9 +13,9 @@ library(rtracklayer)
 library(tidyverse)
 library(ComplexHeatmap)
 
-source("../../util/plotting_functions.R")
-source("../../util/intersect_functions.R")
-source("../../util/_setup.R")
+source("util/plotting_functions.R")
+source("util/intersect_functions.R")
+source("util/_setup.R")
 ```
 
 ```{r import}
@@ -33,8 +33,19 @@ all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
 
 ```{r}
 # Let's look at what's binding on Firre and where it's binding.
-firre_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "FIRRE"]
-firre_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
-plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = "FIRRE", save_pdf = TRUE)
+
+#low binder
+x <- 'TEX35'
+x_promoter <- all_promoters_gr[all_promoters_gr$gene_name == x]
+x_matrix <- make_promoter_binding_matrix(consensus_peaks, x_promoter)
+plot_promoter_peak_matrix(x_matrix, gene_name = x, save_pdf = TRUE)
+
+#high binder
+high <- 'UCKL1'
+high_promoter <- all_promoters_gr[all_promoters_gr$gene_name == high]
+high_matrix <- make_promoter_binding_matrix(consensus_peaks, high_promoter)
+plot_promoter_peak_matrix(high_matrix, gene_name = high, save_pdf = TRUE)
+
+TEX35_
 ```
 
