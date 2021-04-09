@@ -90,9 +90,10 @@ samplesheet$condition <- factor(samplesheet$condition, levels = c("nuclear_fract
 
 # Now we have all the components that we need to add to the 
 # DESeq2 function. So now let's create our DEseq2 object
+set.seed(789723)
 dds <- DESeqDataSetFromTximport(txi,
-                                colData = samplesheet,
                                 design = ~ condition,
+                                colData = samplesheet,
                                 rowData = genes)
 ```
 
