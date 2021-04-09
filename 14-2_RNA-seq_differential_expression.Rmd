@@ -236,7 +236,7 @@ res_df <- res %>% as.data.frame() %>%
 summary(res_df$log2FoldChange)
 
 ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj))) + 
-  geom_point() + xlim(-24, 13)
+  geom_point() + xlim(-24, 22)
 
 
 res_shrunken_df <- res_shrunken %>% as.data.frame() %>%
@@ -245,7 +245,7 @@ res_shrunken_df <- res_shrunken %>% as.data.frame() %>%
   mutate(result_name = "condition_membrane_fraction_vs_total")
 
 ggplot(res_shrunken_df, aes(x = log2FoldChange, y = -log10(padj))) + 
-  geom_point() + xlim(-24, 13)
+  geom_point() + xlim(-24, 22)
 ```
 
 ```{r}
@@ -259,8 +259,76 @@ results_names <- resultsNames(dds)
 results_names <- results_names[-1]
 ```
 
+```{r}
+#Generate each individual data.frame for each condition
+#membrane_fraction_vs_total
+res <- results(dds, name = "condition_membrane_fraction_vs_total")
+
+res_shrunken_membrane <- lfcShrink(dds, coef = "condition_membrane_fraction_vs_total",  res = res)
+
+res_shrunken_df_mem <- res_shrunken_membrane %>% as.data.frame() %>%
+  rownames_to_column("gene_id") %>%
+  merge(g2s) %>%
+  mutate(result_name = "condition_membrane_fraction_vs_total")
 
 
 
+#cytosolic_fraction_vs_total
+res <- results(dds, name = "condition_cytosolic_fraction_vs_total")
+
+res_shrunken_cytosolic <- lfcShrink(dds, coef = "condition_cytosolic_fraction_vs_total",  res = res)
+
+res_shrunken_df_cyt <- res_shrunken_cytosolic %>% as.data.frame() %>%
+  rownames_to_column("gene_id") %>%
+  merge(g2s) %>%
+  mutate(result_name = "condition_cytosolic_fraction_vs_total")
+
+
+#insoluble_cytoplasmic_fraction_vs_total
+res <- results(dds, name = "condition_insoluble_cytoplasmic_fraction_vs_total")
+
+res_shrunken_insoluble_cytoplasmic <- lfcShrink(dds, coef = "condition_insoluble_cytoplasmic_fraction_vs_total",  res = res)
+
+res_shrunken_df_ins <- res_shrunken_insoluble_cytoplasmic %>% as.data.frame() %>%
+  rownames_to_column("gene_id") %>%
+  merge(g2s) %>%
+  mutate(result_name = "condition_insoluble_cytoplasmic_fraction_vs_total")
+
+
+
+
+#nuclear_fraction_vs_total
+res <- results(dds, name = "condition_nuclear_fraction_vs_total")
+
+res_shrunken_nuclear <- lfcShrink(dds, coef = "condition_nuclear_fraction_vs_total",  res = res)
+
+res_shrunken_df_nuc <- res_shrunken_nuclear %>% as.data.frame() %>%
+  rownames_to_column("gene_id") %>%
+  merge(g2s) %>%
+  mutate(result_name = "condition_nuclear_fraction_vs_total")
+
+
+
+```
+
+```{r}
+#merge all data.frames together
+master_res_df <- rbind(res_shrunken_df_mem, res_shrunken_df_cyt, res_shrunken_df_ins, res_shrunken_df_nuc)
+
+#pivot_wider specify values and names to make a big matrix
+lfc_matrix <- master_res_df %>% dplyr::select(gene_id, log2FoldChange, result_name) %>%
+  pivot_wider(names_from = "result_name", values_from = "log2FoldChange")
+
+```
+
+```{r}
+#generate Heatmap
+lfc_matrix_no_NA <- na.omit(lfc_matrix)
+lfc_matrix_no_NA <- lfc_matrix_no_NA %>% column_to_rownames("gene_id") %>% as.matrix()
+
+library(ComplexHeatmap)
+pdf("figures/lfc_matrix_allconditions_heatmap.pdf", height = 35, width = 10)
+Heatmap(lfc_matrix_no_NA,show_row_names = FALSE, show_column_names=TRUE)
+dev.off()
 
 
