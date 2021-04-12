@@ -11,8 +11,8 @@ options(stringsAsFactors = F)
 library(tidyverse)
 library(GenomicRanges)
 library(ggpubr)
-source("util/intersect_functions.R")
-source("util/_setup.R")
+source("/scratch/Shares/rinnclass/JR/CLASS_2021/util/intersect_functions.R")
+source("/scratch/Shares/rinnclass/JR/CLASS_2021/util/_setup.R")
 ```
 
 
@@ -24,6 +24,8 @@ samplesheet <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/rnaseq/samplesh
 # but for now we can swap it here.
 samplesheet[which(samplesheet$sample_name == "hepg2_R1"), "condition"] <- "insoluble_cytoplasmic_fraction"
 samplesheet[which(samplesheet$sample_name == "hepg2_insoluble_cytoplasmic_fraction_R2"), "condition"] <- "total"
+
+write_csv(samplesheet, "results/samplesheet_fix.csv")
 ```
 
 ## Read in the TPM data from salmon
