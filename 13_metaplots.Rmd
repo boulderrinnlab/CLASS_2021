@@ -13,6 +13,7 @@ library(rtracklayer)
 library(tidyverse)
 library(ComplexHeatmap)
 library(circlize)
+library(ggdendro)
 
 source("/scratch/Shares/rinnclass/Nina/CLASS_2021/util/plotting_functions.R")
 source("/scratch/Shares/rinnclass/Nina/CLASS_2021/util/intersect_functions.R")

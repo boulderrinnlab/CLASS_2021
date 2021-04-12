@@ -11,6 +11,10 @@ options(stringsAsFactors = FALSE)
 library(tidyverse)
 library(tximport)
 library(DESeq2)
+library(ComplexHeatmap)
+library(circlize)
+library(ggdendro)
+library(pheatmap)
 
 source("util/plotting_functions.R")
 source("util/_setup.R")
@@ -206,6 +210,7 @@ samplesheet$condition <- factor(samplesheet$condition, levels = c("total", "memb
                                                               "insoluble_cytoplasmic_fraction", 
                                                               "cytosolic_fraction", "nuclear_fraction"))
 
+
 dds <- DESeqDataSetFromTximport(txi,
                                 design = ~ condition,
                                 colData = samplesheet,
@@ -237,7 +242,7 @@ res_df <- res %>% as.data.frame() %>%
 summary(res_df$log2FoldChange)
 
 ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj))) + 
-  geom_point() + xlim(-24, 13)
+  geom_point() + xlim(-24, 16)
 
 
 res_shrunken_df <- res_shrunken %>% as.data.frame() %>%
@@ -246,7 +251,7 @@ res_shrunken_df <- res_shrunken %>% as.data.frame() %>%
   mutate(result_name = "condition_membrane_fraction_vs_total")
 
 ggplot(res_shrunken_df, aes(x = log2FoldChange, y = -log10(padj))) + 
-  geom_point() + xlim(-24, 13)
+  geom_point() + xlim(-24, 16)
 ```
 
 ```{r}
@@ -258,6 +263,80 @@ ggplot(res_shrunken_df, aes(x = log2FoldChange, y = -log10(padj))) +
 results_names <- resultsNames(dds)
 # We don't care about the intercept, so we can leave that out
 results_names <- results_names[-1]
+
+
+res_shrunken_df <- data.frame("gene_id" = character(), 
+                              "baseMean" = numeric(), 
+                              "log2FoldChange" = numeric(), 
+                              "lfcSE" = numeric(),
+                              "stat" = numeric(),
+                              "pvalue" = numeric(),
+                              "padj" = numeric(),
+                              "gene_name" = character(),
+                              "result_name" = character())
+
+
+res_df <- data.frame("gene_id" = character(), 
+                              "baseMean" = numeric(), 
+                              "log2FoldChange" = numeric(), 
+                              "lfcSE" = numeric(),
+                              "stat" = numeric(),
+                              "pvalue" = numeric(),
+                              "padj" = numeric(),
+                              "gene_name" = character(),
+                              "result_name" = character())
+
+
+for(i in 1:length(results_names)) {
+  results_name <- results_names[i]
+  res <- results(dds, name = results_name)
+  res_shrunken <- lfcShrink(dds, coef = results_name,  res = res)
+  tmp_res_df <- res %>% as.data.frame() %>%
+    rownames_to_column("gene_id") %>%
+    merge(g2s) %>%
+    mutate(result_name = results_name)
+  tmp_res_shrunken_df <- res_shrunken %>% as.data.frame() %>%
+    rownames_to_column("gene_id") %>%
+    merge(g2s) %>%
+    mutate(result_name = results_name)
+  # Append to full data.frame
+  res_df <- bind_rows(res_df, tmp_res_df)
+  res_shrunken_df <- bind_rows(res_shrunken_df, tmp_res_shrunken_df)
+}
+
+colnames(res_shrunken_df)
+
+# filter for sign
+
+res_shrunken_df <- res_shrunken_df %>%
+  group_by(gene_id) %>%
+  mutate(sig = ifelse(any(padj < 0.05), "sig", "ns"))
+
+res_shrunken_df_sig <- res_shrunken_df %>%
+  filter(sig == "sig")
+
+           
+# results data.frame that contains all columns
+# also a matrix
+
+
+#to make matrix:
+L2FC_matrix <- res_shrunken_df_sig %>% dplyr::select(gene_id, log2FoldChange, result_name) %>% pivot_wider(names_from = "result_name", values_from = "log2FoldChange") %>% column_to_rownames('gene_id') %>% as.matrix()
+
+
+# clustering 
+bin_hier <- hclust(dist(L2FC_matrix), method = "complete")
+plot(bin_hier)
+
+# heatmap
+pheatmap(L2FC_matrix, show_rownames = F, breaks = seq(-3, 3, length.out = 100))
+
+# Z-Scale the rows and Plot the dendrogram
+mm_scaled <- t(scale(t(L2FC_matrix)))
+metaplot_hclust <- hclust(dist(mm_scaled), method = "complete")
+plot(metaplot_hclust)
+
+
 ```
 
 
