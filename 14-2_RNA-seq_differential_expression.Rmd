@@ -232,6 +232,8 @@ resultsNames(dds)
 
 res <- results(dds, name = "condition_membrane_fraction_vs_total")
 
+#lfcShrink shrinks log fold change based on certainty (so low expression get's accounted for)
+
 res_shrunken <- lfcShrink(dds, coef = "condition_membrane_fraction_vs_total",  res = res)
 
 
@@ -288,6 +290,8 @@ res_shrunken_df <- data.frame("gene_id" = character(),
                               "result_name" = character())
 
 
+
+
 for(i in 1:length(results_names)) {
   results_name <- results_names[i]
   res <- results(dds, name = results_name)
@@ -308,6 +312,10 @@ for(i in 1:length(results_names)) {
   res_df <- bind_rows(res_df, tmp_res_df)
   res_shrunken_df <- bind_rows(res_shrunken_df, tmp_res_shrunken_df)
 }
+
+write_csv(res_df, "/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/05_RNA_Seq/results/deseq_unshrnk_results.csv")
+
+write_csv(res_shrunken_df, "/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/05_RNA_Seq/results/deseq_shrnk_results.csv")
 
 # Let's move forward with the shrunken log fold-changes
 # First let's label the genes as being significant in any condition or not.
