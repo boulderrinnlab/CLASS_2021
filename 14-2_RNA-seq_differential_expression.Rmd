@@ -143,6 +143,15 @@ ggplot(res_df, aes(x = log10(baseMean), y = log2FoldChange)) +
 hist(res_df$padj)
 ```
 
+Writting out useful files
+```{r}
+
+write.csv(res_df,"/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/05_RNA_Seq/results/res_df.csv")
+
+write.csv(samplesheet, "/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/05_RNA_Seq/results/samplesheet.csv")
+
+```
+
 ```{r}
 # Now on your own, find the top 10 genes that are nuclear vs. cytoplasmic.
 # There's lots more to explore with this type of data and these results
