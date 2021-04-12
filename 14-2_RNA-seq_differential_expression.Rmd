@@ -202,8 +202,8 @@ stopifnot(all(rownames(samplesheet) == colnames(txi$counts)))
 # In order to make the total (whole cell) condition be the one that everything is compared back to
 # we will want to set the factor levels with "total" first
 samplesheet$condition <- factor(samplesheet$condition, levels = c("total", "membrane_fraction", 
-                                                              "insoluble_cytoplasmic_fraction", 
-                                                              "cytosolic_fraction", "nuclear_fraction"))
+                                                                  "insoluble_cytoplasmic_fraction", 
+                                                                  "cytosolic_fraction", "nuclear_fraction"))
 
 dds <- DESeqDataSetFromTximport(txi,
                                 design = ~ condition,
@@ -257,6 +257,69 @@ ggplot(res_shrunken_df, aes(x = log2FoldChange, y = -log10(padj))) +
 results_names <- resultsNames(dds)
 # We don't care about the intercept, so we can leave that out
 results_names <- results_names[-1]
+
+res_df <- data.frame("gene_id" = character(), 
+                     "baseMean" = numeric(), 
+                     "log2FoldChange" = numeric(), 
+                     "lfcSE" = numeric(),
+                     "stat" = numeric(),
+                     "pvalue" = numeric(),
+                     "padj" = numeric(),
+                     "gene_name" = character(),
+                     "result_name" = character())
+
+res_shrunken_df <- data.frame("gene_id" = character(), 
+                              "baseMean" = numeric(), 
+                              "log2FoldChange" = numeric(), 
+                              "lfcSE" = numeric(),
+                              "stat" = numeric(),
+                              "pvalue" = numeric(),
+                              "padj" = numeric(),
+                              "gene_name" = character(),
+                              "result_name" = character())
+
+
+for(i in 1:length(results_names)) {
+  results_name <- results_names[i]
+  res <- results(dds, name = results_name)
+  res_shrunken <- lfcShrink(dds, coef = results_name,  res = res)
+  
+  tmp_res_df <- res %>% as.data.frame() %>%
+    rownames_to_column("gene_id") %>%
+    merge(g2s) %>%
+    mutate(result_name = results_name)
+  
+  
+  tmp_res_shrunken_df <- res_shrunken %>% as.data.frame() %>%
+    rownames_to_column("gene_id") %>%
+    merge(g2s) %>%
+    mutate(result_name = results_name)
+  
+  # Append to full data.frame
+  res_df <- bind_rows(res_df, tmp_res_df)
+  res_shrunken_df <- bind_rows(res_shrunken_df, tmp_res_shrunken_df)
+}
+
+# Let's move forward with the shrunken log fold-changes
+# First let's label the genes as being significant in any condition or not.
+res_shrunken_df <- res_shrunken_df %>%
+  group_by(gene_id) %>%
+  mutate(sig = ifelse(any(padj < 0.05), "sig", "ns"))
+
+# Let's clean up the column names a little bit
+res_shrunken_df <- res_shrunken_df %>%
+  mutate(subcellular_fraction = gsub("condition_|_fraction_vs_total", "", result_name))
+
+sig_res_shrunked_df <- res_shrunken_df %>%
+  filter(sig == "sig")
+
+lfc_matrix <- sig_res_shrunked_df %>% 
+  dplyr::select(gene_id, log2FoldChange, subcellular_fraction) %>% 
+  pivot_wider(names_from = "subcellular_fraction", values_from = "log2FoldChange") %>%
+  column_to_rownames("gene_id") %>%
+  as.matrix()
+
+pheatmap::pheatmap(lfc_matrix, show_rownames = FALSE, breaks = seq(-3, 3, length.out = 100))
 ```
 
 
