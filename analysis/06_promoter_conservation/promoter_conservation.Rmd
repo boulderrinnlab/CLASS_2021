@@ -1,0 +1,56 @@
+---
+title: "Promoter conservation"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = FALSE)
+library(tidyverse)
+library(CoverageView)
+```
+
+```{r}
+# http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phyloP100way/hg38.phyloP100way.bw
+promoter_gr <- rtracklayer::import("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_promoters.gtf")
+promoter_gr$score <- 0
+promoter_gr$name <- promoter_gr$gene_id
+rtracklayer::export(promoter_gr, "results/lncrna_mrna_promoter.bed")
+cb <- CoverageBigWigFile("data/hg38.phyloP100way.bw")
+cm <- cov.matrix(cb, coordfile = "results/lncrna_mrna_promoter.bed", no_windows = 1, num_cores = 20)
+```
+
+```{r}
+peak_occurrence_df <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv")
+peak_occurrence_df$phyloP100 <- cm
+
+peak_occurrence_df <- peak_occurrence_df %>%
+  mutate(binding_level = ifelse(number_of_dbp > 300, "high", ifelse(number_of_dbp > 100, "med", "low")))
+
+ggplot(peak_occurrence_df, aes(x = binding_level, y = number_of_dbp)) + 
+  geom_boxplot()
+
+ggplot(peak_occurrence_df, aes(x = binding_level, y = phyloP100)) + 
+  geom_boxplot()
+
+ggplot(peak_occurrence_df, aes(x = phyloP100, color = binding_level)) + 
+  geom_density()
+
+write_csv(peak_occurrence_df, "results/peak_occurrence_df_phyloP.csv")
+
+library(ggpubr)
+ggplot(peak_occurrence_df, aes(x = number_of_dbp, y = phyloP100))   +
+   geom_hex(bins = 70) +
+  xlim(100,450) +
+  scale_fill_continuous(type = "viridis") +
+  theme_bw() + 
+  geom_smooth() + 
+  # stat_regline_equation() + 
+  stat_cor()
+
+
+```
+
+
