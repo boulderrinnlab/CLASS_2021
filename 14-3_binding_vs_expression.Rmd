@@ -79,6 +79,8 @@ pheatmap::pheatmap(tpm_scaled, show_rownames = FALSE)
 # We're plotting only a trend line here with geom_smooth
 # But we're also adding in the points for those with no expression (as triangle shapes)
 # The ones with high number of DBPs and no expression are our reservoirs
+
+
 ggplot(promoter_features_df, 
             aes(y = log2(tpm_total + 0.001), x = number_of_dbp, color = gene_type)) + 
   geom_point(data = promoter_features_df %>% filter(tpm_total < 0.001),
@@ -87,9 +89,60 @@ ggplot(promoter_features_df,
   # stat_cor() +
   scale_x_continuous(expand = c(0,0)) +
   scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
-  ggtitle("Expression vs. promoter binding events") + 
+  ggtitle("total Expression vs. promoter binding events") + 
   xlab(expression('Number of TFs')) +
   ylab(expression(log[2](TPM)))
+
+
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_nuclear_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_nuclear_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  # stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("nuclear Expression vs. promoter binding events") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_cytosolic_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_cytosolic_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  # stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("cytosolic Expression vs. promoter binding events") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_insoluble_cytoplasmic_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_insoluble_cytoplasmic_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  # stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("insol cyto Expression vs. promoter binding events") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_membrane_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_membrane_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  # stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("membrane Expression vs. promoter binding events") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+
 ```
 
 ```{r}
