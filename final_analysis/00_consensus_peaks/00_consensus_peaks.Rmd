@@ -5,26 +5,92 @@ date: "4/14/2021"
 output: html_document
 ---
 
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(GenomicRanges)
+source("/scratch/Shares/rinnclass/CLASS_2021/util/plotting_functions.R")
 ```
 
-## R Markdown
+Note: pay attention to file paths
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+First, download data to desired directory ('/scratch/Shares/rinnclass/data/XXXX' in our case) using wget.
 
-```{r cars}
-summary(cars)
+Website: https://www.dropbox.com/sh/76etjxl10v2hcuc/AAAIk9a6aMhw8CvUtKlFnMn6a?dl=0
+
+Create and export consensus peaks from individual peak files.
+
+```{r}
+consensus_peaks <- create_consensus_peaks("/scratch/Shares/rinnclass/data/peaks")
+
+
+for(i in 1:length(consensus_peaks)) {
+  rtracklayer::export(consensus_peaks[[i]], 
+                      paste0("./results/chipseq/consensus_peaks/", 
+                             names(consensus_peaks)[i], 
+                             "_consensus_peaks.bed"))
+}
+
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
+Filtering the consensus peaks to files with at least 250 peaks (per last years class cut-off)
+```{r}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+num_peaks_threshold <- 250
+
+filtered_consensus_peaks <- consensus_peaks[sapply(consensus_peaks, length) > num_peaks_threshold]
+
+#Export consensus peaks
+for(i in 1:length(filtered_consensus_peaks)) {
+  rtracklayer::export(filtered_consensus_peaks[[i]], 
+                      paste0("./results/chipseq/filtered_consensus/", 
+                             names(filtered_consensus_peaks)[i], 
+                             "_filtered_consensus_peaks.bed"))
+}
+
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+Exporting Genomic features that we will use frequently and save to results folder
+
+1) Promoter Regions
+```{r}
+gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
+
+lncrna_mrna_promoters <- get_promoter_regions(gencode_gr, biotype = c("lncRNA", "protein_coding"))
+rtracklayer::export(lncrna_mrna_promoters, "./results/lncrna_mrna_promoters.gtf")
+
+
+lncrna_promoters <- get_promoter_regions(gencode_gr, biotype = "lncRNA")
+rtracklayer::export(lncrna_promoters, "./results/lncrna_promoters.gtf")
+
+
+mrna_promoters <- get_promoter_regions(gencode_gr, biotype = "protein_coding")
+rtracklayer::export(mrna_promoters, "./results/mrna_promoters.gtf")
+```
+
+
+2) Gene Bodies
+
+```{r}
+lncrna_mrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
+                                     gencode_gr$gene_type %in% c("lncRNA", "protein_coding")]
+rtracklayer::export(lncrna_mrna_genebody, "./results/lncrna_mrna_genebody.gtf")
+
+
+lncrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
+                                gencode_gr$gene_type %in% c("lncRNA")]
+rtracklayer::export(lncrna_genebody, "./results/lncrna_genebody.gtf")
+
+
+mrna_genebody <- gencode_gr[gencode_gr$type == "gene" & 
+                              gencode_gr$gene_type %in% c("protein_coding")]
+rtracklayer::export(mrna_genebody, "./results/mrna_genebody.gtf")
+
+```
+
+
+
