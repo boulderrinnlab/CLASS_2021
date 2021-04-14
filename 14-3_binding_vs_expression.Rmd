@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 options(stringsAsFactors = F)
 library(tidyverse)
 library(GenomicRanges)
-library(ggpubr)
+# library(ggpubr)
 source("util/intersect_functions.R")
 source("util/_setup.R")
 ```
@@ -24,6 +24,7 @@ samplesheet <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/rnaseq/samplesh
 # but for now we can swap it here.
 samplesheet[which(samplesheet$sample_name == "hepg2_R1"), "condition"] <- "insoluble_cytoplasmic_fraction"
 samplesheet[which(samplesheet$sample_name == "hepg2_insoluble_cytoplasmic_fraction_R2"), "condition"] <- "total"
+# write_csv(samplesheet, "/scratch/Shares/rinnclass/data/samplesheet_fixed_condition.csv")
 ```
 
 ## Read in the TPM data from salmon
@@ -33,7 +34,9 @@ salmon_tpm <- read_tsv("/scratch/Shares/rinnclass/JR/CLASS_2021/rnaseq/results/s
 
 # We want to summarize the TPM values for each subcellular fraction, so we'll take the 
 # mean of the two replicates
-tpm <- salmon_tpm %>% pivot_longer(cols = 2:ncol(.), names_to = "sample_name", values_to = "tpm") %>%
+
+tpm <- salmon_tpm %>% 
+  pivot_longer(cols = 2:ncol(.), names_to = "sample_name", values_to = "tpm") %>%
   merge(samplesheet) %>%
   group_by(gene_id, condition) %>%
   summarize(tpm = mean(tpm, na.rm = T)) %>%
@@ -65,6 +68,9 @@ tpm_matrix <- tpm %>%
 # And z-scale each row.
 tpm_scaled <- t(scale(t(tpm_matrix)))
 
+# We want to be sure that we're not removing rows that have NA in only one fraction.
+# And right now we're not sure.
+
 # Remove NAs with the complete.cases function
 ?complete.cases
 tpm_scaled <- tpm_scaled[complete.cases(tpm_scaled),]
@@ -84,7 +90,7 @@ ggplot(promoter_features_df,
   geom_point(data = promoter_features_df %>% filter(tpm_total < 0.001),
              shape = 17, alpha = 0.7) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
-  # stat_cor() +
+  stat_cor() +
   scale_x_continuous(expand = c(0,0)) +
   scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
   ggtitle("Expression vs. promoter binding events") + 
