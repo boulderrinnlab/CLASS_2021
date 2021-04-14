@@ -132,10 +132,6 @@ k562_reservoir <- k562_df %>%
 
 promoter_features_df <- merge(promoter_features_df, k562_reservoir)
 
-#add column of resevoirs shared in both cell lines
-
-promoter_features_df$shared_resevoir <- as.numeric(promoter_features_df$hepg2_reservoir == 1 & promoter_features_df$k562_reservoir == 1)
-
 # Make a table of reservoir status
 res_status <- promoter_features_df %>% 
   group_by(hepg2_reservoir, k562_reservoir, k562_conservative_reservoir) %>%
@@ -149,6 +145,40 @@ write_csv(tpm, "results/mean_tpm_per_condition.csv")
 write_csv(samplesheet, "results/samplesheet.csv")
 ```
 
+```{r}
+#Filter promoter_features_df to only give the 57 genes that are shared conservative resevoirs
+
+?filter
+shared_conservative_resevoirs_df <- filter(promoter_features_df, promoter_features_df$shared_conserved_resevoirs == 1)
+write_csv(shared_conservative_resevoirs_df, "/scratch/Shares/rinnclass/James/CLASS_2021/analysis/shared_conservative_resevoirs.csv")
+```
+
+```{r import}
+gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
+
+fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names = TRUE)
+consensus_peaks <- lapply(fl, rtracklayer::import)
+names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks/|.bed", "", fl)
+```
+
+```{r make-promoters}
+genes <- gencode_gr[gencode_gr$type == "gene"]
+all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
+```
+
+```{r}
+# Let's look at what's binding on conserved resevoirs and where it's binding.
+AC011383.1_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "AC011383.1"]
+AC011383.1_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, AC011383.1_promoter)
+plot_promoter_peak_matrix(AC011383.1_promoter_matrix, gene_name = "AC011383.1", save_pdf = TRUE)
+```
+
+```{r}
+# Let's look at what's binding on conserved resevoirs and where it's binding.
+AC104695.1_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "AC104695.1"]
+AC104695.1_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, AC104695.1_promoter)
+plot_promoter_peak_matrix(AC104695.1_promoter_matrix, gene_name = "AC104695.1", save_pdf = TRUE)
+```
 There's a lot to explore here. We have some potential analyses that you can pursue, or your group can decide on a direction that you're interested in.
 
 1. How does the binding vs. expression change for the high binding promoters (> ~300 DBPs) vs low binders? And does this trend change across subcellular fractions?
