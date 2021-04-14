@@ -10,7 +10,8 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GenomicRanges)
-source("/scratch/Shares/rinnclass/CLASS_2021/util/plotting_functions.R")
+source("../util/plotting_functions.R")
+source("../util/intersect_functions.R")
 ```
 
 Note: pay attention to file paths
