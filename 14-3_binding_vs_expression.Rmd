@@ -24,6 +24,9 @@ samplesheet <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/rnaseq/samplesh
 # but for now we can swap it here.
 samplesheet[which(samplesheet$sample_name == "hepg2_R1"), "condition"] <- "insoluble_cytoplasmic_fraction"
 samplesheet[which(samplesheet$sample_name == "hepg2_insoluble_cytoplasmic_fraction_R2"), "condition"] <- "total"
+
+# write_csv(sample_sheet, "/scratch/Shares/rinnclass/data/samplesheet_fixed_condition.csv)
+
 ```
 
 ## Read in the TPM data from salmon
@@ -38,6 +41,7 @@ tpm <- salmon_tpm %>% pivot_longer(cols = 2:ncol(.), names_to = "sample_name", v
   group_by(gene_id, condition) %>%
   summarize(tpm = mean(tpm, na.rm = T)) %>%
   pivot_wider(names_from = condition, values_from = tpm, names_prefix = "tpm_")
+
 ```
 
 ## Read in the promoter features data
@@ -65,7 +69,8 @@ tpm_matrix <- tpm %>%
 # And z-scale each row.
 tpm_scaled <- t(scale(t(tpm_matrix)))
 
-# Remove NAs with the complete.cases function
+# we want to be sure that we are not removing rows that only have one fractsion. currently we are not sure... 
+# Remove NAs with the complete.cases function; removes entire line
 ?complete.cases
 tpm_scaled <- tpm_scaled[complete.cases(tpm_scaled),]
 
@@ -84,16 +89,76 @@ ggplot(promoter_features_df,
   geom_point(data = promoter_features_df %>% filter(tpm_total < 0.001),
              shape = 17, alpha = 0.7) +
   geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
-  # stat_cor() +
+  stat_cor() +
   scale_x_continuous(expand = c(0,0)) +
   scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
-  ggtitle("Expression vs. promoter binding events") + 
+  ggtitle("Expression vs. promoter binding events - Total") + 
   xlab(expression('Number of TFs')) +
   ylab(expression(log[2](TPM)))
+
 ```
 
 ```{r}
 # Now plot this for each subcellular fraction
+
+colnames(promoter_features_df)
+# tpm_nuclear_fraction, tpm_cytosolic_fraction, tpm_membrane_fraction, tpm_insoluble_cytoplasmic_fraction
+
+
+# 1) tpm_nuclear_fraction
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_nuclear_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_nuclear_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Expression vs. promoter binding events - nuclear fraction") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+# tpm_nuclear_fraction, tpm_cytosolic_fraction, tpm_membrane_fraction, tpm_insoluble_cytoplasmic_fraction
+
+# 2) tpm_cytosolic_fraction,
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_cytosolic_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_cytosolic_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Expression vs. promoter binding events - cytosolic fraction") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+# 3) tpm_membrane_fraction,
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_membrane_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_membrane_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Expression vs. promoter binding events - membrane fraction") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+# 4) tpm_insoluble_cytoplasmic_fraction,
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_insoluble_cytoplasmic_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_insoluble_cytoplasmic_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Expression vs. promoter binding events - insoluble_cytoplasmic fraction") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
 ```
 
 
@@ -101,7 +166,42 @@ ggplot(promoter_features_df,
 # We can see this from the trend lines that lncRNAs are less expressed,
 # but here's another way of looking at that.
 ggplot(promoter_features_df, aes(x = log2(tpm_total + 0.01), color = gene_type))+
-  geom_density()
+  geom_density()+
+  ggtitle("Density plot - total")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+
+# tpm_nuclear_fraction, tpm_cytosolic_fraction, tpm_membrane_fraction, tpm_insoluble_cytoplasmic_fraction
+
+ggplot(promoter_features_df, aes(x = log2(tpm_nuclear_fraction + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("Density plot - nuclear fraction")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+ggplot(promoter_features_df, aes(x = log2(tpm_cytosolic_fraction + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("Density plot - cytosolic fraction")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+ggplot(promoter_features_df, aes(x = log2(tpm_membrane_fraction + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("Density plot - membrane fraction")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+ggplot(promoter_features_df, aes(x = log2(tpm_insoluble_cytoplasmic_fraction + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("Density plot - insoluble cytoplasmic fraction")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+
+
+
+
 ```
 
 ## Now we can define reservoirs in HEPG2
@@ -134,6 +234,7 @@ promoter_features_df <- merge(promoter_features_df, k562_reservoir)
 res_status <- promoter_features_df %>% 
   group_by(hepg2_reservoir, k562_reservoir, k562_conservative_reservoir) %>%
   summarize(count = n())
+
 ```
 
 ```{r}
@@ -150,3 +251,154 @@ There's a lot to explore here. We have some potential analyses that you can purs
 3. Are there any mRNAs that are exclusively in the nuclear fraction?
 4. What does the expression of the K562 reservoirs look like in HEPG2 in terms of expression? Are they more lowly expressed? Or does their trend follow the binding vs expression trend for non-K562 reservoirs?
 
+```{r}
+# filter for high binders 
+promoter_features_df <- read.csv("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv")
+
+promoter_features_high_binders_df <- promoter_features_df %>% filter(number_of_dbp > 300)
+
+
+# Now we can merge in the TPM data to this data.frame
+promoter_features_high_binders_df <- merge(promoter_features_high_binders_df, tpm)
+
+# Remember this plot!
+ggplot(promoter_features_high_binders_df, aes(x = number_of_dbp)) +
+  geom_density()
+
+```
+
+
+## Plot the binding vs. expression
+
+```{r}
+# Total
+# We're plotting only a trend line here with geom_smooth
+# But we're also adding in the points for those with no expression (as triangle shapes)
+# The ones with high number of DBPs and no expression are our reservoirs
+ggplot(promoter_features_high_binders_df, 
+            aes(y = log2(tpm_total + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_high_binders_df %>% filter(tpm_total < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("high binders: Expression vs. promoter binding events - Total") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+```
+
+```{r}
+# Now plot this for each subcellular fraction
+
+# tpm_nuclear_fraction, tpm_cytosolic_fraction, tpm_membrane_fraction, tpm_insoluble_cytoplasmic_fraction
+
+# 1) tpm_nuclear_fraction
+ggplot(promoter_features_high_binders_df, 
+            aes(y = log2(tpm_nuclear_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_high_binders_df %>% filter(tpm_nuclear_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Expression vs. promoter binding events - nuclear fraction") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+# tpm_nuclear_fraction, tpm_cytosolic_fraction, tpm_membrane_fraction, tpm_insoluble_cytoplasmic_fraction
+
+# 2) tpm_cytosolic_fraction,
+ggplot(promoter_features_high_binders_df, 
+            aes(y = log2(tpm_cytosolic_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_high_binders_df %>% filter(tpm_cytosolic_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Expression vs. promoter binding events - cytosolic fraction") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+# 3) tpm_membrane_fraction,
+ggplot(promoter_features_high_binders_df, 
+            aes(y = log2(tpm_membrane_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_high_binders_df %>% filter(tpm_membrane_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Expression vs. promoter binding events - membrane fraction") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+# 4) tpm_insoluble_cytoplasmic_fraction,
+ggplot(promoter_features_high_binders_df, 
+            aes(y = log2(tpm_insoluble_cytoplasmic_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_high_binders_df %>% filter(tpm_insoluble_cytoplasmic_fraction < 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Expression vs. promoter binding events - insoluble_cytoplasmic fraction") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM)))
+
+```
+
+
+```{r}
+# We can see this from the trend lines that lncRNAs are less expressed,
+# but here's another way of looking at that.
+ggplot(promoter_features_high_binders_df, aes(x = log2(tpm_total + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("High binders:Density plot - total")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+
+# tpm_nuclear_fraction, tpm_cytosolic_fraction, tpm_membrane_fraction, tpm_insoluble_cytoplasmic_fraction
+
+ggplot(promoter_features_high_binders_df, aes(x = log2(tpm_nuclear_fraction + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("High binders: Density plot - nuclear fraction")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+ggplot(promoter_features_high_binders_df, aes(x = log2(tpm_cytosolic_fraction + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("High binders: Density plot - cytosolic fraction")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+ggplot(promoter_features_high_binders_df, aes(x = log2(tpm_membrane_fraction + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("High binders: Density plot - membrane fraction")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+
+ggplot(promoter_features_high_binders_df, aes(x = log2(tpm_insoluble_cytoplasmic_fraction + 0.01), color = gene_type))+
+  geom_density()+
+  ggtitle("High binders: Density plot - insoluble cytoplasmic fraction")+
+    xlab(expression(log[2](TPM) + 0.01)) +
+  ylab(expression('density'))
+```
+
+
+There's a lot to explore here. We have some potential analyses that you can pursue, or your group can decide on a direction that you're interested in.
+
+1. How does the binding vs. expression change for the high binding promoters (> ~300 DBPs) vs low binders? And does this trend change across subcellular fractions?
+2. For the genes that are exclusively in one fraction (i.e. exclusively nuclear) what do their promoter binding profiles have in common?
+3. Are there any mRNAs that are exclusively in the nuclear fraction?
+4. What does the expression of the K562 reservoirs look like in HEPG2 in terms of expression? Are they more lowly expressed? Or does their trend follow the binding vs expression trend for non-K562 reservoirs?
+
+
+```{r}
+
+
+
+
+```
