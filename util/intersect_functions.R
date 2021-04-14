@@ -503,14 +503,15 @@ make_promoter_binding_matrix <- function(peak_list, promoter) {
   promoter <- GRangesList(promoter) 
   
   promoter_peak_view <- lapply(promoter_coverage, extract_peak_view, promoter)
-<<<<<<< HEAD
+
+#<<<<<<< HEAD
   
   promoter_peak_matrix <- do.call(rbind, promoter_peak_view)
-=======
+#=======
 
   promoter_peak_matrix <- do.call(rbind, promoter_peak_view)
   
->>>>>>> origin/in_class
+#>>>>>>> origin/in_class
   
   if(as.character(strand(promoter[[1]])) == "-") {
     # Then flip the matrix so that downstream is always to the right
