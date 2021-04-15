@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GenomicRanges)
 library(Gviz)
-library(ggpubr)
+#library(ggpubr)
 source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/intersect_functions.R")
 ```
 
@@ -29,14 +29,14 @@ filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::
 names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/00_consensus_peaks/results/filtered_consensus/|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
 
 # Import annotations
-lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/00_consensus_peaks/results/genebody/lncrna_mrna_promoters.gtf")
+lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/00_consensus_peaks/results/promoters/lncrna_mrna_promoters.gtf")
 lncrna_mrna_genebody <- rtracklayer::import("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/00_consensus_peaks/results/genebody/lncrna_mrna_genebody.gtf")
 
 lncrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "lncRNA"]
 mrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "protein_coding"]
 ```
 
-# Make Data Frame: DBP & Number of Genes Bound
+# Make Data Frame: DBP, Number of Genes Bound, and Peak Length
 
 ```{r}
 num_peaks_df <- data.frame("dbp" = names(filtered_consensus_peaks),
@@ -154,7 +154,8 @@ summary(num_ovl)
 
 ```
 
-Plot peak_occurence_df
+# Plot peak_occurence_df
+
 ```{r}
 
 g <- ggplot(peak_occurence_df, aes(x = number_of_dbp))
@@ -168,7 +169,8 @@ g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
 ggsave("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/01_global_peak_properties/figures/DBPs_distribution.png", height = 5, width = 8)
 ```
 
-Dive deeper into genes with num of DBPs >= 300
+# Dive deeper into genes with num of DBPs >= 300
+
 ```{r}
 high_dense_genes <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp >= 300)
 
