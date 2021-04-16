@@ -1,0 +1,153 @@
+---
+title: "04_01_RNAseq_Design"
+author: "James Pratt"
+date: "4/16/2021"
+output: html_document
+---
+
+Goal: To make the RNAseq design file required to run RNAseq to be analyzed in 04_resevoir_analysis.Rmd
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = FALSE)
+library(tidyverse)
+library(httr)
+library(janitor)
+```
+
+[Encode Link] ("https://www.encodeproject.org/report/?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all&advancedQuery=date_released:[2009-01-01%20TO%202021-12-31]")
+
+Retrieve RNAseq count data from encode:
+```{bash}
+# You'll want to change directory to the rnaseq directory for this following bit.
+# Retrieve experiment info table
+# cd to rnaseq directory (/scratch/Shares/rinnclass/<your_dir>/rnaseq)
+wget -O samples.txt "https://www.encodeproject.org/report.tsv?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all&advancedQuery=date_released:[2009-01-01%20TO%202021-12-31]"
+
+# Retrieve fastq file urls
+wget -O files.txt "https://www.encodeproject.org/batch_download/?type=Experiment&status=released&assay_slims=Transcription&assay_slims=Transcription&replicates.library.biosample.donor.organism.scientific_name=Homo+sapiens&biosample_ontology.term_name=HepG2&biosample_ontology.classification=cell+line&assay_title=total+RNA-seq&files.read_length=50&limit=all&advancedQuery=date_released:[2009-01-01%20TO%202021-12-31]"
+
+# Now cd to the rnaseq/fastq directory 
+# If the fastq directory doesn't exist, let's create it.
+# You can either use the terminal and mkdir or create the directory in R.
+# if(!dir.exists("rnaseq/fastq")) dir.create("rnaseq/fastq")
+# Download the fastq files -- ~50 GB
+# xargs -L 1 curl -O -J -L < files.txt
+```
+
+So now we have the samples (in this case, cellular fractionations from HepG2 cell line), and we want to read this into R to start making the design file.
+```{r}
+# We'll also rename this Accession column to clarify between experiment_accession and file_accession.
+samples <- read.table("rnaseq/samples.txt",
+                      sep = "\t", skip = 1, header = T) %>%
+  dplyr::rename(experiment_accession = Accession) 
+```
+
+Now we are going to slowly build this samplesheet which will be used in the later RNAseq run. This requires the httr package. 
+
+```{r}
+# First we need a function  to query their api.
+# A basic API query for a REST API is made in the form of an http request (just like when you visit a website)
+# Instead of sending the information to your browser though, we'll just capture this information in text format.
+
+# We'll use for this the R library httr
+library(httr)
+# The basic way to retrieve data from a rest API is with a GET request. 
+(resp <- GET("http://httpbin.org/get"))
+
+# This returns to us a response object which contains information about the request made as well as some accompanying data.
+# In our case we want to query the ENCODE API using the experiment accession number and request information on the md5sum, number of reads, etc.
+# The base url we'll use for querying ENCODE is as follows:
+# https://www.encodeproject.org/report.tsv?
+# You can see from this that we expect the data to be returned in a tsv -- tab separated values format.
+
+# Let's look at an example request for this experiment accession: ENCSR541TIG
+request_url <- "https://www.encodeproject.org/report.tsv?type=File&status=released&file_format=fastq&dataset=%2Fexperiments%2FENCSR541TIG%2F&field=accession&field=read_count&field=md5sum&field=controlled_by&field=paired_end&field=paired_with&field=replicate&field=target"
+# Let's break this down into your parts.
+# Just like a function, we have paramters and accomanying values separated by equal signs.
+# https://www.encodeproject.org/report.tsv?type=File&status=released&file_format=fastq
+# Here's where we request this particular accession
+# dataset=%2Fexperiments%2FENCSR541TIG%2F
+
+# And the field parameter is where we tell it which columns or which pieces of data we want to get.
+# Here we're retrieving read_count, md5sum, controlled_by, paired_end, paired_with, replicate, and target
+# field=read_count&field=md5sum&field=controlled_by&field=paired_end&field=paired_with&field=replicate&field=target
+
+
+# Paste this in your browswer address bar and you'll get a preview of the data we're about to retrieve.
+# https://www.encodeproject.org/report.tsv?type=File&status=released&file_format=fastq&dataset=%2Fexperiments%2FENCSR541TIG%2F&field=accession&field=read_count&field=md5sum&field=controlled_by&field=paired_end&field=paired_with&field=replicate&field=target
+
+# Let's use the httr to retreive this same data into our r session
+(resp <- GET(request_url))
+# This object contains the data we want, but also contains header information about the request, so let's extract just the data (body) portion
+body <- read_tsv(content(resp, "text"), skip = 1)
+# We can see that this now gives us a data frame of just the requested information.
+```
+
+Additionally, we are going to Get all of the samples above and plug these in, basically making a matrix where each cell is another matrix with all of the RNAseq reads for that sample.
+
+```{r}
+
+## This will generate a request URL in the format that ENCODE requires to retrieve each of the columns listed in the field default parameter (accession, read_count, md5sum, etc.)
+contstruct_query <- function(experiment_accession,
+                             base_url = "https://www.encodeproject.org/report.tsv?",
+                             file_format = "fastq",
+                             type = "File",
+                             status = "released",
+                             fields = c("accession", "read_count", "md5sum",
+                                        "controlled_by", "paired_end",
+                                        "paired_with", "replicate", "target")) {
+  query <- paste(list(paste0("type=", type),
+                      paste0("status=", status),
+                      paste0("file_format=", file_format),
+                      paste0("dataset=%2Fexperiments%2F", experiment_accession, "%2F"),
+                      map_chr(fields, ~paste0("field=", .))) %>%
+                   flatten(),
+                 collapse = "&")
+  url <- paste0(base_url, query)
+  return(url)
+}
+
+# This function actually makes the request and returns the data only (without the response headers) in a data.frame format.
+encode_file_info <- function(experiment_accession,
+                             base_url = "https://www.encodeproject.org/report.tsv?",
+                             file_format = "fastq",
+                             type = "File",
+                             status = "released",
+                             fields = c("accession", "read_count", "md5sum",
+                                        "controlled_by", "paired_end",
+                                        "paired_with", "replicate", "target")) {
+  path <- "report.tsv?"
+  base_url <- modify_url("https://www.encodeproject.org/", path = path)
+  url <- contstruct_query(experiment_accession,
+                          base_url = base_url,
+                          file_format,
+                          type,
+                          status,
+                          fields)
+  resp <- GET(url)
+  if (http_error(resp)) {
+    error_message <- content(resp, type = "text/html", encoding = "UTF-8") %>%
+      xml_find_all("//p") %>%
+      xml_text() %>%
+      first()
+    stop(
+      sprintf(
+        "ENCODE API request failed [%s]\n%s",
+        status_code(resp),
+        error_message
+      ),
+      call. = FALSE
+    )
+  }
+  
+  if (http_type(resp) != "text/tsv") {
+    stop("API did not return text/tsv", call. = FALSE)
+  }
+  body <- read_tsv(content(resp, "text"), skip = 1) %>%
+    clean_names()
+  return(body)
+}
+```
+
+NEED to finish this file on Monday.

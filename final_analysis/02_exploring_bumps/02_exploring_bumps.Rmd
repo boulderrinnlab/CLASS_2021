@@ -1,30 +1,27 @@
 ---
-title: "02_exploring_bumps"
-author: "James Pratt"
-date: "4/14/2021"
+title: "Exploring Bumps"
+author: "Group 2"
 output: html_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+source("../../util/plotting_functions.R")
+source("../../util/_setup.R")
 ```
 
-## R Markdown
+Load in our consensus peaks and counted peak occurrence matrices.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+```{r setup, include=FALSE}
+filtered_consensus_peaks_files <- list.files("../00_consensus_peaks/results/chipseq/filtered_consensus/",
+                                             pattern = "*.bed",
+                                             full.names = TRUE)
+filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
+num_peaks_df <- read_csv('./analysis/00_consensus_peaks/results/num_peaks_df.csv')
+peak_occurence_df <- read_csv('./analysis/01_consensus_peaks/results/peak_occurence_df.csv')
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
-
-```{r pressure, echo=FALSE}
-plot(pressure)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+styff

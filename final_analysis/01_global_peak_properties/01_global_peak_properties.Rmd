@@ -6,7 +6,7 @@ output: html_document
 editor_options: 
   chunk_output_type: console
 ---
-set working directory to the final analysis folder where all of the 0X folders are
+set working directory to 01_global_peak_properties
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -15,72 +15,33 @@ library(tidyverse)
 library(GenomicRanges)
 library(Gviz)
 library(ggplot2)
-source("../util/intersect_functions.R")
-source("../util/plotting_functions.R")
-source("../util/_setup.R")
+source("../../util/intersect_functions.R")
+source("../../util/plotting_functions.R")
+source("../../util/_setup.R")
 
 ```
 
 
-
-converting tag matrix:
-```{r}
-#Load annotaitons
-#ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_32/gencode.v32.annotation.gtf.gz
-gencode_gr <- rtracklayer::import("scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
-g2s <- gencode_gr[gencode_gr$type == "gene"] %>%
-  as.data.frame() %>%
-  dplyr::select(gene_id, gene_name)
-
-HEPG2_promoter_df <- read.table("results/lncrna_mrna_promoter_peak_occurence_matrix-1.tsv",
-                              sep = " ", header = TRUE) %>%
-  pivot_longer(2:ncol(.), names_to = "gene_id", values_to = "bound") %>%
-  filter(bound == 1) %>%
-  merge(g2s) %>%
-  mutate(cell_type = "HEPG2")
-
-k562_promoter_df <- read.table("results/k562_lncrna_mrna_promoter_peak_occurence_matrix-1.tsv",
-                              sep = " ", header = TRUE) %>%
-  pivot_longer(2:ncol(.), names_to = "gene_id", values_to = "bound") %>%
-  filter(bound == 1) %>%
-  merge(g2s) %>%
-  mutate(cell_type = "K562")
-
-promoter_df <- bind_rows(HEPG2_promoter_df, k562_promoter_df) %>%
-  pivot_wider(names_from = cell_type, values_from = bound, values_fill = 0) %>%
-  write_csv("results/promoter_dbp_map.csv")
-
-firre_promoter <- promoter_df %>%
-  filter(gene_name == "FIRRE", K562 == 1, HEPG2 == 1)
-
-shf_promoter <- promoter_df %>%
-  filter(gene_name == "SHF", K562 == 1, HEPG2 == 1)
-
-shf_promoter$dbp[shf_promoter$dbp %in% firre_promoter$dbp]
-
-```
-
-
-global peak properties:
+import filtered consensus peaks and annotations:
 ```{r}
 
-filtered_consensus_peaks_files <- list.files("/scratch/Shares/rinnclass/data/filtered_consensus_peaks", 
+filtered_consensus_peaks_files <- list.files("../00_consensus_peaks/results/chipseq/filtered_consensus_peaks", 
                                              pattern = "*.bed",
                                              full.names = TRUE)
 filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
 
-names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/filtered_consensus_peaks/|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
+names(filtered_consensus_peaks) <- gsub("../00_consensus_peaks/results/chipseq/filtered_consensus_peaks/|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
 
 # Import annotations
-lncrna_mrna_promoters <- rtracklayer::import("results/lncrna_mrna_promoters.gtf")
-lncrna_mrna_genebody <- rtracklayer::import("results/lncrna_mrna_genebody.gtf")
+lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/results/lncrna_mrna_promoters.gtf")
+lncrna_mrna_genebody <- rtracklayer::import("/scratch/Shares/rinnclass/results/lncrna_mrna_genebody.gtf")
 
 lncrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "lncRNA"]
 mrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "protein_coding"]
 ```
 
 
-
+make num_peaks_df to hold our data:
 ```{r}
 num_peaks_df <- data.frame("dbp" = names(filtered_consensus_peaks),
                            "num_peaks" = sapply(filtered_consensus_peaks, length))
@@ -90,6 +51,7 @@ num_peaks_df <- data.frame("dbp" = names(filtered_consensus_peaks),
 num_peaks_df$total_peak_length <- sapply(filtered_consensus_peaks, function(x) sum(width(x)))
 
 ```
+
 
 ```{r}
 
@@ -101,13 +63,10 @@ num_peaks_df$peaks_overlapping_lncrna_promoters <- rowSums(promoter_peak_counts[
 
 num_peaks_df$peaks_overlapping_mrna_promoters <- rowSums(promoter_peak_counts[,mrna_gene_ids])
 
-
-
 ```
 
+
 ```{r}
-
-
 
 genebody_peak_counts <- count_peaks_per_feature(lncrna_mrna_genebody, 
                                                 filtered_consensus_peaks, 
@@ -158,13 +117,7 @@ stopifnot(all(colnames(promoter_peak_occurence) == lncrna_mrna_promoters$gene_id
 
 
 
-# We are going to use the promoter peak occurence matrix above to essentially
-# recreate a working version of num_peaks_df. However we will now organize it more
-# this is a good example of how to set up a bunch of columns in dataframe. using the
-# data.frame() fucntion.
-# essentially we will index values from the objects we created and make a .CSV 
-# to keep adding onto in future classes.
-
+#make a df to put our info in
 peak_occurence_df <- data.frame("gene_id" = colnames(promoter_peak_occurence),
                                 "gene_name" = lncrna_mrna_promoters$gene_name,
                                 "gene_type" = lncrna_mrna_promoters$gene_type,
