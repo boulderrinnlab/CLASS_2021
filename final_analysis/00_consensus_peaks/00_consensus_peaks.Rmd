@@ -10,16 +10,17 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GenomicRanges)
-source("../../util/plotting_functions.R")
-source("../../util/intersect_functions.R")
+source("../util/plotting_functions.R")
+source("../util/intersect_functions.R")
+
 ```
 
 Note: pay attention to file paths
 
 
 First, download data to desired directory ('/scratch/Shares/rinnclass/data/XXXX' in our case) using wget.
-
-Website: https://www.dropbox.com/sh/76etjxl10v2hcuc/AAAIk9a6aMhw8CvUtKlFnMn6a?dl=0
+Download gencode annotation from:
+ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_32/gencode.v32.annotation.gtf.gz
 
 Create and export consensus peaks from individual peak files.
 
