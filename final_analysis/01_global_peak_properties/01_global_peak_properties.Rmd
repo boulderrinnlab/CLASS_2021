@@ -3,6 +3,8 @@ title: "01_global_peak_properties"
 author: "James Pratt"
 date: "4/14/2021"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 set working directory to the final analysis folder where all of the 0X folders are
 
@@ -25,7 +27,7 @@ converting tag matrix:
 ```{r}
 #Load annotaitons
 #ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_32/gencode.v32.annotation.gtf.gz
-gencode_gr <- rtracklayer::import("data/gencode.v32.annotation.gtf")
+gencode_gr <- rtracklayer::import("scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
 g2s <- gencode_gr[gencode_gr$type == "gene"] %>%
   as.data.frame() %>%
   dplyr::select(gene_id, gene_name)
@@ -46,7 +48,7 @@ k562_promoter_df <- read.table("results/k562_lncrna_mrna_promoter_peak_occurence
 
 promoter_df <- bind_rows(HEPG2_promoter_df, k562_promoter_df) %>%
   pivot_wider(names_from = cell_type, values_from = bound, values_fill = 0) %>%
-  write_csv("promoter_dbp_map.csv")
+  write_csv("results/promoter_dbp_map.csv")
 
 firre_promoter <- promoter_df %>%
   filter(gene_name == "FIRRE", K562 == 1, HEPG2 == 1)
@@ -70,8 +72,8 @@ filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::
 names(filtered_consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/filtered_consensus_peaks/|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
 
 # Import annotations
-lncrna_mrna_promoters <- rtracklayer::import("./00_consensus_peaks/lncrna_mrna_promoters.gtf")
-lncrna_mrna_genebody <- rtracklayer::import("/scratch/Shares/rinnclass/YOUR_FOLDER/X/results/lncrna_mrna_genebody.gtf")
+lncrna_mrna_promoters <- rtracklayer::import("results/lncrna_mrna_promoters.gtf")
+lncrna_mrna_genebody <- rtracklayer::import("results/lncrna_mrna_genebody.gtf")
 
 lncrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "lncRNA"]
 mrna_gene_ids <- lncrna_mrna_genebody$gene_id[lncrna_mrna_genebody$gene_type == "protein_coding"]
