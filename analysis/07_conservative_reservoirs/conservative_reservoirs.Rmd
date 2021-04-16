@@ -1,0 +1,61 @@
+---
+title: "Conservative reservoirs"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = FALSE)
+library(tidyverse)
+library(Rsubread)
+source("../../util/plotting_functions.R")
+source("../../util/_setup.R")
+```
+
+```{r}
+samplesheet <- read_csv("../../rnaseq/samplesheet.csv")
+
+peak_occurrence_df <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv")
+
+
+promoters_df <- rtracklayer::import("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_promoters.gtf") %>%
+  as.data.frame() %>%
+  dplyr::select("gene_id", "seqnames", "start", "end", "strand") 
+names(promoters_df) <- c("GeneID", "Chr", "Start", "End", "Strand")
+promoters_df[which(promoters_df$Start < 0), "Start"] <- 0
+write.table(promoters_df, "results/gencode_v32_promoters_6kb.SAF", sep = "\t",
+            quote = F, row.names = F)
+
+# Run feature counts on promoter windows
+fl <- list.files("../../rnaseq/results/star_salmon/", pattern = ".bam$", full.names = TRUE)
+
+counts <- featureCounts(fl, 
+                        annot.ext = "results/gencode_v32_promoters_6kb.SAF", 
+                        isPairedEnd = TRUE, nthreads = 16)
+
+write_rds(counts, "promoter_counts.rds")
+promoter_counts <- read_rds("promoter_counts.rds")
+```
+
+```{r}
+rpk <- promoter_counts$counts / (promoter_counts$annotation$Length/1000)
+expression <- data.frame("rpk" = rpk) %>%
+  rownames_to_column("gene_id") %>%
+  pivot_longer(2:ncol(.), names_to = "sample", values_to = "rpk")
+expression_summary <- expression %>%
+  group_by(sample) %>%
+  summarize(total_rpk = sum(rpk, na.rm = T))
+expression_summary$rpk_m <- expression_summary$total_rpk / 1e6
+expression <- merge(expression, expression_summary)
+expression$tpm <- expression$rpk / expression$rpk_m
+promoter_expression <- expression %>% group_by(gene_id) %>%
+  summarize(promoter_median_tpm = median(tpm),
+            promoter_max_tpm = max(tpm))
+peak_occurrence_df <- merge(peak_occurrence_df, promoter_expression)
+peak_occurrence_df <- peak_occurrence_df %>% mutate(conservative_reservoir = ifelse(promoter_median_tpm < 0.01 & reservoir == 1, 1, 0))
+
+```
+
+
