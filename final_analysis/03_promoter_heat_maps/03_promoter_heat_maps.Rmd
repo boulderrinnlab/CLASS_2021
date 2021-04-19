@@ -1,4 +1,4 @@
----
+read.c---
 title: "03_promoter_heat_maps"
 author: "James Pratt"
 date: "4/14/2021"
@@ -40,7 +40,7 @@ To make the actual promoter heat map (as in, show peaks for all DNA binding prot
 
 ```{r}
 # Example gene promoter heat map, can search for any gene name that is in the all_promoters_gr - use the num_peaks_df to determine genes of interest. 
-firre_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "FIRRE"]
-firre_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
-plot_promoter_peak_matrix(firre_promoter_matrix, gene_name = "FIRRE", save_pdf = TRUE)
+ZNF280B_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "ZNF280B"]
+ZNF280B_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, firre_promoter)
+plot_promoter_peak_matrix(ZNF280B_promoter_matrix, gene_name = "ZNF280B", save_pdf = TRUE)
 ```
