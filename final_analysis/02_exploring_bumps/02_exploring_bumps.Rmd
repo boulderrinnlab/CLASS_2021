@@ -1,30 +1,161 @@
 ---
-title: "02_exploring_bumps"
-author: "James Pratt"
-date: "4/14/2021"
+title: "Exploring Bumps"
+author: "Group 2"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
-```{r setup, include=FALSE}
+```{r setup, include=FALSE,warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(tidyverse)
+source("../../util/plotting_functions.R")
+source("../../util/_setup.R")
+source('../../util/intersect_functions.R')
 ```
 
-## R Markdown
+Load in our consensus peaks and peak occurrence matrices.
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r, include=FALSE,warning=FALSE}
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+filtered_consensus_peaks_files <- list.files("../00_consensus_peaks/results/chipseq/filtered_consensus/",
+                                             pattern = "*.bed",
+                                             full.names = TRUE)
+filtered_consensus_peaks <- lapply(filtered_consensus_peaks_files, rtracklayer::import)
+names(filtered_consensus_peaks) <- gsub("../00_consensus_peaks/results/chipseq/filtered_consensus//|_filtered_consensus_peaks.bed", "", filtered_consensus_peaks_files)
+num_peaks_df <- read_csv('../01_global_peak_properties/results/num_peaks_df.csv')
+peak_occurrence_df <- read_csv('../01_global_peak_properties/results/peak_occurence_dataframe.csv')
 ```
 
-## Including Plots
+Now load in promoter and gene body information for lncrnas and mrnas.
+```{r, include=FALSE,warning=FALSE}
+#gene bodies
 
-You can also embed plots, for example:
+lncrna_mrna_genebody <- rtracklayer::import("../00_consensus_peaks/results/lncrna_mrna_genebody.gtf")
+mrna_genebody <- rtracklayer::import("../00_consensus_peaks/results/mrna_genebody.gtf")
+lncrna_genebody <- rtracklayer::import("../00_consensus_peaks/results//lncrna_genebody.gtf")
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+#promoters
+lncrna_mrna_promoters <- rtracklayer::import("../00_consensus_peaks/results/lncrna_mrna_promoters.gtf")
+lncrna_promoters <- rtracklayer::import("../00_consensus_peaks/results/lncrna_promoters.gtf")
+mrna_promoters <- rtracklayer::import("../00_consensus_peaks/results/mrna_promoters.gtf")
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+
+Convert GRanges to data frames and filter peak occurrence for lncrna or mrna peaks.
+
+```{r, include=FALSE,warning=FALSE}
+#g ranges to data frames
+mrna_promoters_df <- as.data.frame(mrna_promoters)
+lncrna_promoters_df <- as.data.frame(lncrna_promoters)
+
+lncrna_genebodies_df <- as.data.frame(lncrna_genebody)
+lncrna_genebodies_df <- as.data.frame(mrna_genebody)
+lncrna_mrna_genebodies_df <-as.data.frame(lncrna_mrna_genebody)
+
+
+#filter out the lncrnas, etc
+peak_occurrence_lncrna <- filter(peak_occurrence_df, gene_type == "lncRNA")
+peak_occurrence_mrna <- filter(peak_occurrence_df, gene_type == "protein_coding")
+
+```
+
+Convert them to data frames.
+
+```{r, include=FALSE,warning=FALSE}
+#g ranges to data frames
+mrna_promoters_df <- as.data.frame(mrna_promoters)
+lncrna_promoters_df <- as.data.frame(lncrna_promoters)
+
+lncrna_genebodies_df <- as.data.frame(lncrna_genebody)
+lncrna_genebodies_df <- as.data.frame(mrna_genebody)
+lncrna_mrna_genebodies_df <-as.data.frame(lncrna_mrna_genebody)
+
+
+#filter out the lncrnas, etc
+peak_occurence_lncrna <- filter(peak_occurrence_df, gene_type == "lncRNA")
+peak_occurence_mrna <- filter(peak_occurrence_df, gene_type == "protein_coding")
+```
+
+Now do some plotting!
+Plot distribution of DBPs for all promoters. 
+
+```{r, include=FALSE,warning=FALSE}
+#plotting
+g <- ggplot(peak_occurrence_df, aes(x = number_of_dbp))
+g + geom_density(alpha = 0.2, color = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes")
+
+```
+
+
+Now do the same, but separate lncRNA and mRNA promoters binding events.
+
+```{r, include=FALSE,warning=FALSE}
+#now, see if the double peak occurs for lncRNA and mRNA promoters
+g <- ggplot(peak_occurrence_df, aes(x = number_of_dbp,fill = gene_type, color = gene_type))
+g + geom_density(alpha = 0.2, color = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Promoter binding events",
+          subtitle = "mRNA and lncRNA genes")
+
+```
+
+
+Now, calculate peak occurrences for gene bodies and see if a similar trend occurs.
+
+```{r, include=FALSE,warning=FALSE}
+#calculate peak counts for gene bodies
+genebody_peak_occurrence <- count_peaks_per_feature(lncrna_mrna_genebody, 
+                                                filtered_consensus_peaks, 
+                                                type = "occurrence")
+
+genebody_peak_occurrence_df <- data.frame("gene_id" = colnames(genebody_peak_occurrence),
+                                "gene_name" = lncrna_mrna_genebody$gene_name,
+                                "gene_type" = lncrna_mrna_genebody$gene_type,
+                                "chr" = lncrna_mrna_genebody@seqnames,   
+                                "3kb_up_tss_start" = lncrna_mrna_genebody@ranges@start,
+                                "strand" = lncrna_mrna_genebody@strand,
+                                "number_of_dbp" = colSums(genebody_peak_occurrence))
+
+
+```
+
+
+Let's plot and see!
+
+```{r, include=FALSE,warning=FALSE}
+#now, see if the double peak occurs for lncRNA and mRNA promoters
+g <- ggplot(genebody_peak_occurrence_df, aes(x = number_of_dbp))
+g + geom_density(alpha = 0.2, color = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Gene Body binding events",
+          subtitle = "lncRNA and mRNA gene bodies")
+
+```
+
+
+And now, separate by gene body type (lncRNA or mRNA).
+
+```{r, include=FALSE,warning=FALSE}
+#now, see if the double peak occurs for lncRNA and mRNA promoters
+g <- ggplot(genebody_peak_occurrence_df, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
+g + geom_density(alpha = 0.2, color = "#424242") +
+  theme_paperwhite() +
+  xlab(expression("Number of DBPs")) +
+  ylab(expression("Density")) +
+  ggtitle("Gene Body binding events",
+          subtitle = "lncRNA and mRNA gene bodies")
+
+```
+

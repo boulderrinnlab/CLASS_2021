@@ -1,6 +1,6 @@
 ---
 title: "00_consensus_peaks"
-author: "James Pratt"
+author: "Group 2"
 date: "4/14/2021"
 output: html_document
 ---
@@ -10,16 +10,18 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GenomicRanges)
-source("../util/plotting_functions.R")
-source("../util/intersect_functions.R")
+source("../../util/plotting_functions.R")
+source("../../util/intersect_functions.R")
+
 ```
 
 Note: pay attention to file paths
 
+For information on obtaining Chip Seq data, reference 02_designfile.Rmd
 
-First, download data to desired directory ('/scratch/Shares/rinnclass/data/XXXX' in our case) using wget.
-
-Website: https://www.dropbox.com/sh/76etjxl10v2hcuc/AAAIk9a6aMhw8CvUtKlFnMn6a?dl=0
+Also download data to desired directory ('/scratch/Shares/rinnclass/data/XXXX' in our case) using wget.
+Download gencode annotation from:
+ftp://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_32/gencode.v32.annotation.gtf.gz
 
 Create and export consensus peaks from individual peak files.
 
@@ -55,7 +57,7 @@ for(i in 1:length(filtered_consensus_peaks)) {
 
 ```
 
-Exporting Genomic features that we will use frequently and save to results folder
+Exporting Genomic features that we will use frequently and save to results folder.
 
 1) Promoter Regions
 ```{r}
