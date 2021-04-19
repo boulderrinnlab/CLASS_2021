@@ -17,7 +17,7 @@ source("../../util/_setup.R")
 ```{r}
 samplesheet <- read_csv("../../rnaseq/samplesheet.csv")
 
-peak_occurrence_df <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv")
+peak_occurrence_df <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/06_defining_reservoirs/results/promoter_features_df.csv")
 
 
 promoters_df <- rtracklayer::import("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_promoters.gtf") %>%
@@ -53,9 +53,26 @@ expression$tpm <- expression$rpk / expression$rpk_m
 promoter_expression <- expression %>% group_by(gene_id) %>%
   summarize(promoter_median_tpm = median(tpm),
             promoter_max_tpm = max(tpm))
-peak_occurrence_df <- merge(peak_occurrence_df, promoter_expression)
-peak_occurrence_df <- peak_occurrence_df %>% mutate(conservative_reservoir = ifelse(promoter_median_tpm < 0.01 & reservoir == 1, 1, 0))
 
+peak_occurrence_df <- merge(peak_occurrence_df, promoter_expression)
+peak_occurrence_df <- peak_occurrence_df %>% mutate(hepg2_conservative_reservoir = ifelse(promoter_median_tpm < 0.01 & hepg2_reservoir == 1, 1, 0))
+table(peak_occurrence_df$hepg2_conservative_reservoir)
 ```
+
+```{r}
+ggplot(peak_occurrence_df, aes(x = number_of_dbp, fill = factor(hepg2_conservative_reservoir))) +
+  geom_density(alpha = 0.3)
+
+ggplot(peak_occurrence_df, aes(x = number_of_dbp, fill = factor(hepg2_reservoir))) +
+  geom_density(alpha = 0.3)
+
+table(peak_occurrence_df$hepg2_reservoir)
+```
+
+```{r}
+write_csv(peak_occurrence_df, "results/peak_occurrence_df.csv")
+```
+
+
 
 
