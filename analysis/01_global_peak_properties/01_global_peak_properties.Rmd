@@ -10,8 +10,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(GenomicRanges)
 library(Gviz)
-#library(ggpubr)
 source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/intersect_functions.R")
+source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/_setup.R")
 ```
 
 # Load Filtered Consensus Peaks, Promoter Regions, & Gene Body
@@ -76,7 +76,7 @@ num_peaks_df$peaks_overlapping_genebody <- rowSums(genebody_peak_counts)
 num_peaks_df$peaks_overlapping_lncrna_genebody <- rowSums(genebody_peak_counts[,lncrna_gene_ids])
 num_peaks_df$peaks_overlapping_mrna_genebody <- rowSums(genebody_peak_counts[,mrna_gene_ids])
 
-
+#The counts produced here are not directly used in the pipeline, however, this data is useful for other analysis.
 ```
 
 # Merge with Human TF Database
@@ -124,6 +124,7 @@ stopifnot(all(colnames(promoter_peak_occurence) == lncrna_mrna_promoters$gene_id
 peak_occurence_df <- data.frame("gene_id" = colnames(promoter_peak_occurence),
                                 "gene_name" = lncrna_mrna_promoters$gene_name,
                                 "gene_type" = lncrna_mrna_promoters$gene_type,
+                                #"gene_length" = 
                                 "chr" = lncrna_mrna_promoters@seqnames,   
                                 "3kb_up_tss_start" = lncrna_mrna_promoters@ranges@start,
                                 "strand" = lncrna_mrna_promoters@strand,
@@ -139,7 +140,7 @@ unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_db
 
 summary(unbound_promoters)
 # here is just a simple index and filter of the index to have at least 1 dbp bound.
-write_csv(unbound_promoters, "/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/01_global_peak_properties/results/unbound_lncrna_mrna_promoters.csv")
+#There are no unbound promoters.
 ```
 
 # Find DBPs with no overlaps with promoter
@@ -169,17 +170,30 @@ g + geom_density(alpha = 0.2, color = "#424242", fill = "#424242") +
 ggsave("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/01_global_peak_properties/figures/DBPs_distribution.png", height = 5, width = 8)
 ```
 
-# Dive deeper into genes with num of DBPs >= 300
-
+# Find super promoter
+## Here we are defining super promoters as promoters that bind more than 350 different DBPs.
 ```{r}
-high_dense_genes <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp >= 300)
+super_promoter <- promoter_peak_occurence[, colSums(promoter_peak_occurence) > 350]
 
-#high_dense_genes$gene_type = "lncRNA" 
+super_promoter_dbps <- data.frame(dbp = rownames(super_promoter), num_super_promoter_overlaps = rowSums(super_promoter))
 
-interesting_id <- high_dense_genes$gene_id
+super_promoter_features <- merge(super_promoter_dbps, num_peaks_df)
 
-interesting_genes <- human_tfs %>% filter(ensembl_id %in% interesting_id)
+super_promoter_features <- dplyr::select(super_promoter_features, dbp, num_super_promoter_overlaps, everything() )
 
+super_promoter_features <- super_promoter_features %>%
+  mutate(percent_super_prom_ov = num_super_promoter_overlaps/peaks_overlapping_promoters * 100, 
+         percent_of_total_peaks_at_super_prom = num_super_promoter_overlaps/num_peaks * 100,
+         zincfinger = ifelse(grepl(" ZF",dbd), "ZF", "Other"))
+
+table(super_promoter_features$zincfinger)
+
+ggplot(super_promoter_features, aes(x = percent_super_prom_ov, color = zincfinger)) +
+  geom_density()
+ggplot(super_promoter_features, aes(x = percent_of_total_peaks_at_super_prom, y = percent_super_prom_ov)) + 
+  geom_point()
+
+write.csv(super_promoter_features, "/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/01_global_peak_properties/results/super_promoter_features.csv")
 
 ```
 
