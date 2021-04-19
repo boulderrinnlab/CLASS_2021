@@ -17,7 +17,7 @@ source('../../util/intersect_functions.R')
 
 Load in our consensus peaks and peak occurrence matrices.
 
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 
 filtered_consensus_peaks_files <- list.files("../00_consensus_peaks/results/chipseq/filtered_consensus/",
                                              pattern = "*.bed",
@@ -29,7 +29,7 @@ peak_occurrence_df <- read_csv('../01_global_peak_properties/results/peak_occure
 ```
 
 Now load in promoter and gene body information for lncrnas and mrnas.
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 #gene bodies
 
 lncrna_mrna_genebody <- rtracklayer::import("../00_consensus_peaks/results/lncrna_mrna_genebody.gtf")
@@ -46,7 +46,7 @@ mrna_promoters <- rtracklayer::import("../00_consensus_peaks/results/mrna_promot
 
 Convert GRanges to data frames and filter peak occurrence for lncrna or mrna peaks.
 
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 #g ranges to data frames
 mrna_promoters_df <- as.data.frame(mrna_promoters)
 lncrna_promoters_df <- as.data.frame(lncrna_promoters)
@@ -57,14 +57,14 @@ lncrna_mrna_genebodies_df <-as.data.frame(lncrna_mrna_genebody)
 
 
 #filter out the lncrnas, etc
-peak_occurrence_lncrna <- filter(peak_occurence, gene_type == "lncRNA")
-peak_occurrence_mrna <- filter(peak_occurence, gene_type == "protein_coding")
+peak_occurrence_lncrna <- filter(peak_occurrence_df, gene_type == "lncRNA")
+peak_occurrence_mrna <- filter(peak_occurrence_df, gene_type == "protein_coding")
 
 ```
 
 Convert them to data frames.
 
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 #g ranges to data frames
 mrna_promoters_df <- as.data.frame(mrna_promoters)
 lncrna_promoters_df <- as.data.frame(lncrna_promoters)
@@ -82,7 +82,7 @@ peak_occurence_mrna <- filter(peak_occurrence_df, gene_type == "protein_coding")
 Now do some plotting!
 Plot distribution of DBPs for all promoters. 
 
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 #plotting
 g <- ggplot(peak_occurrence_df, aes(x = number_of_dbp))
 g + geom_density(alpha = 0.2, color = "#424242") +
@@ -97,7 +97,7 @@ g + geom_density(alpha = 0.2, color = "#424242") +
 
 Now do the same, but separate lncRNA and mRNA promoters binding events.
 
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 #now, see if the double peak occurs for lncRNA and mRNA promoters
 g <- ggplot(peak_occurrence_df, aes(x = number_of_dbp,fill = gene_type, color = gene_type))
 g + geom_density(alpha = 0.2, color = "#424242") +
@@ -112,7 +112,7 @@ g + geom_density(alpha = 0.2, color = "#424242") +
 
 Now, calculate peak occurrences for gene bodies and see if a similar trend occurs.
 
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 #calculate peak counts for gene bodies
 genebody_peak_occurrence <- count_peaks_per_feature(lncrna_mrna_genebody, 
                                                 filtered_consensus_peaks, 
@@ -132,7 +132,7 @@ genebody_peak_occurrence_df <- data.frame("gene_id" = colnames(genebody_peak_occ
 
 Let's plot and see!
 
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 #now, see if the double peak occurs for lncRNA and mRNA promoters
 g <- ggplot(genebody_peak_occurrence_df, aes(x = number_of_dbp))
 g + geom_density(alpha = 0.2, color = "#424242") +
@@ -147,7 +147,7 @@ g + geom_density(alpha = 0.2, color = "#424242") +
 
 And now, separate by gene body type (lncRNA or mRNA).
 
-```{r setup, include=FALSE,warning=FALSE}
+```{r, include=FALSE,warning=FALSE}
 #now, see if the double peak occurs for lncRNA and mRNA promoters
 g <- ggplot(genebody_peak_occurrence_df, aes(x = number_of_dbp, fill = gene_type, color = gene_type))
 g + geom_density(alpha = 0.2, color = "#424242") +

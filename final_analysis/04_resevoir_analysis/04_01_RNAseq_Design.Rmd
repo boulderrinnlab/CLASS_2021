@@ -84,7 +84,7 @@ body <- read_tsv(content(resp, "text"), skip = 1)
 # We can see that this now gives us a data frame of just the requested information.
 ```
 
-Additionally, we are going to Get all of the samples above and plug these in, basically making a matrix where each cell is another matrix with all of the RNAseq reads for that sample.
+Now we are going to use some functions to retrieve the data from ENCODE required to make the samplesheet.
 
 ```{r}
 
@@ -150,4 +150,148 @@ encode_file_info <- function(experiment_accession,
 }
 ```
 
-NEED to finish this file on Monday.
+Now we will make a "matrix of matrices" that makes each cell of the sample sheet into its own embedded matrix that includes all of the information required to make the RNAseq design file.
+
+```{r}
+samples <- samples %>%
+  mutate(file_info = map(experiment_accession, ~ encode_file_info(.x)))
+
+# Note that in this new column we have a bunch of data.frames -- nested in our samples data.frame.
+# Let's retrieve one as an example
+file_info <- samples$file_info[[1]]
+```
+
+To improve readability of the data frame that is being written, we can unnest some of the matrices from their nested cells.
+
+```{r}
+# We also need to tell it which column we want to unnest.
+samples <- samples %>%
+  unnest(cols = file_info)
+```
+
+Now we have our completed sample sheet, we just need to clean this up and get it into the format that is required for nextflow.
+
+```{r}
+samples <- read.table("rnaseq/samples.txt",
+                      sep = "\t", skip = 1, header = T) %>%
+  dplyr::rename(experiment_accession = Accession) %>%
+  mutate(file_info = map(experiment_accession, ~ encode_file_info(.x))) %>%
+  unnest(file_info) %>% 
+  group_by(experiment_accession) %>%
+  mutate(rep_number = as.numeric(factor(replicate))) %>%
+  unite(sample_id, experiment_accession, rep_number, sep = "_rep") %>%
+  dplyr::select(sample_id, accession, Assay.title,
+                Biosample.summary, md5sum, paired_end_identifier) %>%
+  unite(fastq_file, sample_id, paired_end_identifier, sep = "_read", remove = F) %>%
+  mutate(fq_extension = ".fastq.gz") %>%
+  unite(fastq_file, fastq_file, fq_extension, sep = "", remove = F) %>%
+  unite(original_file, accession, fq_extension, sep = "")
+```
+
+Now from this data frame, we can "write" the design file required for nf-seq (the nextflow pipeline for RNAseq).
+
+```{r}
+# Rename the fastq files so that they contain the sample ID.
+rename_script <- samples %>%
+  dplyr::select(fastq_file, original_file) %>%
+  mutate(command = "mv") %>%
+  unite(command, command, original_file, fastq_file, sep = " ")
+# The result of this is that each row is a bash command.
+
+# We can write this out as a bash script with ?write_lines 
+# We include a shebang header line so that the script is interpreted by bash.
+
+write_lines(c("#!/bin/bash", rename_script$command), "rnaseq/fastq/rename.sh")
+# Here we use an R command to call bash and cd into that directory, then make the file executable, and then run it.
+# system("cd rnaseq/fastq; chmod u+x rename.sh; ./rename.sh")
+```
+
+Optionally, you can run the md5 checksums to make sure you have downloaded the correct data.
+
+```{r}
+# Let's create an md5.txt to run the checksums
+md5 <- samples %>% 
+  dplyr::select(md5sum, fastq_file) %>%
+  unite(line, md5sum, fastq_file, sep = "  ")
+write_lines(md5$line, "rnaseq/fastq/md5.txt")
+# Now let's run it.
+# system("cd rnaseq/fastq; md5sum -c md5.txt")
+```
+
+Now we can write out everything we have done as a clean samplesheet.
+
+```{r}
+# Let's create the sample sheet that we will use later
+# to do the RNA-seq analysis in R.
+samples <- samples %>%
+  dplyr::rename(fastq = fastq_file,
+                seq_type = Assay.title,
+                sample_name = Biosample.summary) %>%
+  # The minus sign will remove this column -- which we no longer need.
+  dplyr::select(-original_file) 
+
+
+# Now that we have it cleaned up, let's create one line for each replicate where the fastq read 1 and read 2 are in the same row.
+# For this we will use the pivot wider function
+# We need to tell the pivot_wider function which unique column combinations will specify each new row. 
+samplesheet <- samples
+samplesheet <- samplesheet %>%
+  pivot_wider(id_cols = c("sample_id", "seq_type", "sample_name"),
+              names_from = paired_end_identifier,
+              values_from = c("fastq", "md5sum"))
+
+
+# Harmonize the sample names with the design file.
+samplesheet <- samplesheet %>%
+  mutate(condition = gsub(" ", "_", sample_name) %>% tolower()) %>%
+  separate(sample_id, into = c("experiment_accession", "replicate"), 
+           remove = FALSE, sep = "_") %>%
+  mutate(replicate = gsub("rep", "R", replicate)) %>%
+  unite(sample_name, condition, replicate, sep = "_", remove = FALSE)
+
+samplesheet$condition[samplesheet$condition == "hepg2"] <- "hepg2_total"
+samplesheet <- samplesheet %>%
+  mutate(cell_type = "hepg2",
+         condition = gsub("hepg2_", "", condition)) %>%
+  dplyr::select(sample_id, sample_name, replicate, condition,
+                cell_type, seq_type, fastq_1, fastq_2, md5sum_1,
+                md5sum_2)
+
+write_csv(samplesheet, "rnaseq/samplesheet.csv")
+```
+
+Finally, write out the final design file.
+
+```{r}
+# This will have the following columns:
+# group,replicate,fastq_1,fastq_2,strandedness
+# The group will specify the experimental condition 
+# We could use the experiment accesion or we could use the 
+# sample_name.
+# Let's create a group column using mutate -- and we'll clean up the names
+# There's spaces in the names currently and we need to get rid of those.
+design <- samplesheet %>%
+  # We also need to add the proper file path
+  mutate(group = gsub(" ", "_", sample_name) %>% tolower(),
+         strandedness = "reverse",
+         fastq_1 = paste0("/scratch/Shares/rinnclass/data/rnaseq_fastq/", fastq_1),
+         fastq_2 = paste0("/scratch/Shares/rinnclass/data/rnaseq_fastq/", fastq_2)) %>%
+  # We have the replicate number already, but it's just a part of the sample id
+  # We can use the separate function (opposite of unite) to retrieve it.
+  separate(sample_id, into = c("experiment_accession", "replicate"), sep = "_", remove = FALSE) %>%
+  mutate(replicate = gsub("rep", "", replicate)) %>%
+  # Now we gather just the columns we need
+  dplyr::select(group, replicate, fastq_1, fastq_2, strandedness)
+
+design <- design %>%
+  mutate(group = gsub("_r1", "", group),
+         group = gsub("_r2", "", group))
+
+design <- design %>% 
+  arrange(group, replicate)
+
+all(sapply(design$fastq_1, file.exists))
+all(sapply(design$fastq_2, file.exists))
+# Now we can write this out for input into nextflow
+write_csv(design, "rnaseq/design.csv")
+```
