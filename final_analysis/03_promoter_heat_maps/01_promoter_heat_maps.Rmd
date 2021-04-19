@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 read.c---
 title: "03_promoter_heat_maps"
 author: "James Pratt"
@@ -27,6 +32,10 @@ gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.an
 fl <- list.files("/scratch/Shares/rinnclass/data/consensus_peaks", full.names = TRUE)
 consensus_peaks <- lapply(fl, rtracklayer::import)
 names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/data/consensus_peaks/|.bed", "", fl)
+
+num_peaks_threshold <- 250
+
+filtered_consensus_peaks <- consensus_peaks[sapply(consensus_peaks, length) > num_peaks_threshold]
 ```
 
 Create promoters for all genes - here defined as 3kb up and downstream of called peak.
@@ -40,7 +49,7 @@ To make the actual promoter heat map (as in, show peaks for all DNA binding prot
 
 ```{r}
 # Example gene promoter heat map, can search for any gene name that is in the all_promoters_gr - use the num_peaks_df to determine genes of interest. 
-ZNF280B_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "ZNF280B"]
-ZNF280B_promoter_matrix <- make_promoter_binding_matrix(consensus_peaks, ZNF280B_promoter)
-plot_promoter_peak_matrix(ZNF280B_promoter_matrix, gene_name = "ZNF280B", save_pdf = TRUE)
+ZNF470_promoter <- all_promoters_gr[all_promoters_gr$gene_name == "ZNF470"]
+ZNF470_promoter_matrix <- make_promoter_binding_matrix(filtered_consensus_peaks, ZNF470_promoter)
+plot_promoter_peak_matrix(ZNF470_promoter_matrix, gene_name = "ZNF470", save_pdf = TRUE)
 ```
