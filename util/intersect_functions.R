@@ -488,6 +488,10 @@ make_promoter_binding_matrix <- function(peak_list, promoter) {
   
   promoter_peaks <- promoter_peaks[sapply(promoter_peaks, length) > 0]
   
+  if(length(promoter_peaks) == 0) {
+    return(matrix(0, ncol = 6000,nrow = 1))
+  }
+  
   # Set the seqlevels to only the chromosome that the promoter is on
   for(i in 1:length(promoter_peaks)) {
     seqlevels(promoter_peaks[[i]]) <- as.character(seqnames(promoter))
