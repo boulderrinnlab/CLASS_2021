@@ -10,9 +10,9 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(ggdendro)
 library(GenomicRanges)
-source("util/intersect_functions.R")
-source("util/plotting_functions.R")
-source("util/_setup.R")
+source("../../util/intersect_functions.R")
+source("../../util/plotting_functions.R")
+source("../../util/_setup.R")
 ```
 
 The goal for today is to "cluster" the 438 DBPs to find which ones have similar binding profiles across the genome -- and those that are different. 
