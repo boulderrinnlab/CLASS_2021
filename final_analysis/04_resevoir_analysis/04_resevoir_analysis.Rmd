@@ -24,7 +24,7 @@ source("../../util/_setup.R")
 First, read in the data from the sample sheet made in the 04_01 Rmd.
 
 ```{r}
-samplesheet <- read_csv("rnaseq/samplesheet.csv")
+samplesheet <- read_csv("/scratch/Shares/rinnclass/Group2/CLASS_2021/final_analysis/rnaseq/samplesheet.csv")
 
 # We want to select just a subset of these samples
 # so that we can run differential expression for two conditions

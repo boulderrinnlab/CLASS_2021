@@ -20,3 +20,7 @@ rmarkdown::render(file.path("03_promoter_heat_maps",
 rmarkdown::render(file.path("03_promoter_heat_maps",
                             "00_global_clustering.Rmd"), 
                   md_document(variant = "markdown_github"))
+
+rmarkdown::render(file.path("04_resevoir_analysis",
+                            "04_01_RNAseq_Design.Rmd"), 
+                  md_document(variant = "markdown_github"))

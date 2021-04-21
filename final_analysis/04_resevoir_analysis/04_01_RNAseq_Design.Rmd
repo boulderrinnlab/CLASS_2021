@@ -38,7 +38,7 @@ wget -O files.txt "https://www.encodeproject.org/batch_download/?type=Experiment
 So now we have the samples (in this case, cellular fractionations from HepG2 cell line), and we want to read this into R to start making the design file.
 ```{r}
 # We'll also rename this Accession column to clarify between experiment_accession and file_accession.
-samples <- read.table("rnaseq/samples.txt",
+samples <- read.table("/scratch/Shares/rinnclass/Group2/CLASS_2021/rnaseq/samples.txt",
                       sep = "\t", skip = 1, header = T) %>%
   dplyr::rename(experiment_accession = Accession) 
 ```
@@ -172,7 +172,7 @@ samples <- samples %>%
 Now we have our completed sample sheet, we just need to clean this up and get it into the format that is required for nextflow.
 
 ```{r}
-samples <- read.table("rnaseq/samples.txt",
+samples <- read.table("/scratch/Shares/rinnclass/Group2/CLASS_2021/rnaseq/samples.txt",
                       sep = "\t", skip = 1, header = T) %>%
   dplyr::rename(experiment_accession = Accession) %>%
   mutate(file_info = map(experiment_accession, ~ encode_file_info(.x))) %>%
@@ -257,7 +257,7 @@ samplesheet <- samplesheet %>%
                 cell_type, seq_type, fastq_1, fastq_2, md5sum_1,
                 md5sum_2)
 
-write_csv(samplesheet, "rnaseq/samplesheet.csv")
+write_csv(samplesheet, "/scratch/Shares/rinnclass/Group2/CLASS_2021/final_analysis/rnaseq/samplesheet.csv")
 ```
 
 Finally, write out the final design file.
