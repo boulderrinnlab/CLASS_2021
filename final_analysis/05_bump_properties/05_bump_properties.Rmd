@@ -22,11 +22,11 @@ peak_occurrence_mrna <- filter(peak_occurrence_df, gene_type == "protein_coding"
 
 Now filter out the promoters in bump 1 (defined as 1-50 DBPs) and bump 2 (defined as 250-350 DBPs)
 ```{r bumps, include=TRUE,warning=FALSE}
-bump1_promoters <- filter(peak_occurrence_df, peak_occurrence_df$number_of_dbp < 50)
-bump1_promoters <- filter(peak_occurrence_df, peak_occurrence_df$number_of_dbp > 0)
+bump1_promoters <- filter(peak_occurrence_df, peak_occurrence_df$number_of_dbp < 46)
+bump1_promoters <- filter(peak_occurrence_df, peak_occurrence_df$number_of_dbp > 1)
 
-bump2_promoters <- filter(peak_occurrence_df, peak_occurrence_df$number_of_dbp > 250)
-bump2_promoters <- filter(bump2_promoters, peak_occurrence_df$number_of_dbp < 350)
+bump2_promoters <- filter(peak_occurrence_df, peak_occurrence_df$number_of_dbp > 230)
+bump2_promoters <- filter(peak_occurrence_df, peak_occurrence_df$number_of_dbp < 352)
 ```
 
 

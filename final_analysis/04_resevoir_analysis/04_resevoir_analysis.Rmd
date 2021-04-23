@@ -3,6 +3,8 @@ title: "04_resevoir_analysis"
 author: "James Pratt"
 date: "4/14/2021"
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 Now that we have our RNAseq data, we can start analyzing these reads and learn more about differential expression in different subcellular fractionations. Additionally, we can use this data set to learn more about the relationship between number of DNA binding proteins that bind to a promoter, and the expression from those promoters. This will let us see if we have resevoirs in our HepG2 cell lines.
