@@ -30,5 +30,7 @@ ZNF470_promoter_matrix <- make_promoter_binding_matrix(filtered_consensus_peaks,
 plot_promoter_peak_matrix(ZNF470_promoter_matrix, gene_name = "ZNF470", save_pdf = TRUE)
 ```
 
-    ## RStudioGD 
-    ##         2
+![](01_promoter_heat_maps_files/figure-markdown_github/unnamed-chunk-1-1.png)
+
+    ## png 
+    ##   2
