@@ -1,0 +1,57 @@
+---
+title: "05_bump_properties_template"
+author: "Katy Walsh"
+date: "4/21/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(ggplot2)
+library(tidyverse)
+source("../../util/plotting_functions.R")
+source("../../util/_setup.R")
+source('../../util/intersect_functions.R')
+```
+
+
+```{r importing}
+
+
+```
+
+
+Defining low binder and high binder promoters
+```{r}
+
+```
+
+make TSS plots of histone marks for second hump 
+Is there a corrolation between promoters with lots of DBPs bound vs those with fewer DBPs?
+    Are there more DBPs binding because more chomatin is open? (or maybe do all the DBP binding events open or maintain open chromatin?)
+```{r histone marks}
+
+
+
+```
+
+
+Are the genes belonging to the promoters with high DBP binding share common features?
+    Do they have more exons compared to low bound promoters?
+    Are they longer on average?
+    Are there more mRNA than lncRNA or vise versa?
+    differences in CpG islands? (would need to import data from UCSC)
+```{r gene features}
+
+
+```
+
+
+Is there different levels of expression in the low bound promoters vs high bound promoters?
+    Do reservoirs make up most of the second bump or are they distributed?
+    (bring in RNA-seq data)
+```{r expresion levels}
+
+```
+
