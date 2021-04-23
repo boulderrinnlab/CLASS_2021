@@ -245,8 +245,7 @@ Now that we have all of the raw counts read in, and the DESeq anlysis done succe
 resultsNames(dds)
 ```
 
-    ## [1] "Intercept"                                         "condition_membrane_fraction_vs_total"             
-    ## [3] "condition_insoluble_cytoplasmic_fraction_vs_total" "condition_cytosolic_fraction_vs_total"            
+    ## [1] "Intercept"                                         "condition_membrane_fraction_vs_total"              "condition_insoluble_cytoplasmic_fraction_vs_total" "condition_cytosolic_fraction_vs_total"            
     ## [5] "condition_nuclear_fraction_vs_total"
 
 ``` r
@@ -409,7 +408,7 @@ salmon_tpm <- read_tsv("/scratch/Shares/rinnclass/JR/CLASS_2021/rnaseq/results/s
 ```
 
     ## 
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
     ## cols(
     ##   gene_id = col_character(),
     ##   hepg2_R1 = col_double(),
