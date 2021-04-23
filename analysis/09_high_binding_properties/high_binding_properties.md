@@ -305,7 +305,7 @@ finite_differences <- function(x, y) {
 }
 
 
-d1 <- finite.differences(x,y)
+d1 <- finite_differences(x,y)
 # We should smooth it out before taking the second deriv
 # otherwise -- propagating errors.
 plot(x, d1)
@@ -321,7 +321,7 @@ plot(x, d1)
 ![](high_binding_properties_files/figure-markdown_github/deriv-3.png)
 
 ``` r
-d2 <- finite.differences(x,d1)
+d2 <- finite_differences(x,d1)
 
 plot(x, d2)
 ```
