@@ -207,7 +207,7 @@ finite_differences <- function(x, y) {
 }
 
 
-d1 <- finite.differences(x,y)
+d1 <- finite_differences(x,y)
 # We should smooth it out before taking the second deriv
 # otherwise -- propagating errors.
 plot(x, d1)
