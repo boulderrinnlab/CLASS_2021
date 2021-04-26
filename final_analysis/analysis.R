@@ -29,6 +29,6 @@ rmarkdown::render(file.path("04_resevoir_analysis",
                             "04_resevoir_analysis.Rmd"), 
                   md_document(variant = "markdown_github"))
 
-rmarkdown::render(file.path("05_resevoir_analysis",
+rmarkdown::render(file.path("05_bump_properties",
                             "05_histone_marks_comparing_bumps.Rmd"), 
                   md_document(variant = "markdown_github"))
