@@ -120,6 +120,15 @@ rld_prcomps <- merge(samplesheet, rld_prcomps)
 g <- ggplot(rld_prcomps, aes(x = PC1, y = PC2, color = condition))
 g + geom_point() 
 
+# Now we can check out the results from this analysis.
+resultsNames(dds)
+res <- results(dds, name = "condition_cytosolic_fraction_vs_total")
+
+# It's easier to view it as a data.frame so we'll convert it.
+res_df <- res %>% as.data.frame() %>%
+  rownames_to_column("gene_id") %>%
+  merge(g2s)
+
 # We can now make some standard plots to check out these results
 
 # Volcano plot

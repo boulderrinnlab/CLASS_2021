@@ -7,7 +7,7 @@ samplesheet <- read_csv("/scratch/Shares/rinnclass/Group2/CLASS_2021/final_analy
 ```
 
     ## 
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────────────────────────────────────
     ## cols(
     ##   sample_id = col_character(),
     ##   sample_name = col_character(),
@@ -140,6 +140,22 @@ g + geom_point()
 ![](04_resevoir_analysis_files/figure-markdown_github/unnamed-chunk-7-1.png)
 
 ``` r
+# Now we can check out the results from this analysis.
+resultsNames(dds)
+```
+
+    ## [1] "Intercept"                                         "condition_membrane_fraction_vs_total"             
+    ## [3] "condition_insoluble_cytoplasmic_fraction_vs_total" "condition_cytosolic_fraction_vs_total"            
+    ## [5] "condition_nuclear_fraction_vs_total"
+
+``` r
+res <- results(dds, name = "condition_cytosolic_fraction_vs_total")
+
+# It's easier to view it as a data.frame so we'll convert it.
+res_df <- res %>% as.data.frame() %>%
+  rownames_to_column("gene_id") %>%
+  merge(g2s)
+
 # We can now make some standard plots to check out these results
 
 # Volcano plot
@@ -147,7 +163,7 @@ ggplot(res_df, aes(x = log2FoldChange, y = -log10(padj))) +
   geom_point()
 ```
 
-    ## Warning: Removed 167412 rows containing missing values (geom_point).
+    ## Warning: Removed 40879 rows containing missing values (geom_point).
 
 ![](04_resevoir_analysis_files/figure-markdown_github/unnamed-chunk-7-2.png)
 
@@ -157,7 +173,7 @@ ggplot(res_df, aes(x = log10(baseMean), y = log2FoldChange)) +
   geom_point()
 ```
 
-    ## Warning: Removed 121212 rows containing missing values (geom_point).
+    ## Warning: Removed 30303 rows containing missing values (geom_point).
 
 ![](04_resevoir_analysis_files/figure-markdown_github/unnamed-chunk-7-3.png)
 
@@ -245,7 +261,8 @@ Now that we have all of the raw counts read in, and the DESeq anlysis done succe
 resultsNames(dds)
 ```
 
-    ## [1] "Intercept"                                         "condition_membrane_fraction_vs_total"              "condition_insoluble_cytoplasmic_fraction_vs_total" "condition_cytosolic_fraction_vs_total"            
+    ## [1] "Intercept"                                         "condition_membrane_fraction_vs_total"             
+    ## [3] "condition_insoluble_cytoplasmic_fraction_vs_total" "condition_cytosolic_fraction_vs_total"            
     ## [5] "condition_nuclear_fraction_vs_total"
 
 ``` r
@@ -408,7 +425,7 @@ salmon_tpm <- read_tsv("/scratch/Shares/rinnclass/JR/CLASS_2021/rnaseq/results/s
 ```
 
     ## 
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ────────────────────────────────────────────────────────────────────────────────────────────
     ## cols(
     ##   gene_id = col_character(),
     ##   hepg2_R1 = col_double(),
