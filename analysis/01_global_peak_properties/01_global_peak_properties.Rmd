@@ -85,8 +85,8 @@ num_peaks_df$peaks_overlapping_mrna_genebody <- rowSums(genebody_peak_counts[,mr
 # The human TFs
 # https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx
 
-human_tfs <- readxl::read_excel("/scratch/Shares/rinnclass/data/mmc2.xlsx",
-                                sheet = 2, skip = 1)
+suppressWarnings(human_tfs <- readxl::read_excel("/scratch/Shares/rinnclass/data/mmc2.xlsx",
+                                sheet = 2, skip = 1))
 names(human_tfs)[4] <- "is_tf"
 
 length(which(tolower(num_peaks_df$dbp) %in% tolower(human_tfs$Name)))
@@ -138,7 +138,6 @@ write_csv(peak_occurence_df, "/scratch/Shares/rinnclass/tardigrades/CLASS_2021/a
 ```{r} 
 unbound_promoters <- peak_occurence_df %>% filter(peak_occurence_df$number_of_dbp < 1)
 
-summary(unbound_promoters)
 # here is just a simple index and filter of the index to have at least 1 dbp bound.
 #There are no unbound promoters.
 ```
@@ -148,10 +147,7 @@ summary(unbound_promoters)
 ```{r}
 dbp_promoter_ovl <- get_overlapping_peaks(lncrna_mrna_promoters, filtered_consensus_peaks)
 
-head(dbp_promoter_ovl)
 num_ovl <- sapply(dbp_promoter_ovl, length)
-min(num_ovl)
-summary(num_ovl)
 
 ```
 
@@ -185,8 +181,6 @@ super_promoter_features <- super_promoter_features %>%
   mutate(percent_super_prom_ov = num_super_promoter_overlaps/peaks_overlapping_promoters * 100, 
          percent_of_total_peaks_at_super_prom = num_super_promoter_overlaps/num_peaks * 100,
          zincfinger = ifelse(grepl(" ZF",dbd), "ZF", "Other"))
-
-table(super_promoter_features$zincfinger)
 
 ggplot(super_promoter_features, aes(x = percent_super_prom_ov, color = zincfinger)) +
   geom_density()

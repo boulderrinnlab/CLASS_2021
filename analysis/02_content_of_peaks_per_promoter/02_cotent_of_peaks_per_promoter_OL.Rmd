@@ -13,53 +13,40 @@ library(Gviz)
 library(ggpubr)
 library(BiocManager)
 
-
-source("/scratch/Shares/rinnclass/CLASS_2021/util/intersect_functions.R
-")
-source("/scratch/Shares/rinnclass/CLASS_2021/util/plotting_functions.R
-")
-source("/scratch/Shares/rinnclass/CLASS_2021/util/_setup.R
-")
-```
-
- 
-
-# This script is designed to organize promoters by how many DBPs they bind and compare them across the cell types K562 and HEPG2.
-
-```{r}
-base_path <- "/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/00_consensus_peaks/results"
-peak_list <- import_peaks(file.path(base_path,
-                                    "filtered_consensus/"))
-
+source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/intersect_functions.R")
+source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/plotting_functions.R")
+source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/_setup.R")
 ```
 
 # 1) Normalizing the number of DBPs bound between K562 and HEPG2.
 ```{r}
 #First, we are going to retrieve the peak occurrence data from K562 cells (2020 class data) and HEPG2 cells (2021 class data).
-po_K562_df <- read.csv(file = '/scratch/Shares/rinnclass/data/2020_peak_occurence_df.csv')
-po_HEPG2_df <- read.csv(file = '/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv')
+K562_df <- read.csv(file = '/scratch/Shares/rinnclass/data/2020_peak_occurence_df.csv')
+HEPG2_df <- read.csv(file = '~/CLASS/Justin/CLASS_2021/analysis/01_global_peak_properties/results/peak_occurence_dataframe.csv')
+K562_occ_matrix <- read.csv(file = '/scratch/Shares/rinnclass/data/dbp_promoter_binding_table.csv')
 
 #Next, we want to normalize the number of DBPs bound to promoters between the two cell lines so that we can accurately compare the two. This will be added to each dataframe.
-po_K562_df <- po_K562_df %>%
-  mutate(num_dbp_norm_K562 = number_of_dbp/length(po_K562_df$dbp))
+K562_df <- K562_df %>%
+  mutate(num_dbp_norm_K562 = number_of_dbp/length(K562_occ_matrix$dbp))
 
-po_HEPG2_df <- po_HEPG2_df %>%
-  mutate(num_dbp_norm_HEPG2 = number_of_dbp/nrow(po_HEPG2_df))
+HEPG2_df <- HEPG2_df %>%
+  mutate(num_dbp_norm_HEPG2 = number_of_dbp/nrow(promoter_peak_occurence))
+
 ```
 
 # 2) Identifying promoters that bind a high number of DBPs and promoters that are reservoirs.
 ```{r}
 #Now that we can compare the number of DBPs bound in K562 vs. HEPG2 cells, we want to know which promoters are being bound by the highest number of DBPs. Those greater than 350 DBPs bound, we'll call high binders.
-high_binder_df <- po_HEPG2_df[po_HEPG2_df$number_of_dbp >= 200&po_HEPG2_df$number_of_dbp <= 350,]
-high_K562_df <- po_K562_df[po_K562_df$gene_id %in% high_binder_df$gene_id,]
+high_binder_df <- HEPG2_df[HEPG2_df$number_of_dbp >= 200&HEPG2_df$number_of_dbp <= 350,]
+high_K562_df <- K562_df[K562_df$gene_id %in% high_binder_df$gene_id,]
 
 #We also want to compare how promoters identified as reservoirs bind DBPs across cell types. We'll take the promoters labeled 'reservoirs' from K562 and apply that to our HEPG2 dataset.
-reservoir_K562 <- po_K562_df %>% filter(po_K562_df$reservoir == 1)
-reservoir_HEPG2_df <- po_HEPG2_df[po_HEPG2_df$gene_id %in% reservoir_K562$gene_id,]
+reservoir_K562 <- K562_df %>% filter(K562_df$reservoir == 1)
+reservoir_HEPG2_df <- HEPG2_df[HEPG2_df$gene_id %in% reservoir_K562$gene_id,]
 
 #And finally, we'll find which reservoir promoters are also high binders.
-filtered_df$num_dbp_norm_K562 <- reservoir_K562$num_dbp_norm_K562
-reservoir_high_df <- filtered_df[filtered_df$gene_id %in% high_binder_df$gene_id,]
+reservoir_HEPG2_df$num_dbp_norm_K562 <- reservoir_K562$num_dbp_norm_K562
+reservoir_high_df <- reservoir_HEPG2_df[reservoir_HEPG2_df$gene_id %in% high_binder_df$gene_id,]
 ```
 
 
@@ -70,7 +57,7 @@ ggplot(reservoir_high_df, aes(x = num_dbp_norm_K562,
                  y = num_dbp_norm_HEPG2,
                  color = gene_type,
                  label = gene_name)) +
-  geom_hex(bins = 40, alpha = 0.5)+
+  geom_point(bins = 40, alpha = 0.5)+
   ggtitle("Normalized num of dbp bound to each reservoir in HEPG2 vs in K562",
           subtitle = "Color by Gene Type") 
 ggsave("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/02_content_of_peaks_per_promoter/figures/Normalized_distribution_num_dbp_HEPG2_K562.png", height = 5, width = 8)
