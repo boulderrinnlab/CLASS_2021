@@ -60,3 +60,25 @@ print(paste('The percent mRNA in bump2 (high binders) is ',percent_mrna_bump2))
 print(paste('The percent lncRNA in bump2 (high binders) is ',percent_lncrna_bump2))
 ```
 
+
+```{r gene lengths, include=TRUE,warning=FALSE}
+#read out the promoter gene names for each bump
+bump1_gene_names <- row.names(bump1_promoters$gene_name)
+bump2_gene_names <- row.names(bump2_promoters$gene_name)
+
+
+#read in all the gencode data and make them a data frame!
+gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
+gene_df <- as.data.frame(gencode_gr)
+gencode_length <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
+                           "gene_type" = gencode_gr@elementMetadata$gene_type,
+                           "type" = gencode_gr@elementMetadata$type,
+                           "start" = gencode_gr@ranges@start,
+                           "width" = gencode_gr@ranges@width)
+
+gencode_length <- row.names(gencode_gr@elementMetadata$gene_name)
+gene_length <- filter(gencode_length, type == "gene")
+
+
+
+```
