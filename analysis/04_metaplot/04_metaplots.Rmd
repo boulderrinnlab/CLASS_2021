@@ -1,25 +1,44 @@
-TSS profile plots
-=================
+---
+title: "TSS profiles: plotting & clustering"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 
-Import the data
----------------
+```{r setup, include=FALSE}
+options(stringsAsFactors = FALSE)
+knitr::opts_chunk$set(echo = TRUE)
+library(GenomicRanges)
+library(rtracklayer)
+library(tidyverse)
+library(ComplexHeatmap)
+library(circlize)
 
--   consensus peaks
--   Gencode gene annotations
+source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/plotting_functions.R")
+source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/intersect_functions.R")
+source("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/util/_setup.R")
+```
 
-``` r
+# TSS profile plots
+
+## Import the data 
+
+- consensus peaks 
+- Gencode gene annotations
+
+```{r}
 gencode_gr <- rtracklayer::import("/Shares/rinn_class/data/genomes/human/gencode/v32/gencode.v32.annotation.gtf")
 
 data_path <- "/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/"
 consensus_peaks <- import_peaks(file.path(data_path, "00_consensus_peaks/results/filtered_consensus"))
+
 ```
 
-Step 1: Create promoter windows
--------------------------------
+## Step 1: Create promoter windows
 
 We're going to create a GRanges object that contains 6kb promoter windows for each gene in the Gencode annotation. First we'll need to filter the Gencode GRanges object to just the genes and then we can use the promoter function from GRanges that will allow us to specify how big of a window we want upstream and downstream of the TSS (you can have asymmetrical windows).
 
-``` r
+```{r}
 # The gencode annotation contains an entry for each exon, transcript, etc.
 # Use table(gencode_gr$type) to see how many of each entry there are. 
 # We don't want to create a "promoter" window around each exon for example
@@ -30,12 +49,11 @@ all_promoters_gr <- promoters(genes, upstream = 3e3, downstream = 3e3)
 #table(width(all_promoters_gr))
 ```
 
-Step 2: Transform peaks into a coverage object
-----------------------------------------------
+## Step 2: Transform peaks into a coverage object
 
-In order to calculate what the peak coverage across each promoter is we'll convert the peaks GRanges object which currently holds a range for each peak into a run-length encoded list where 0 represents the genomic coordinates where there is no peak present and 1 represents the locations where a peak is present. The reason for run length encoding is that storing this vector without this compression means that we would be storing a numeric value for each of the 3.2 billion base pairs. This would mean allocating a vector in memory that's ~180 GB -- instead with run-length encoding we're in the ~100 KB range.
+In order to calculate what the peak coverage across each promoter is we'll convert the peaks GRanges object which currently holds a range for each peak into a run-length encoded list where 0 represents the genomic coordinates where there is no peak present and 1 represents the locations where a peak is present. The reason for run length encoding is that storing this vector without this compression means that we would be storing a numeric value for each of the 3.2 billion base pairs. This would mean allocating a vector in memory that's ~180 GB -- instead with run-length encoding we're in the ~100 KB range. 
 
-``` r
+```{r}
 # We can use any binding protein here (use names(consensus_peaks) to see the available DBPs)
 peak_coverage <- coverage(consensus_peaks[["POLR2A"]])
 ```
@@ -44,7 +62,7 @@ peak_coverage <- coverage(consensus_peaks[["POLR2A"]])
 
 This step will accomplish two things: filter out promoters that fall outside the bounds of our coverage vectors and filter out chromosomes that are not in common between the promoters object and the peak coverage object. The reason we need to do this is because the peaks may not extend to the end of each chromosome and therefore there is likely to be promoters that fall outside of the peak coverage vectors -- since we know that there are no peaks on those promoters and therefore they don't give us any extra information about where peaks are relative to promoters we'll filter them out. Also, it creates problems for the Views command that we'll use to subset the coverage vectors to just the promoter windows.
 
-``` r
+```{r}
 ##### Filter promoters to bounds of peak coverage vectors
 
 # This is the length of each run-length encoded vector in the peak_coverage object
@@ -82,24 +100,24 @@ peak_coverage <- peak_coverage[chromosomes]
 # the chromosome information -- when converting to an IRanges list, 
 # each chromosome will be represented by a named element in the list.
 all_promoters_ir <- as(all_promoters_gr, "IntegerRangesList")[chromosomes]
+
 ```
 
-Step 3: Subset the peak coverage vector to just the promoter windows
---------------------------------------------------------------------
+## Step 3: Subset the peak coverage vector to just the promoter windows
 
 Here we'll use the Views function to mask the peak coverage object everywhere but in the windows of the promoters.
 
-``` r
+```{r}
 promoter_peak_view <- Views(peak_coverage, all_promoters_ir)
 # Note that these are still in run-length encoding format.
+
 ```
 
-Step 4: Contstruct a matrix of the coverage values of each promoter region
---------------------------------------------------------------------------
+## Step 4: Contstruct a matrix of the coverage values of each promoter region
 
 We'll not just convert the run-length encoding vectors to actual vectors -- note how much larger the object becomes when represented as vectors (use object.size function). Then we'll row bind the vectors into one matrix.
 
-``` r
+```{r}
 # Converts the Rle objects to vectors -- this is now a small enough size to do so
 # The t() function will transpose the vectors so that the each position in the promoter
 # 1 through 6000 is a column. 
@@ -109,12 +127,11 @@ promoter_peak_view <- lapply(promoter_peak_view, function(x) t(viewApply(x, as.v
 promoter_peak_matrix <- do.call("rbind", promoter_peak_view)
 ```
 
-Step 5: Align the positive and negative strand promoters
---------------------------------------------------------
+## Step 5: Align the positive and negative strand promoters
 
 Since the genes that are transcribed from the minus strand will have their upstream and downstream values flipped relative to the plus strand promoters, we need to reverse those vectors so that upstream and downstream values are consistent.
 
-``` r
+```{r}
 # We're just going to flip one strand because we want to get them in the same orientation
 minus_idx <- which(as.character(strand(all_promoters_gr)) == "-")
 promoter_peak_matrix[minus_idx,] <- promoter_peak_matrix[minus_idx, ncol(promoter_peak_matrix):1]
@@ -124,14 +141,14 @@ promoter_peak_matrix[minus_idx,] <- promoter_peak_matrix[minus_idx, ncol(promote
 # even Pol II is not bound to every promoter
 
 promoter_peak_matrix <- promoter_peak_matrix[rowSums(promoter_peak_matrix) > 0,]
+
 ```
 
-Step 6: Sum the columns, normalize, and plot
---------------------------------------------
+## Step 6: Sum the columns, normalize, and plot
 
-To summarize this matrix, we'll sum up the number of binding events at each position in this 6kb window. This vector represents the overall peak coverage of each posistion, for the purpose of visualizing this, we'll normalize by the total coverage so that the area under the curve in the plot sums to one.
+To summarize this matrix, we'll sum up the number of binding events at each position in this 6kb window. This vector represents the overall peak coverage of each posistion, for the purpose of visualizing this, we'll normalize by the total coverage so that the area under the curve in the plot sums to one. 
 
-``` r
+```{r}
 peak_sums <- colSums(promoter_peak_matrix)
 # Normalization -- this makes it into a sort of density plot -- it sums to 1.
 peak_dens <- peak_sums/sum(peak_sums)
@@ -143,11 +160,9 @@ ggplot(metaplot_df, aes(x = x, y = dens)) +
   geom_line(size = 1.5)
 ```
 
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-8-1.png)
-
 ### add legends and title
 
-``` r
+```{r}
 # Plot it with ggplot geom_line
 ggplot(metaplot_df, aes(x = x, y = dens)) + 
   geom_vline(xintercept = 0, lty = 2) + 
@@ -157,20 +172,13 @@ ggplot(metaplot_df, aes(x = x, y = dens)) +
                      labels = c("-3kb", "TSS", "+3kb"),
                      name = "") + 
   ylab("Peak frequency")
-```
-
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-9-1.png)
-
-``` r
 ggsave("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figures/POLR2A_promoter_metaplot.pdf")
+
 ```
 
-    ## Saving 7 x 5 in image
+# make a function with all teh steps from above : "profile_tss" 
 
-make a function with all teh steps from above : "profile\_tss"
-==============================================================
-
-``` r
+```{r}
 profile_tss <- function(peaks, 
                         promoters_gr,
                         upstream = 3e3,
@@ -215,12 +223,11 @@ profile_tss <- function(peaks,
 }
 ```
 
-Use this function to make separate plots for lncRNA and mRNA
-============================================================
+# Use this function to make separate plots for lncRNA and mRNA
 
 First we'll create separate objects for lncRNA promoters and mRNA promoters, then we'll supply each of these to the new function we just made.
 
-``` r
+```{r}
 # lncRNA promoter profiles
 lncrna_genes <- genes[genes$gene_type == "lncRNA"]
 lncrna_promoters <- promoters(lncrna_genes, upstream = 3e3, downstream = 3e3)
@@ -248,17 +255,10 @@ ggplot(combined_metaplot_profile,
                      name = "") + 
   ylab("Peak frequency") + 
   scale_color_manual(values = c("#424242","#a8404c"))
-```
-
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-11-1.png)
-
-``` r
 ggsave("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figures/POLR2A_promoter_metaplot_mRNAvsncRNA.pdf")
 ```
 
-    ## Saving 7 x 5 in image
-
-``` r
+```{r}
 # Let's now run this for all off the DBPs and compile it into one data frame.
 # Let's first define an empty data.frame to which we can row_bind each new one created.
 
@@ -282,7 +282,7 @@ metaplot_df <- data.frame(x = integer(), dens = numeric(), dbp = character())
 #Sys.Date()
 ```
 
-``` r
+```{r}
 # Let's filter out those peaks that don't pass the threshold, since
 # in particular here it will make a difference, since the 
 # average profile will be very lumpy for those DBPs with few peaks.
@@ -291,17 +291,7 @@ passing_peaks <- names(consensus_peaks)[sapply(consensus_peaks, length) > 250]
 # Let's cluster the metaplots df. First we need to turn it into a matrix.
 metaplot_df <- read_csv("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/metaplot_df.csv") %>%
   filter(dbp %in% passing_peaks)
-```
 
-    ## 
-    ## ── Column specification ────────────────────────────────────────────────────────────────────────────────
-    ## cols(
-    ##   x = col_double(),
-    ##   dens = col_double(),
-    ##   dbp = col_character()
-    ## )
-
-``` r
 # Pivot wider into a matrix
 metaplot_matrix <- metaplot_df %>% 
   pivot_wider(names_from = x, values_from = dens) %>%
@@ -318,28 +308,14 @@ pdf("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figur
 par(cex=0.3)
 plot(metaplot_hclust)
 dev.off()
-```
 
-    ## RStudioGD 
-    ##         2
-
-``` r
 # Cut the tree to make some clusters
 clusters <- cutree(metaplot_hclust, h = 75)
-```
-
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-13-1.png)
-
-``` r
 #table(mm_scaled)
 ?cutree
 clus2 <- mm_scaled[clusters == 2,]
 dim(clus2)
-```
 
-    ## [1]  132 6000
-
-``` r
 # make a heatmap:
 col_fun <- colorRamp2(c(-3, 0, 3), c("#5980B3", "#ffffff", "#B9605D"))
 split <- data.frame(split = c(rep("-3kb",3000), rep("+3kb", 3000)))
@@ -352,29 +328,14 @@ Heatmap(mm_scaled, cluster_columns = F, col = col_fun, border = TRUE,
         column_split = split,
         column_gap = unit(0, "mm"),row_names_gp = gpar(fontsize = 7))
 dev.off()
-```
 
-    ## RStudioGD 
-    ##         2
 
-``` r
+
 par(cex = 1)
 # plot some individual TSS profiles
 plot_tss_profile(metaplot_matrix, "H3K4me1", save_pdf = TRUE, save_dir ="/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figures/")
-```
-
-    ## NULL
-
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-13-2.png)
-
-    ## NULL
-
-``` r
 plot_tss_profile(metaplot_matrix, "NFIC", save_pdf = TRUE, save_dir ="/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figures/")
+
 ```
 
-    ## NULL
 
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-13-3.png)
-
-    ## NULL
