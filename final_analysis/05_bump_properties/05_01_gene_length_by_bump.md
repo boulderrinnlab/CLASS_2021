@@ -1,32 +1,12 @@
----
-title: "05_01_Gene_Length_by_Bump"
-author: "James Pratt"
-date: "4/26/2021"
-output: html_document
-editor_options: 
-  chunk_output_type: console
----
-
-```{r setup, include=FALSE}
-library(ggplot2)
-library(tidyverse)
-library(GenomicRanges)
-library(rtracklayer)
-library(Gviz)
-source("../../util/plotting_functions.R")
-source("../../util/_setup.R")
-source("../../util/intersect_functions.R")
-```
-
 Read in the gencode data
 
-```{r}
+``` r
 gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/data/gencode.v32.annotation.gtf")
 ```
 
-Filter the gencode_gr to give a data frame with the gene names, gene type, and gene length
+Filter the gencode\_gr to give a data frame with the gene names, gene type, and gene length
 
-```{r}
+``` r
 gene_length_df <- data.frame("gene_id" = gencode_gr@elementMetadata$gene_id,
                               "gene_name" = gencode_gr@elementMetadata$gene_name,
                               "gene_type" = gencode_gr@elementMetadata$gene_type,
@@ -40,11 +20,25 @@ lncRNA_gene_length_df <- filter(gene_length_df, gene_type == "lncRNA", type == "
 gene_length_filtered_df <- rbind(mrna_gene_length_df, lncRNA_gene_length_df)
 ```
 
-Combine this data frame with the peak_occurrence_df to add in gene length column and find if longer genes are enriched in the second peak.
+Combine this data frame with the peak\_occurrence\_df to add in gene length column and find if longer genes are enriched in the second peak.
 
-```{r}
+``` r
 peak_occurrence_df <- read_csv('../01_global_peak_properties/results/peak_occurence_dataframe.csv')
+```
 
+    ## 
+    ## ── Column specification ────────────────────────────────────────────────────────────────────────────────────
+    ## cols(
+    ##   gene_id = col_character(),
+    ##   gene_name = col_character(),
+    ##   gene_type = col_character(),
+    ##   chr = col_character(),
+    ##   X3kb_up_tss_start = col_double(),
+    ##   strand = col_character(),
+    ##   number_of_dbp = col_double()
+    ## )
+
+``` r
 #peak_occurrence_df <- column_to_rownames(peak_occurrence_df, var = "gene_name")
 
 #gene_length_df <- column_to_rownames(gene_length_df, var = "gene_name")
@@ -58,22 +52,28 @@ lncRNA_peak_occurrence_gene_length_df <- filter(peak_occurrence_gene_length_df, 
 
 Find how gene length correlates with number of DBPs bound
 
-```{r}
+``` r
 ggplot(peak_occurrence_gene_length_df, aes(x = number_of_dbp,
                          y = width, color = gene_type)) +
   geom_point()
+```
 
+![](05_01_gene_length_by_bump_files/figure-markdown_github/unnamed-chunk-4-1.png)
+
+``` r
 ggplot(mrna_peak_occurrence_gene_length_df, aes(x = number_of_dbp,
                          y = width, color = gene_type)) +
   geom_point()
+```
 
+![](05_01_gene_length_by_bump_files/figure-markdown_github/unnamed-chunk-4-2.png)
+
+``` r
 ggplot(lncRNA_peak_occurrence_gene_length_df, aes(x = number_of_dbp,
                          y = width, color = gene_type)) +
   geom_point()
 ```
 
-Filter the peak_occurrence_gene_length_df to give a data frame for each bump.
+![](05_01_gene_length_by_bump_files/figure-markdown_github/unnamed-chunk-4-3.png)
 
-```{r}
-
-```
+Filter the peak\_occurrence\_gene\_length\_df to give a data frame for each bump.

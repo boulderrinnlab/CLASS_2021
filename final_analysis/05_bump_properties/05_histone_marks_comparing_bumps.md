@@ -16,7 +16,7 @@ peak_occurrence_df <- read_csv('../01_global_peak_properties/results/peak_occure
 ```
 
     ## 
-    ## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────
+    ## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────
     ## cols(
     ##   gene_id = col_character(),
     ##   gene_name = col_character(),
@@ -906,3 +906,40 @@ ggsave("./figures/H3K27ac_bumps_metaplot_profile.pdf")
 ```
 
     ## Saving 7 x 5 in image
+
+make summary table
+==================
+
+``` r
+#make a df with all the histone marks
+summary_histone_marks <- data.frame(Histone_marks = c('H4K20me1', 'H3K9me3', 'H3K9ac', 'H3K4me3', 'H3K4me2', 'H3K4me1', 'H3K36me3', 'H3K27me3', 'H3K27ac'), 
+                                    mark_function = c('promoter activation', 'promoter repression', 'promoter activation', 'identifies promoters', 'promoter activation', 'identifies enhancers', 'gene bodies', 'silencers', 'enhancer activation'), 
+                                    difference_in_RNA_type = c('Yes', 'maybe', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'maybe'), 
+                                    difference_in_bumps = c('No', 'Yes', 'No', 'No', 'No', 'No', 'maybe', 'maybe', 'No')
+                                    )
+
+summary_histone_marks$bumps_notes <- c('', 'present in bump2 promoters only (matching all genes) but absent at bump1 promoters', '', '', '', '', 'slightly less depleted at bump2 promoters (potentially due to smaller % of lncRNA - flat line across lncRNA TSS)', 'depleted directly at TSS for both but different patters maybe +-1kb out from TSS', '')
+
+summary_histone_marks
+```
+
+    ##   Histone_marks        mark_function difference_in_RNA_type difference_in_bumps
+    ## 1      H4K20me1  promoter activation                    Yes                  No
+    ## 2       H3K9me3  promoter repression                  maybe                 Yes
+    ## 3        H3K9ac  promoter activation                    Yes                  No
+    ## 4       H3K4me3 identifies promoters                    Yes                  No
+    ## 5       H3K4me2  promoter activation                    Yes                  No
+    ## 6       H3K4me1 identifies enhancers                    Yes                  No
+    ## 7      H3K36me3          gene bodies                    Yes               maybe
+    ## 8      H3K27me3            silencers                    Yes               maybe
+    ## 9       H3K27ac  enhancer activation                  maybe                  No
+    ##                                                                                                        bumps_notes
+    ## 1                                                                                                                 
+    ## 2                               present in bump2 promoters only (matching all genes) but absent at bump1 promoters
+    ## 3                                                                                                                 
+    ## 4                                                                                                                 
+    ## 5                                                                                                                 
+    ## 6                                                                                                                 
+    ## 7 slightly less depleted at bump2 promoters (potentially due to smaller % of lncRNA - flat line across lncRNA TSS)
+    ## 8                                 depleted directly at TSS for both but different patters maybe +-1kb out from TSS
+    ## 9

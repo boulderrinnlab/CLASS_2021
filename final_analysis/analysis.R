@@ -32,3 +32,11 @@ rmarkdown::render(file.path("04_resevoir_analysis",
 rmarkdown::render(file.path("05_bump_properties",
                             "05_histone_marks_comparing_bumps.Rmd"), 
                   md_document(variant = "markdown_github"))
+
+rmarkdown::render(file.path("05_bump_properties",
+                            "05_01_gene_length_by_bump.Rmd"), 
+                  md_document(variant = "markdown_github"))
+
+rmarkdown::render(file.path("05_bump_properties",
+                            "05_bump_properties.Rmd"), 
+                  md_document(variant = "markdown_github"))

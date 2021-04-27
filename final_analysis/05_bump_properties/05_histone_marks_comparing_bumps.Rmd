@@ -680,3 +680,18 @@ ggplot(H3K27ac_bumps_metaplot_profile,
   scale_color_manual(values = c("#424242","#a8404c"))
 ggsave("./figures/H3K27ac_bumps_metaplot_profile.pdf")
 ```
+
+#make summary table
+```{r summary}
+#make a df with all the histone marks
+summary_histone_marks <- data.frame(Histone_marks = c('H4K20me1', 'H3K9me3', 'H3K9ac', 'H3K4me3', 'H3K4me2', 'H3K4me1', 'H3K36me3', 'H3K27me3', 'H3K27ac'), 
+                                    mark_function = c('promoter activation', 'promoter repression', 'promoter activation', 'identifies promoters', 'promoter activation', 'identifies enhancers', 'gene bodies', 'silencers', 'enhancer activation'), 
+                                    difference_in_RNA_type = c('Yes', 'maybe', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'Yes', 'maybe'), 
+                                    difference_in_bumps = c('No', 'Yes', 'No', 'No', 'No', 'No', 'maybe', 'maybe', 'No')
+                                    )
+
+summary_histone_marks$bumps_notes <- c('', 'present in bump2 promoters only (matching all genes) but absent at bump1 promoters', '', '', '', '', 'slightly less depleted at bump2 promoters (potentially due to smaller % of lncRNA - flat line across lncRNA TSS)', 'depleted directly at TSS for both but different patters maybe +-1kb out from TSS', '')
+
+summary_histone_marks
+```
+
