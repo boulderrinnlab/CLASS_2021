@@ -1,8 +1,8 @@
 TSS profile plots
 =================
 
-Import the data
----------------
+Import the data and plot POLR2A metaplot
+----------------------------------------
 
 -   consensus peaks
 -   Gencode gene annotations
@@ -138,14 +138,10 @@ peak_dens <- peak_sums/sum(peak_sums)
 
 # Create a data frame in order to plot this. 
 metaplot_df <- data.frame(x = -3e3:(3e3-1), dens = peak_dens)
-
-ggplot(metaplot_df, aes(x = x, y = dens)) + 
-  geom_line(size = 1.5)
 ```
 
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-8-1.png)
-
-### add legends and title
+plot POLR2A\_promoter metaplot
+==============================
 
 ``` r
 # Plot it with ggplot geom_line
@@ -258,29 +254,38 @@ ggsave("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/fi
 
     ## Saving 7 x 5 in image
 
+make metaplot df for all DBPs
+=============================
+
 ``` r
 # Let's now run this for all off the DBPs and compile it into one data frame.
 # Let's first define an empty data.frame to which we can row_bind each new one created.
 
-metaplot_df <- data.frame(x = integer(), dens = numeric(), dbp = character())
+##metaplot_df <- data.frame(x = integer(), dens = numeric(), dbp = character())
 
 # Started run at 9:58 PM -- finished at 1am
 # SKIP ZNF382 -- only 19 peaks -- probably none overlap promoters
 # Number 391
 
 #part commented out,takes to long to create md file
-#for(i in c(1:390, 392:length(consensus_peaks))) {
-#  print(names(consensus_peaks)[[i]])
-#  tmp_df <- profile_tss(consensus_peaks[[i]], promoters_gr = all_promoters_gr)
-#  tmp_df$dbp <- names(consensus_peaks)[[i]]
-#  metaplot_df <- bind_rows(metaplot_df, tmp_df)
-#}
-#write_csv(metaplot_df, "/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/results/metaplot_df.csv")
+##for(i in c(1:390, 392:length(consensus_peaks))) {
+##  print(names(consensus_peaks)[[i]])
+##  tmp_df <- profile_tss(consensus_peaks[[i]], promoters_gr = all_promoters_gr)
+##  tmp_df$dbp <- names(consensus_peaks)[[i]]
+##  metaplot_df <- bind_rows(metaplot_df, tmp_df)
+##}
+##write_csv(metaplot_df, "/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/results/metaplot_df.csv")
 #table(names(consensus_peaks) %in% unique(metaplot_df$dbp))
 #which(names(consensus_peaks) == "ZNF382")
 #Sys.time()
 #Sys.Date()
 ```
+
+plot dendrogram and heatmap of all DBPs
+=======================================
+
+select a cluster of the dendrogram
+----------------------------------
 
 ``` r
 # Let's filter out those peaks that don't pass the threshold, since
@@ -311,10 +316,11 @@ metaplot_matrix <- metaplot_df %>%
 # Z-Scale the rows
 mm_scaled <- t(scale(t(metaplot_matrix)))
 
+# make dendrogram
 metaplot_hclust <- hclust(dist(mm_scaled), method = "complete")
 
 # Plot the dendrogram
-pdf("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figures/tss_profile_dendrogram.pdf", height = 10, width = 27)
+pdf("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figures/tss_profile_dendrogram.pdf", height = 4, width = 9) # 5 and 27 originally
 par(cex=0.3)
 plot(metaplot_hclust)
 dev.off()
@@ -334,17 +340,38 @@ clusters <- cutree(metaplot_hclust, h = 75)
 #table(mm_scaled)
 ?cutree
 clus2 <- mm_scaled[clusters == 2,]
+
+#dim before cut
+dim(mm_scaled)
+```
+
+    ## [1]  459 6000
+
+``` r
+#dim after cut
 dim(clus2)
 ```
 
     ## [1]  132 6000
 
 ``` r
+metaplot_cut_hclust <- hclust(dist(clus2), method = "complete")
+# Plot the dendrogram
+
+pdf("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figures/tss_profile_dendrogram_cluster2.pdf", height = 4, width = 9) # 5 and 27 originally
+par(cex=0.3)
+plot(metaplot_cut_hclust)
+dev.off()
+```
+
+    ## RStudioGD 
+    ##         2
+
+``` r
 # make a heatmap:
 col_fun <- colorRamp2(c(-3, 0, 3), c("#5980B3", "#ffffff", "#B9605D"))
 split <- data.frame(split = c(rep("-3kb",3000), rep("+3kb", 3000)))
-
-pdf("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/results/tss_profile_heatmap.pdf", height = 35, width = 10)
+pdf("/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/results/tss_profile_heatmap.pdf", height = 30, width = 9)
 Heatmap(mm_scaled, cluster_columns = F, col = col_fun, border = TRUE, 
         show_column_names = FALSE,
         use_raster = TRUE,
@@ -357,6 +384,9 @@ dev.off()
     ## RStudioGD 
     ##         2
 
+plot individual tss profiles
+============================
+
 ``` r
 par(cex = 1)
 # plot some individual TSS profiles
@@ -365,16 +395,16 @@ plot_tss_profile(metaplot_matrix, "H3K4me1", save_pdf = TRUE, save_dir ="/scratc
 
     ## NULL
 
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-13-2.png)
-
     ## NULL
 
 ``` r
 plot_tss_profile(metaplot_matrix, "NFIC", save_pdf = TRUE, save_dir ="/scratch/Shares/rinnclass/tardigrades/CLASS_2021/analysis/04_metaplot/figures/")
 ```
 
+![](04_metaplots_files/figure-markdown_github/unnamed-chunk-14-1.png)
+
     ## NULL
 
-![](04_metaplots_files/figure-markdown_github/unnamed-chunk-13-3.png)
+![](04_metaplots_files/figure-markdown_github/unnamed-chunk-14-2.png)
 
     ## NULL
