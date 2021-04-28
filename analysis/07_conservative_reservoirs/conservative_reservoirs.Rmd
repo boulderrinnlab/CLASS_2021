@@ -9,6 +9,7 @@ editor_options:
 knitr::opts_chunk$set(echo = TRUE)
 options(stringsAsFactors = FALSE)
 library(tidyverse)
+library(eulerr)
 library(Rsubread)
 source("../../util/plotting_functions.R")
 source("../../util/_setup.R")
@@ -17,61 +18,86 @@ source("../../util/_setup.R")
 ```{r}
 samplesheet <- read_csv("../../rnaseq/samplesheet.csv")
 
-peak_occurrence_df <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/06_defining_reservoirs/results/promoter_features_df.csv")
-
-
-promoters_df <- rtracklayer::import("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_promoters.gtf") %>%
-  as.data.frame() %>%
-  dplyr::select("gene_id", "seqnames", "start", "end", "strand") 
-names(promoters_df) <- c("GeneID", "Chr", "Start", "End", "Strand")
-promoters_df[which(promoters_df$Start < 0), "Start"] <- 0
-write.table(promoters_df, "results/gencode_v32_promoters_6kb.SAF", sep = "\t",
-            quote = F, row.names = F)
-
-# Run feature counts on promoter windows
-fl <- list.files("../../rnaseq/results/star_salmon/", pattern = ".bam$", full.names = TRUE)
-
-counts <- featureCounts(fl, 
-                        annot.ext = "results/gencode_v32_promoters_6kb.SAF", 
-                        isPairedEnd = TRUE, nthreads = 16)
-
-write_rds(counts, "promoter_counts.rds")
-promoter_counts <- read_rds("promoter_counts.rds")
+# peak_occurrence_df <- read_csv("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/06_defining_reservoirs/results/promoter_features_df.csv")
+# 
+# 
+# promoters_df <- rtracklayer::import("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_promoters.gtf") %>%
+#   as.data.frame() %>%
+#   dplyr::select("gene_id", "seqnames", "start", "end", "strand") 
+# names(promoters_df) <- c("GeneID", "Chr", "Start", "End", "Strand")
+# promoters_df[which(promoters_df$Start < 0), "Start"] <- 0
+# write.table(promoters_df, "results/gencode_v32_promoters_6kb.SAF", sep = "\t",
+#             quote = F, row.names = F)
+# 
+# # Run feature counts on promoter windows
+# fl <- list.files("../../rnaseq/results/star_salmon/", pattern = ".bam$", full.names = TRUE)
+# 
+# counts <- featureCounts(fl, 
+#                         annot.ext = "results/gencode_v32_promoters_6kb.SAF", 
+#                         isPairedEnd = TRUE, nthreads = 16)
+# 
+# write_rds(counts, "promoter_counts.rds")
+# promoter_counts <- read_rds("promoter_counts.rds")
 ```
 
 ```{r}
-rpk <- promoter_counts$counts / (promoter_counts$annotation$Length/1000)
-expression <- data.frame("rpk" = rpk) %>%
-  rownames_to_column("gene_id") %>%
-  pivot_longer(2:ncol(.), names_to = "sample", values_to = "rpk")
-expression_summary <- expression %>%
-  group_by(sample) %>%
-  summarize(total_rpk = sum(rpk, na.rm = T))
-expression_summary$rpk_m <- expression_summary$total_rpk / 1e6
-expression <- merge(expression, expression_summary)
-expression$tpm <- expression$rpk / expression$rpk_m
-promoter_expression <- expression %>% group_by(gene_id) %>%
-  summarize(promoter_median_tpm = median(tpm),
-            promoter_max_tpm = max(tpm))
-
-peak_occurrence_df <- merge(peak_occurrence_df, promoter_expression)
-peak_occurrence_df <- peak_occurrence_df %>% mutate(hepg2_conservative_reservoir = ifelse(promoter_median_tpm < 0.01 & hepg2_reservoir == 1, 1, 0))
-table(peak_occurrence_df$hepg2_conservative_reservoir)
+# rpk <- promoter_counts$counts / (promoter_counts$annotation$Length/1000)
+# expression <- data.frame("rpk" = rpk) %>%
+#   rownames_to_column("gene_id") %>%
+#   pivot_longer(2:ncol(.), names_to = "sample", values_to = "rpk")
+# expression_summary <- expression %>%
+#   group_by(sample) %>%
+#   summarize(total_rpk = sum(rpk, na.rm = T))
+# expression_summary$rpk_m <- expression_summary$total_rpk / 1e6
+# expression <- merge(expression, expression_summary)
+# expression$tpm <- expression$rpk / expression$rpk_m
+# promoter_expression <- expression %>% group_by(gene_id) %>%
+#   summarize(promoter_median_tpm = median(tpm),
+#             promoter_max_tpm = max(tpm))
+# 
+# peak_occurrence_df <- merge(peak_occurrence_df, promoter_expression)
+# peak_occurrence_df <- peak_occurrence_df %>% mutate(hepg2_conservative_reservoir = ifelse(promoter_median_tpm < 0.01 & hepg2_reservoir == 1, 1, 0))
+# table(peak_occurrence_df$hepg2_conservative_reservoir)
+# write_csv(peak_occurrence_df, "results/peak_occurrence_df.csv")
 ```
 
 ```{r}
-ggplot(peak_occurrence_df, aes(x = number_of_dbp, fill = factor(hepg2_conservative_reservoir))) +
-  geom_density(alpha = 0.3)
+peak_occurrence_df <- read_csv("results/peak_occurrence_df.csv")
 
 ggplot(peak_occurrence_df, aes(x = number_of_dbp, fill = factor(hepg2_reservoir))) +
-  geom_density(alpha = 0.3)
+  geom_density(alpha = 0.3) + scale_fill_manual(values = c("#424242","#a8404c")) + 
+  ggtitle("Reservoir vs non-reservoir peak count")
+
+ggplot(peak_occurrence_df, aes(x = number_of_dbp, fill = factor(hepg2_conservative_reservoir))) +
+  geom_density(alpha = 0.3) + scale_fill_manual(values = c("#424242","#a8404c")) + 
+  ggtitle("Conservative reservoir vs non-reservoir peak count")
 
 table(peak_occurrence_df$hepg2_reservoir)
 ```
 
 ```{r}
-write_csv(peak_occurrence_df, "results/peak_occurrence_df.csv")
+
+# library(venneuler)
+# Let's make a set matrix
+set_matrix <- peak_occurrence_df %>%
+  dplyr::select(k562_reservoir, hepg2_reservoir) %>%
+  as.matrix()
+
+(vd <- euler(set_matrix))
+
+evd <- euler(c("K562" = 1006, "HEPG2" = 1197, "K562&HEPG2" = 356), key = TRUE, counts = TRUE)
+
+plot(vd, quantities = TRUE)
+
+set_matrix <- peak_occurrence_df %>%
+  dplyr::select(k562_reservoir, k562_conservative_reservoir, hepg2_reservoir, hepg2_conservative_reservoir) %>%
+  as.matrix()
+(vd <- euler(set_matrix))
+plot(vd, quantities = TRUE)
+
 ```
+
+
 
 
 
