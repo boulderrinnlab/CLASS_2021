@@ -52,7 +52,22 @@ generate_promoter_profile <- function(gene_id) {
   return(promoter_profile)
 }
 
-pars <- peak_occurrence_df %>% filter(number_of_dbp > 0) %>% dplyr::select(gene_id)
+
+hmm <- generate_promoter_profile("ENSG00000000971.15")
+hmm[1:10]
+plot(hmm[1,])
+pars <- peak_occurrence_df %>% filter(number_of_dbp > 0) %>% dplyr::select(gene_id) %>% dplyr::slice(1:40)
+
+pp_matrix <- matrix(numeric(), ncol = 6000)
+for(i in 1:nrow(pars)) {
+  print(pars$gene_id[[i]])
+  pp <- generate_promoter_profile(pars$gene_id[[i]])
+  pp_matrix <- rbind(pp_matrix, pp)
+}
+pheatmap::pheatmap(pp_matrix, cluster_cols = FALSE)
+
+
+
 sjob <- slurm_apply(generate_promoter_profile, pars, jobname = 'promoter_profiles',
                       add_objects = c("all_promoters_gr", "peak_list", "make_promoter_binding_matrix", "extract_peak_view"),
                       nodes = 5, cpus_per_node = 10, 
@@ -62,7 +77,7 @@ sjob <- slurm_apply(generate_promoter_profile, pars, jobname = 'promoter_profile
 
 ```{r promoter-profile-results}
 # Gather results
-res <- read_rds("_rslurm_conservative_res_promoter_profiles/results_0.RDS")
-
+res <- read_rds("_rslurm_promoter_profiles/results_0.RDS")
+res
 res_matrix <- do.call(rbind, res)
 ```

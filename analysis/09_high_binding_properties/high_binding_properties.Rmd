@@ -104,20 +104,20 @@ dens_nls_fit <- nls_multstart(y ~ nzibinom_guass_mixture(x, mu_nb,
                               start_lower = c(mu_nb = 4,
                                               theta_nb = 0.5, 
                                               pi_nb = 0.3, 
-                                              mu_g = 250, 
+                                              mu_g = 293, 
                                               sd_g = 30, 
                                               w1 = 1000, 
                                               w2 = 30),
                               start_upper = c(mu_nb = 20,
                                               theta_nb = 1, 
                                               pi_nb = 0.99, 
-                                              mu_g = 350, 
+                                              mu_g = 298, 
                                               sd_g = 80, 
                                               w1 = 3000, 
                                               w2 = 100),
                               algorithm = "port",
-                              lower = c(0, 0, 0, 0, 0, 0, 0),
-                              upper = c(400, 1, 0.99, 400, 200, 4000, 200),
+                              lower = c(0, 0, 0, 250, 0, 0, 0),
+                              upper = c(400, 1, 0.99, 350, 200, 4000, 200),
                               control = list(maxiter = 5000),
                               supp_errors = "Y",
                               convergence_count = 100)
@@ -253,3 +253,24 @@ mu+sd
 
 
 Okay, that's maybe too much fun for one night. 
+
+# k-mer content clustering
+
+```{r}
+# Let's start by extracting the fasta sequences for the promoter regions
+lncrna_mrna_promoters <- rtracklayer::import("/scratch/Shares/rinnclass/JR/CLASS_2021/analysis/00_consensus_peaks/results/gene_annotations/lncrna_mrna_promoters.gtf")
+lncrna_mrna_promoters$score <- 0
+lncrna_mrna_promoters$name <- lncrna_mrna_promoters$gene_id
+rtracklayer::export(lncrna_mrna_promoters, "results/lncrna_mrna_promoters.bed")
+```
+
+```{bash}
+cd results
+module load bedtools/2.28.0
+bedtools getfasta -name -fi /scratch/Shares/rinnclass/data/genomes/GRCh38.p13.genome.fa -bed lncrna_mrna_promoters.bed > lncrna_mrna_promoters.fa
+
+module load jellyfish/2.2.6
+jellyfish bc -m 21 -s 100G -t 16 -o lncrna_mrna_promoters.fa lncrna_mrna_promoters.fa
+#jellyfish count -m 21 -s 100M -t 10 -C lncrna_mrna_promoters.fa
+```
+
