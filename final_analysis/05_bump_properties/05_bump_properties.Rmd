@@ -115,7 +115,7 @@ Some cool histogram of gene length in the two bumps.
 widths_b1 <- bump1_gene_lengths$width
 widths_b2 <- bump2_gene_lengths$width
 
-hist1 <- hist(widths_b1,breaks = 200, main='Gene Lengths Bump1')
+hist(widths_b1,breaks = 200, main='Gene Lengths Bump 1')
 
 ```
 
@@ -123,6 +123,6 @@ hist1 <- hist(widths_b1,breaks = 200, main='Gene Lengths Bump1')
 
 
 
-hist2 <- hist(widths_b2,breaks = 200,main='Gene Lengths Bump2')
+hist(widths_b2,breaks = 200,main='Gene Lengths Bump 2')
 
 ```
